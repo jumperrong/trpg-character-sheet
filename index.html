@@ -1,0 +1,4261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>克苏鲁神话TRPG角色卡</title>
+    <style>
+        :root {
+            --text-color: #333;
+            --border-color: #666;
+            --bg-color: #f5f5f5;
+            --section-bg: #e9e9e9;
+            --input-bg: #fff;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            font-size: 11px;
+        }
+        
+        /* 页面标题样式 */
+        .page-title {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 1001; /* 确保在悬浮导航按钮之上 */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* 为内容添加足够的上边距，确保标题不在A4幅面内 */
+        html {
+            padding-top: 40px;
+        }
+        
+        /* A4纸张在屏幕上的尺寸调整，确保标题在外部 */
+        .character-sheet, .custom-page {
+            margin-top: 10px !important; /* 增加顶部边距，确保标题与页面有明显分隔 */
+            border-top: 1px dashed #ccc; /* 添加虚线边框，视觉上区分标题和页面 */
+        }
+        
+        /* 分页符样式调整，避免产生空白页 */
+        .page-break {
+            display: none; /* 在页面切换模式下不需要分页符 */
+        }
+        
+        /* 打印时隐藏标题并调整页面 */
+        @media print {
+            /* 控制页面尺寸和边距 */
+            @page {
+                size: A4 portrait; /* 保持A4纵向 */
+                margin: 0.5cm;
+            }
+            
+            /* 隐藏打印时不需要的元素 */
+            .page-title {
+                display: none !important;
+            }
+            
+            html {
+                padding-top: 0 !important;
+            }
+            
+            /* 保持原始页面布局，但移除外部边框和阴影 */
+            .character-sheet, .custom-page {
+                margin: 0 !important;
+                border: none !important; /* 移除黑色外边框 */
+                border-top: none !important;
+                width: auto !important; /* 保持原始宽度 */
+                height: auto !important; /* 保持原始高度 */
+                box-shadow: none !important; /* 移除阴影 */
+                /* 移除所有缩放 */
+                transform: none !important;
+                /* 内部填充调整，补偿边框移除 */
+                padding: 0 !important;
+            }
+            
+            /* 确保颜色正确打印 */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            /* 彻底隐藏所有分页符，防止产生多余空白页 */
+            .page-break {
+                display: none !important;
+                height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                page-break-after: avoid !important;
+                page-break-before: avoid !important;
+                visibility: hidden !important;
+                position: absolute !important;
+            }
+            
+            /* 确保所有内部区域边框正常显示 */
+            .sheet-section {
+                border: 1px solid var(--border-color) !important;
+                margin: 2px !important;
+            }
+            
+            /* 禁止所有元素在打印时产生分页 */
+            * {
+                page-break-inside: avoid !important;
+                page-break-after: avoid !important;
+                page-break-before: avoid !important;
+            }
+            
+            /* 隐藏所有不必要的元素 */
+            body::after {
+                content: none !important;
+            }
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 11px !important;
+            line-height: 1.2;
+            padding: 2px;
+            max-width: 21cm; /* A4宽度 */
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .character-sheet, .custom-page {
+            border: 1px solid var(--border-color);
+            padding: 5px;
+            background-color: white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            width: 21cm; /* A4宽度 */
+            box-sizing: border-box;
+            page-break-inside: avoid;
+            margin: 2px auto 10px auto;
+        }
+        
+        .character-sheet {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-gap: 4px;
+            min-height: auto; /* 移除固定高度限制，让内容自适应 */
+            min-height: 29.7cm; /* A4高度 */
+        }
+        
+        .custom-page {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-height: 29.7cm; /* 使用固定的A4高度 */
+            max-height: none; /* 移除最大高度限制 */
+        }
+        
+        /* 打印时的A4设置 */
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        @media print {
+            body {
+                width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+            .character-sheet, .custom-page {
+                width: 21cm;
+                height: 29.7cm;
+                margin: 0;
+                padding: 5px;
+                box-shadow: none;
+                border: none;
+            }
+            
+            .custom-page {
+                margin-top: 0;
+                page-break-before: always;
+                min-height: 29.7cm; /* 确保打印时也有正确的最小高度 */
+            }
+        }
+        .sheet-section {
+            background-color: var(--section-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 3px;
+            margin-bottom: 3px;
+        }
+        .section-title {
+            font-size: 14px !important;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 3px;
+            padding: 3px;
+            line-height: 1.4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #222;
+            width: 100%; /* 确保分割线宽度正确 */
+        }
+        .total-attr {
+            font-size: 12px !important;
+            font-weight: normal;
+            white-space: nowrap; /* 防止文本换行 */
+            display: inline-flex; /* 使用inline-flex确保内容不会断行 */
+            flex-wrap: nowrap; /* 禁止换行 */
+            align-items: center;
+            margin-left: auto; /* 确保总点数靠右显示 */
+        }
+        .field-row {
+            display: flex;
+            margin-bottom: 3px;
+            align-items: center;
+        }
+        .field-label {
+            font-size: 11px;
+            min-width: 40px;
+            margin-right: 5px;
+        }
+        .field-input {
+            flex: 1;
+            padding: 3px 5px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            background-color: var(--input-bg);
+        }
+        
+        /* 添加双列布局样式 */
+        .field-row.double {
+            display: flex;
+            justify-content: space-between;
+            gap: 3px;
+            margin-bottom: 3px;
+        }
+        .field-group {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        .field-group .field-label {
+            width: 40px;
+            min-width: 40px;
+            margin-right: 5px;
+        }
+        
+        input, select {
+            border: 1px solid var(--border-color);
+            padding: 1px 3px;
+            border-radius: 3px;
+            background-color: var(--input-bg);
+            width: 100%;
+            height: 18px;
+        }
+        .characteristics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            margin-bottom: 2px;
+        }
+        .characteristic-item {
+            text-align: center;
+            border: none; /* 移除整体边框 */
+            border-radius: 3px;
+            padding: 2px;
+            background-color: transparent; /* 移除背景色 */
+        }
+        .char-label {
+            font-weight: normal;
+            font-size: 11px;
+            white-space: nowrap;
+            margin-bottom: 3px; /* 添加底部间距 */
+        }
+        .char-value {
+            font-size: 11px;
+            font-weight: normal;
+            text-align: center;
+            -moz-appearance: textfield;
+            border: 1px solid var(--border-color); /* 为输入框添加边框 */
+            background-color: var(--input-bg); /* 为输入框添加背景色 */
+            border-radius: 3px; /* 为输入框添加圆角 */
+            padding: 2px 0; /* 增加垂直内边距 */
+            width: 90%; /* 控制输入框宽度 */
+            margin: 0 auto; /* 水平居中 */
+        }
+        .char-value::-webkit-outer-spin-button,
+        .char-value::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .stats-section {
+            grid-column: span 3;
+            margin-bottom: 4px;
+        }
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 4px;
+            width: 100%;
+        }
+        .stat-box {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 1px;
+            text-align: center;
+            background-color: var(--input-bg);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .stat-title {
+            font-size: 12px !important;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1px;
+            padding-bottom: 1px;
+            color: #444;
+            text-align: center;
+        }
+        .stat-icon {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+            align-items: center;
+            padding: 0 4px;
+        }
+        .stat-label {
+            font-size: 11px;
+            font-weight: normal;
+            color: #555;
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+        .stat-value {
+            width: 24px;
+            height: 14px;
+            text-align: center;
+            padding: 0;
+            font-size: 11px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            background-color: #f9f9f9;
+        }
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 3px;
+            height: auto;
+        }
+        .avatar-container {
+            width: 138px;
+            height: 138px;
+            aspect-ratio: 1;
+            border: 1px solid var(--border-color);
+            margin: 1px auto 3px;
+            background-color: var(--input-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+        .avatar-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(245, 245, 245, 0.9);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .avatar-container:hover .avatar-placeholder {
+            opacity: 1;
+        }
+        .avatar-placeholder-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: #666;
+        }
+        .avatar-placeholder-text {
+            font-size: 11px;
+            text-align: center;
+            color: #666;
+            padding: 0 10px;
+        }
+        .hidden-file-input {
+            display: none;
+        }
+        .skills-section {
+            grid-column: span 3;
+            margin-top: 2px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            border: 1px solid black !important;
+            border-radius: 4px;
+            padding: 3px;
+        }
+        .skills-header {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1px;
+            padding-bottom: 1px;
+            gap: 15px; /* 增加容器之间的间距，从默认的间距增加到15px */
+        }
+        .points-container {
+            display: flex;
+            align-items: center;
+            padding: 1px;
+            background-color: transparent;
+            margin-left: 3px;
+            width: auto;
+        }
+        .points-label {
+            width: 60px;
+            font-weight: normal;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        .points-input {
+            width: 36px; /* 从40px减小到36px，只需容纳3位数字 */
+            text-align: center;
+            min-width: 36px; /* 添加最小宽度确保一致性 */
+            max-width: 36px; /* 添加最大宽度避免拉伸 */
+        }
+        .points-remaining {
+            margin-left: 3px;
+            font-style: italic;
+            width: auto; /* 从50px改为auto，让内容决定宽度 */
+            font-weight: normal;
+            white-space: nowrap;
+            display: flex; /* 添加flex布局 */
+            align-items: center; /* 垂直居中 */
+        }
+        .skills-grid {
+            display: flex;
+            flex-direction: column;
+            background-color: #ddd;
+            gap: 1px;
+            flex-grow: 1;
+        }
+        .skill-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px;
+        }
+        .skill-row:nth-child(odd) .skill-item {
+            background-color: #ffffff !important;
+        }
+        .skill-row:nth-child(even) .skill-item {
+            background-color: #f0f0f0 !important;
+        }
+        .skills-header-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            margin-top: 0;
+            margin-bottom: 1px;
+            background-color: #ddd;
+        }
+        .skills-header-item {
+            display: flex;
+            align-items: center;
+            padding: 0 2px;
+            font-weight: normal;
+            background-color: #e0e0e0;
+            border: none;
+            border-radius: 0;
+            min-height: 18px;
+            justify-content: space-between;
+        }
+        .skills-header-name {
+            flex: 2;
+            min-width: 100px;
+            text-align: left;
+        }
+        .skills-header-points {
+            display: flex;
+            align-items: center;
+            flex: 2;
+            justify-content: space-between;
+        }
+        .skills-header-base, 
+        .skills-header-occupation, 
+        .skills-header-interest, 
+        .skills-header-growth {
+            width: 25px;
+            text-align: center;
+            margin: 0 1px;
+            flex: 0 0 25px;
+            font-size: 10px;
+        }
+        .skills-header-total {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            margin-left: 3px;
+            flex: 1;
+        }
+        .skills-header-success {
+            text-align: center;
+            min-width: 22px;
+            font-size: 10px;
+        }
+        .skill-item {
+            display: flex;
+            align-items: center;
+            border: none;
+            padding: 0 2px;
+            margin-bottom: 0;
+            border-radius: 0;
+            background-color: var(--input-bg);
+            font-size: 11px;
+            min-height: 18px;
+            justify-content: space-between;
+            box-shadow: none;
+            transition: background-color 0.2s;
+        }
+        /* 删除单独的奇数行样式 */
+        .skill-item:nth-child(odd) {
+            background-color: var(--input-bg);
+        }
+        /* 删除悬停样式，以保持一致的背景色 */
+        .skill-item:hover {
+            background-color: var(--input-bg);
+        }
+        /* 删除第一个子元素的特殊边框 */
+        .skill-item:first-child {
+            border-top: none;
+        }
+        .skill-checkbox {
+            margin-right: 3px;
+            width: 12px;
+            height: 12px;
+            transform: scale(0.8);
+            flex: 0 0 auto;
+        }
+        .skill-name {
+            flex: 2;
+            font-size: 11px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            min-width: 68px; /* 从70px减小到68px */
+            overflow: hidden;
+        }
+        .skill-name-text {
+            margin-right: 3px;
+            font-weight: normal;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 68px; /* 从70px减小到68px */
+            font-size: 11px;
+        }
+        .skill-subtype {
+            width: 70px; /* 从90px减少到70px */
+            max-width: 70px;
+            font-size: 10px;
+            margin-left: 2px;
+            padding: 1px;
+            height: 18px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-grow: 1; /* 允许下拉菜单占据剩余空间 */
+        }
+        .skill-point-input {
+            width: 25px;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            font-size: 11px;
+            -moz-appearance: textfield;
+            max-length: 3;
+            flex: 0 0 25px;
+            height: 16px;
+        }
+        .skill-base {
+            width: 25px;
+            font-size: 11px;
+            text-align: center;
+            background-color: var(--section-bg);
+            padding: 0;
+            border-radius: 2px;
+            margin: 0;
+            flex: 0 0 25px;
+            height: 14px;
+            line-height: 14px;
+        }
+        .skill-total {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            margin-left: 3px;
+            flex: 1;
+        }
+        .skill-result {
+            font-size: 11px;
+            background-color: var(--section-bg);
+            padding: 0;
+            text-align: center;
+            border-radius: 2px;
+            min-width: 22px;
+            height: 14px;
+            line-height: 14px;
+        }
+        .skills-header-points {
+            display: flex;
+            align-items: center;
+            flex: 2;
+            justify-content: space-between;
+        }
+        .skills-header-base, 
+        .skills-header-occupation, 
+        .skills-header-interest, 
+        .skills-header-growth {
+            width: 25px;
+            text-align: center;
+            margin: 0 1px;
+            flex: 0 0 25px;
+            font-size: 10px;
+        }
+        .skills-header-success {
+            text-align: center;
+            min-width: 22px;
+            font-size: 10px;
+        }
+        .skill-points {
+            display: flex;
+            align-items: center;
+            flex: 2;
+            justify-content: space-between;
+            gap: 3px; /* 从5px减小到3px，整体压缩间距 */
+            margin-left: -2px; /* 添加负边距使基础值向左移动 */
+        }
+        .multi-row-skill {
+            grid-column: span 2;
+            background-color: inherit;
+        }
+        .empty-row {
+            height: 18px; /* 与skill-item高度一致 */
+            visibility: hidden;
+        }
+        .language-skills, .fight-skills, .shooting-skills, .science-skills, 
+        .art-skills, .survival-skills, .drive-skills {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3px;
+        }
+        .native-language {
+            grid-column: span 2;
+        }
+        .foreign-language {
+            grid-column: span 2;
+        }
+        
+        /* 打印样式 */
+        @media print {
+            /* 确保打印时背景色和颜色可见，并设置最高优先级 */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            /* 确保技能区域标题不分行 */
+            .section-title, .section-title span, .total-attr {
+                white-space: nowrap !important;
+                overflow: visible !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                flex-wrap: nowrap !important;
+                width: auto !important; /* 对span和total-attr设置自动宽度 */
+            }
+            
+            /* 确保section-title在打印时宽度为100% */
+            .section-title {
+                width: 100% !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                border-bottom: 1px solid var(--border-color) !important;
+            }
+            
+            /* 确保总点数在打印时靠右显示 */
+            .total-attr {
+                margin-left: auto !important;
+            }
+            
+            /* 基本打印样式 */
+            body {
+                padding: 0;
+                background-color: var(--bg-color);
+            }
+            
+            .character-sheet {
+                border: 1px solid var(--border-color);
+                box-shadow: none;
+                padding: 5px;
+                background-color: white;
+            }
+            
+            /* 隐藏输入框边框和统一背景色 */
+            input, select, textarea, .field-input, .char-value, .skill-point-input, .stat-value, .points-input {
+                border: none !important;
+                background-color: var(--section-bg) !important; /* 统一使用section-bg背景色 */
+                box-shadow: none !important;
+                -webkit-appearance: none !important;
+                appearance: none !important;
+                padding: 2px !important;
+                border-radius: 2px !important;
+            }
+            
+            /* 专门确保调查员区域和属性区域输入框样式 */
+            .field-input, .char-value, input[type="text"], input[type="number"] {
+                background-color: var(--section-bg) !important;
+                color: var(--text-color) !important;
+            }
+            
+            /* 特别指定调查员区域的输入框使用白色背景 */
+            .sheet-section:first-child input, 
+            .sheet-section:first-child .field-input {
+                background-color: white !important; /* 改为白色背景 */
+            }
+            
+            /* 隐藏下拉菜单中的"选择..."和"自定义..."选项 */
+            select.skill-subtype option[value=""],
+            select.skill-subtype option[value="custom"] {
+                display: none !important;
+            }
+            
+            /* 隐藏未选择值的下拉菜单 */
+            select.skill-subtype.empty-select {
+                display: none !important;
+            }
+            
+            /* 隐藏上传头像提示 */
+            .avatar-placeholder {
+                display: none !important;
+            }
+            
+            /* 确保点数输入区域不换行且剩余显示在同一行 */
+            .skills-header {
+                display: flex;
+                flex-wrap: nowrap !important;
+                white-space: nowrap !important;
+                width: 100% !important;
+                gap: 15px !important; /* 打印时也保持间距为15px */
+            }
+            
+            .points-container {
+                flex-shrink: 0 !important;
+                white-space: nowrap !important;
+                display: flex !important;
+                align-items: center !important;
+            }
+            
+            .points-label, .points-remaining {
+                white-space: nowrap !important;
+                display: flex !important;
+                align-items: center !important;
+            }
+            
+            /* 确保技能名字在打印时完整显示 */
+            .skill-name-text {
+                max-width: none !important;
+                overflow: visible !important;
+                white-space: nowrap !important;
+                flex-shrink: 0 !important;
+            }
+            
+            /* 完全移除所有可能导致0值隐藏的打印规则 */
+            .skill-result:empty, 
+            .skill-result:not(:empty):not([data-filled="true"]),
+            .skill-base:empty, 
+            .skill-base:not(:empty)[data-zero="true"] {
+                visibility: visible !important;
+                color: var(--text-color) !important;
+            }
+            
+            /* 确保所有技能值在打印时可见 */
+            .skill-base, 
+            .skill-result {
+                visibility: visible !important;
+                color: var(--text-color) !important;
+                background-color: var(--section-bg) !important;
+            }
+            
+            /* 重新定义明确的打印棋盘格样式 */
+            .odd-row .left-column-cell {
+                background-color: #ffffff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                visibility: visible !important;
+            }
+            .odd-row .right-column-cell {
+                background-color: #f0f0f0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                visibility: visible !important;
+            }
+            .even-row .left-column-cell {
+                background-color: #f0f0f0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                visibility: visible !important;
+            }
+            .even-row .right-column-cell {
+                background-color: #ffffff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                visibility: visible !important;
+            }
+            
+            /* 隐藏选择和更改按钮 */
+            .skill-subtype-btn {
+                display: none !important;
+            }
+            
+            /* 确保选择的子技能名称正确显示 */
+            .skill-subtype-display {
+                display: inline-block !important;
+                color: var(--text-color) !important;
+                font-style: normal !important;
+                margin-left: 0 !important;
+            }
+            
+            /* 确保打印时不显示页眉页脚 */
+            @page {
+                margin: 0.5cm;
+                size: auto;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            /* 属性区域中的幸运输入框使用白色背景 */
+            .luck-input, 
+            input.field-input.luck-input {
+                background-color: white !important; /* 幸运输入框使用白色背景 */
+            }
+            
+            /* 打印时输入框样式 */
+            .char-value {
+                border: none !important;
+                background-color: white !important; /* 改为白色背景 */
+                width: 60% !important; /* 打印时让输入框适当变窄 */
+            }
+            
+            /* 属性区域布局调整 */
+            .characteristic-item {
+                padding: 0 !important;
+                margin-bottom: 3px !important;
+            }
+            
+            .char-label {
+                margin-bottom: 2px !important;
+            }
+            
+            /* 打印时属性区域输入框样式 - 使用高特异性选择器确保应用 */
+            .sheet-section:nth-child(2) .char-value,
+            .sheet-section:nth-child(2) input[type="number"],
+            .sheet-section:nth-child(2) input[type="text"],
+            .characteristic-item .char-value,
+            .characteristics-grid input,
+            #str, #con, #dex, #app, #siz, #edu, #int, #pow, #luc {
+                background-color: white !important; /* 白色背景 */
+                border: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            /* 确保不受全局规则影响 */
+            .characteristics-grid input.char-value {
+                background-color: white !important; /* 再次指定白色背景，确保优先级 */
+            }
+            
+            /* 确保自定义技能的基础值在打印时可见 */
+            .custom-skill-base {
+                visibility: visible !important;
+                color: var(--text-color) !important;
+                background-color: var(--section-bg) !important;
+            }
+            
+            /* 确保所有技能结果值显示 */
+            .custom-skill-result {
+                visibility: visible !important;
+                color: var(--text-color) !important;
+                background-color: var(--section-bg) !important;
+            }
+        }
+        
+        /* 全局样式 - 确保0值在打印和普通显示时都可见 */
+        .skill-base, .skill-result {
+            min-width: 22px;
+            visibility: visible !important;
+            color: var(--text-color) !important;
+        }
+        
+        /* 确保打印前JS函数能正确处理0值显示 */
+        
+        input[type="text"] {
+            border: 1px solid var(--border-color);
+            padding: 3px 5px;
+            border-radius: 3px;
+            background-color: var(--input-bg);
+            width: 100%;
+            text-align: center;
+        }
+        .skill-points {
+            display: flex;
+            align-items: center;
+            flex: 2;
+            justify-content: space-between;
+            gap: 5px;
+        }
+        /* 横向布局样式 */
+        .stat-content {
+            display: flex;
+            justify-content: space-around;
+            padding: 0;
+            margin-top: 2px;
+            width: 100%;
+            gap: 2px;
+        }
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            max-width: 30%;
+        }
+        .stat-label {
+            font-size: 11px;
+            font-weight: normal;
+            color: #555;
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+        .stat-value {
+            width: 24px;
+            height: 14px;
+            text-align: center;
+            padding: 0;
+            font-size: 11px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            background-color: #f9f9f9;
+        }
+        /* 普通文字样式统一 */
+        .field-label,
+        .char-label,
+        .stat-label,
+        .points-label,
+        .skill-name-text,
+        .skill-base,
+        .skill-result,
+        .points-remaining,
+        .skills-header-item,
+        .skills-header-base,
+        .skills-header-occupation,
+        .skills-header-interest,
+        .skills-header-success,
+        .skill-subtype,
+        .skill-subtype option,
+        .skill-point-input,
+        .points-input,
+        .avatar-placeholder-text,
+        .char-value {
+            font-size: 11px !important;
+        }
+        /* 确保所有输入框内的文字大小一致 */
+        input, select, option {
+            font-size: 11px;
+        }
+        /* 保持属性值的字体与普通文字一致 */
+        .char-value {
+            font-size: 11px;
+            font-weight: normal;
+            text-align: center;
+            -moz-appearance: textfield;
+        }
+        /* 确保角色卡内所有普通文字统一 */
+        .skill-item {
+            font-size: 11px;
+        }
+        /* 添加更高优先级的全局字体样式 */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 11px !important;
+            line-height: 1.2;
+            padding: 2px;
+            max-width: 21cm; /* A4宽度 */
+            margin: 0 auto;
+        }
+        /* 确保所有文本输入元素都是统一字体大小 */
+        input, select, option, textarea, button, label, .field-input, .char-value, .skill-point-input {
+            font-size: 11px !important;
+        }
+        /* 确保唯一例外是区域标题和次级标题 */
+        .section-title {
+            font-size: 14px !important;
+            font-weight: bold;
+        }
+        .stat-title, .total-attr {
+            font-size: 12px !important;
+        }
+        /* 其他可能有特定字体大小的元素 */
+        .skills-header-base, 
+        .skills-header-occupation, 
+        .skills-header-interest, 
+        .skills-header-growth,
+        .skills-header-success,
+        .skill-base,
+        .skill-result {
+            font-size: 11px !important;
+        }
+        .luck-input {
+            width: 90% !important; /* 与其他属性输入框宽度一致 */
+            max-width: none !important; /* 移除最大宽度限制 */
+            flex: none !important;
+            text-align: center !important; /* 文本居中 */
+            margin: 0 auto !important; /* 水平居中 */
+        }
+        /* 优化技能区域的标题和点数布局 */
+        .skills-section .section-title {
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2px;
+            padding-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        /* 修改角色状态区域 */
+        .stat-content {
+            display: flex;
+            justify-content: space-around;
+            padding: 0;
+            margin-top: 2px;
+            width: 100%;
+            gap: 2px;
+        }
+        .stat-box {
+            flex: 1;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 1px;
+            text-align: center;
+            background-color: var(--input-bg);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        .stat-title {
+            font-size: 12px !important;
+            font-weight: bold;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1px;
+            padding-bottom: 1px;
+            color: #444;
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 11px;
+            font-weight: normal;
+            color: #555;
+            margin-bottom: 0;
+            white-space: nowrap;
+        }
+        .skills-header-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            margin-top: 0;
+            margin-bottom: 1px;
+            background-color: #ddd;
+        }
+        /* 优化技能表格内部元素 */
+        .skills-grid {
+            display: flex;
+            flex-direction: column;
+            background-color: #ddd;
+            gap: 1px;
+        }
+        .skill-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px;
+        }
+        .skill-row:nth-child(odd) .skill-item {
+            background-color: #ffffff !important;
+        }
+        .skill-row:nth-child(even) .skill-item {
+            background-color: #f0f0f0 !important;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-size: 11px !important;
+            line-height: 1.2;  /* 从1.3减小到1.2 */
+            padding: 2px;  /* 从5px减小到2px */
+            max-width: 21cm; /* A4宽度 */
+            margin: 0 auto;
+        }
+        .skill-item[style*="grid-column: span 2"] {
+            background-color: #f0f0f0; /* 与奇数行颜色一致 */
+            border-bottom: 1px solid #ddd;
+            font-weight: normal; /* 从bold改为normal */
+        }
+        .skill-item[style*="grid-column: span 2"] .skill-name-text {
+            font-weight: normal; /* 从bold改为normal */
+            color: #444;
+        }
+        /* 确保空行也有适当的背景色 */
+        .skill-row:nth-child(even):empty {
+            background-color: #ffffff;
+            height: 18px;
+        }
+        .skill-row:nth-child(odd):empty {
+            background-color: #f0f0f0;
+            height: 18px;
+        }
+        /* 添加子技能样式 */
+        .subtype-skill {
+            /* 删除对背景色的任何限制 */
+        }
+        
+        /* 子技能文本样式 */
+        .subtype-skill .skill-name-text:empty:before {
+            content: "\00a0"; /* 空格，保持布局 */
+        }
+
+        /* 针对子技能项的特殊样式 */
+        .subtype-skill .skill-name {
+            display: flex;
+            align-items: center;
+        }
+        
+        .subtype-skill .skill-name-text {
+            flex-shrink: 0; /* 防止名称被压缩 */
+        }
+
+        /* 添加固定的列交替样式类 */
+        .left-column-cell {
+            background-color: #f0f0f0 !important;
+        }
+        .right-column-cell {
+            background-color: #ffffff !important;
+        }
+        
+        /* 棋盘格样式 */
+        .odd-row .left-column-cell {
+            background-color: #ffffff !important;
+        }
+        .odd-row .right-column-cell {
+            background-color: #f0f0f0 !important;
+        }
+        .even-row .left-column-cell {
+            background-color: #f0f0f0 !important;
+        }
+        .even-row .right-column-cell {
+            background-color: #ffffff !important;
+        }
+
+        /* 统一所有输入框背景色 */
+        input[type="text"], 
+        input[type="number"],
+        .field-input, 
+        .char-value, 
+        .skill-point-input, 
+        .skill-base,
+        .stat-value, 
+        .points-input,
+        select {
+            background-color: var(--input-bg) !important;
+        }
+
+        /* 移除可能影响输入框背景色的样式 */
+        .skill-base:empty, 
+        .skill-base:not(:empty)[data-zero="true"],
+        .skill-result:empty, 
+        .skill-result:not(:empty)[data-filled="false"] {
+            background-color: var(--section-bg) !important;
+        }
+
+        /* 确保所有技能值区域都有相同的背景色 */
+        .skill-base, .skill-result {
+            background-color: var(--section-bg) !important;
+        }
+
+        /* 打印样式调整 */
+        @media print {
+            /* 隐藏输入框边框，但保持一致的背景色 */
+            input[type="text"], 
+            input[type="number"],
+            .field-input, 
+            .char-value, 
+            .skill-point-input,
+            .points-input,
+            select {
+                border: none !important;
+                background-color: transparent !important;
+            }
+
+            /* 确保技能值区域在打印时仍有一致的背景色 */
+            .skill-base, 
+            .skill-result {
+                background-color: var(--section-bg) !important;
+            }
+
+            /* 当值为空或0时只隐藏文本，但保留背景色 */
+            .skill-base[data-zero="true"],
+            .skill-result[data-filled="false"] {
+                color: transparent !important;
+                background-color: var(--section-bg) !important;
+            }
+            
+            /* 移除技能项和自定义技能项的所有边框和阴影 */
+            .skill-item, .custom-skill-item, 
+            .skill-row, .custom-skill-row,
+            .skills-container, .custom-skills-container,
+            .skills-section, .custom-skills-section {
+                border: none !important;
+                box-shadow: none !important;
+                -webkit-box-shadow: none !important;
+                -moz-box-shadow: none !important;
+                background-color: var(--input-bg) !important;
+                print-color-adjust: exact !important;
+            }
+            
+            /* 确保技能行之间没有边框 */
+            .skill-row:not(:last-child), .custom-skill-row:not(:last-child) {
+                border-bottom: none !important;
+            }
+            
+            /* 移除技能项和自定义技能项内部元素的边框 */
+            .skill-name, .custom-skill-name,
+            .skill-points, .custom-skill-points,
+            .skill-total, .custom-skill-total {
+                border: none !important;
+                box-shadow: none !important;
+            }
+        }
+
+        /* 添加一个全局规则确保打印和普通显示都能看到0值 */
+        .skill-base, .skill-result {
+            min-width: 22px;
+            visibility: visible !important;
+            color: var(--text-color) !important;
+        }
+
+        /* 新增模态窗口样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+        .modal-content {
+            position: relative;
+            background-color: #fff;
+            margin: 10% auto;
+            padding: 0;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            animation: modalopen 0.4s;
+        }
+        @keyframes modalopen {
+            from {opacity: 0; transform: translateY(-10px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        .modal-header {
+            padding: 8px 16px;
+            background-color: #f0f0f0;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-title {
+            font-size: 16px !important;
+            font-weight: bold;
+            margin: 0;
+        }
+        .close-modal {
+            color: #aaa;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-modal:hover {
+            color: #000;
+        }
+        .modal-body {
+            padding: 15px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .subtype-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .subtype-item {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #f9f9f9;
+            transition: all 0.2s;
+        }
+        .subtype-item:hover {
+            background-color: #e9e9e9;
+            border-color: #aaa;
+        }
+        .subtype-category {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            color: #555;
+        }
+        .custom-input-container {
+            margin-top: 15px;
+            display: flex;
+            gap: 8px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+        }
+        #custom-subtype-input {
+            flex: 1;
+            padding: 6px 10px;
+        }
+        #confirm-custom {
+            padding: 6px 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #confirm-custom:hover {
+            background-color: #45a049;
+        }image.png
+        .skill-subtype-btn {
+            margin-left: 5px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 1px 5px;
+            font-size: 10px;
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90px;
+            display: inline-block;
+        }
+        .skill-subtype-btn:hover {
+            background-color: #e0e0e0;
+        }
+        .skill-subtype-display {
+            margin-left: 5px;
+            color: #0066cc;
+            font-style: italic;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90px;
+            display: inline-block;
+        }
+        
+        /* 分页和新页面样式 */
+        .page-break {
+            page-break-after: always;
+            height: 0;
+            display: none;
+        }
+        
+        .custom-page {
+            border: 1px solid var(--border-color);
+            padding: 5px;
+            background-color: white;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 21cm; /* A4宽度 */
+            min-height: auto !important; /* 移除最小高度限制 */
+            height: auto !important; /* 高度自适应内容 */
+            box-sizing: border-box;
+            page-break-inside: avoid;
+            margin: 2px auto;
+        }
+        
+        /* 调查员引用区域，移除多余边框 */
+        .investigator-reference {
+            background-color: var(--section-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 5px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between; /* 两端对齐 */
+            align-items: center; /* 居中对齐 */
+            height: 24px; /* 固定高度 */
+        }
+        
+        .investigator-reference .section-title {
+            border-bottom: none !important; /* 确保没有底部边框 */
+            margin-bottom: 0; 
+            padding-bottom: 0;
+            display: flex;
+            align-items: center;
+            height: 100%;
+            font-size: 14px !important;
+            font-weight: bold;
+        }
+        
+        .investigator-info {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .investigator-data {
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            height: 100%;
+        }
+        
+        .investigator-field {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .investigator-label, .investigator-value {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+        
+        .investigator-label {
+            font-weight: bold;
+            margin-right: 5px;
+            font-size: 11px;
+        }
+        
+        .investigator-value {
+            font-size: 11px;
+        }
+        
+        /* 自定义技能区域 */
+        .sheet-section.custom-skills-section {
+            background-color: #ddd !important; /* 与其他区域保持一致的深色背景 */
+            border: 1px solid black !important;
+            border-radius: 4px !important;
+            padding: 3px !important;
+            display: flex;
+            flex-direction: column;
+            flex: 1 0 auto;
+        }
+        
+        .custom-skills-grid {
+            display: flex;
+            flex-direction: column;
+            background-color: #ddd !important;
+            gap: 1px;
+            flex: 1 0 auto;
+        }
+        
+        .custom-skill-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px;
+        }
+        
+        /* 添加自定义技能区域的棋盘格效果 */
+        .custom-skill-row:nth-child(odd) .custom-skill-item {
+            background-color: #ffffff !important;
+        }
+        
+        .custom-skill-row:nth-child(even) .custom-skill-item {
+            background-color: #f0f0f0 !important;
+        }
+        
+        .custom-skill-item {
+            display: flex;
+            align-items: center;
+            border: none;
+            padding: 0 5px;
+            margin-bottom: 0;
+            border-radius: 0;
+            background-color: var(--input-bg);
+            font-size: 11px;
+            min-height: 22px;
+            justify-content: space-between;
+            box-shadow: none;
+        }
+        
+        .custom-skill-name {
+            flex: 2;
+            font-size: 11px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            min-width: 100px;
+        }
+        
+        .custom-skill-name-input {
+            width: 100%;
+            font-size: 11px;
+            border: 1px solid #ddd;
+            border-radius: 2px;
+            padding: 1px 3px;
+            background-color: white;
+        }
+        
+        .custom-skill-points {
+            display: flex;
+            align-items: center;
+            flex: 2;
+            justify-content: space-between;
+            gap: 1px;
+        }
+        
+        .custom-skill-base {
+            width: 25px;
+            font-size: 11px;
+            text-align: center;
+            background-color: var(--section-bg);
+            padding: 0;
+            border-radius: 2px;
+            margin: 0;
+            flex: 0 0 25px;
+            height: 14px;
+            line-height: 14px;
+            color: var(--text-color) !important; /* 确保文字颜色可见 */
+        }
+        
+        .custom-skill-point-input {
+            width: 25px;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            font-size: 11px;
+            -moz-appearance: textfield;
+            max-length: 3;
+            flex: 0 0 25px;
+            height: 16px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+        }
+        
+        .custom-skill-total {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            margin-left: 3px;
+            flex: 1;
+        }
+        
+        .custom-skill-result {
+            font-size: 11px;
+            background-color: var(--section-bg);
+            padding: 0;
+            text-align: center;
+            border-radius: 2px;
+            min-width: 22px;
+            height: 14px;
+            line-height: 14px;
+        }
+        
+        /* 棋盘格样式 */
+        .custom-odd-row .custom-left-column-cell {
+            background-color: #ffffff !important;
+        }
+        .custom-odd-row .custom-right-column-cell {
+            background-color: #f0f0f0 !important;
+        }
+        .custom-even-row .custom-left-column-cell {
+            background-color: #f0f0f0 !important;
+        }
+        .custom-even-row .custom-right-column-cell {
+            background-color: #ffffff !important;
+        }
+        
+        /* 打印样式优化 */
+        @media print {
+            /* 控制页面大小和边距 */
+            @page {
+                size: A4;
+                margin: 0.5cm;
+            }
+            
+            /* 防止意外分页 */
+            .character-sheet, .custom-page {
+                page-break-inside: avoid;
+                max-height: none; /* 打印时移除最大高度限制 */
+                box-shadow: none;
+            }
+            
+            /* 确保分页符生效 */
+            .page-break {
+                page-break-after: always;
+                height: 0;
+                display: block;
+                clear: both;
+            }
+            
+            /* 隐藏输入技能名称的placeholder */
+            .custom-skill-name-input::placeholder {
+                color: transparent !important;
+            }
+            
+            /* 进一步确保所有技能表相关元素没有边框阴影 */
+            .skills-grid, .custom-skills-grid,
+            .skills-header-row, .skills-header-item,
+            .skill-points div, .custom-skill-points div,
+            .skill-total div, .custom-skill-total div {
+                border: none !important;
+                box-shadow: none !important;
+                -webkit-box-shadow: none !important;
+                text-shadow: none !important;
+                filter: none !important;
+            }
+            
+            /* 清除所有可能影响打印的装饰效果 */
+            .skill-odd-row, .skill-even-row,
+            .custom-odd-row, .custom-even-row,
+            .left-column-cell, .right-column-cell,
+            .custom-left-column-cell, .custom-right-column-cell {
+                box-shadow: none !important;
+                border: none !important;
+                filter: none !important;
+            }
+        }
+        
+        /* 武器区域 */
+        .weapon-section {
+            grid-column: span 2; /* 改回占2列 */
+            margin-top: 5px;
+        }
+        
+        .weapon-header-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr; /* 将三列宽度均分 */
+            gap: 5px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 3px;
+        }
+        
+        .weapon-header-item {
+            font-weight: bold;
+            text-align: center;
+            font-size: 11px;
+        }
+        
+        .weapon-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1px; /* 与技能行一致 */
+        }
+        
+        .weapon-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr; /* 将三列宽度均分 */
+            gap: 5px;
+            align-items: center;
+            min-height: 18px; /* 与技能行高度一致 */
+        }
+        
+        /* 实现奇偶行不同背景色，与技能区域一致 */
+        .weapon-row:nth-child(odd) {
+            background-color: #f0f0f0;
+        }
+        
+        .weapon-row:nth-child(even) {
+            background-color: #ffffff;
+        }
+        
+        .weapon-name, .weapon-damage, .weapon-feature {
+            font-size: 11px;
+            padding: 2px 4px;
+            min-height: 18px;
+            display: flex;
+            align-items: center;
+            cursor: text;
+            position: relative;
+        }
+        
+        .weapon-name-text, .weapon-damage-text, .weapon-feature-text {
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .weapon-name-input, .weapon-damage-input, .weapon-feature-input {
+            width: 100%;
+            padding: 3px 5px;
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            font-size: 11px;
+            background-color: white;
+            min-height: 18px; /* 与技能行高度一致 */
+            display: none; /* 默认隐藏输入框 */
+            position: absolute;
+            left: 0;
+            top: 0;
+            z-index: 10;
+        }
+        
+        /* 确保打印时颜色一致 */
+        @media print {
+            .weapon-row:nth-child(odd) {
+                background-color: #f0f0f0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            .weapon-row:nth-child(even) {
+                background-color: #ffffff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+        
+        /* 悬浮导航按钮组样式 */
+        .float-nav {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .float-nav-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .float-nav-button:hover {
+            background-color: #f0f0f0;
+            transform: scale(1.05);
+        }
+        
+        .float-nav-button:active {
+            background-color: #e0e0e0;
+            transform: scale(0.95);
+        }
+        
+        /* 按钮内部图标占位 */
+        .float-nav-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #333;
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+            -webkit-mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+        }
+        
+        /* 定义每个按钮的图标 */
+        .float-nav-button:nth-child(1) .float-nav-icon {
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z'/%3E%3C/svg%3E");
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z'/%3E%3C/svg%3E");
+        }
+        
+        .float-nav-button:nth-child(2) .float-nav-icon {
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2V9h-2V7h4v10z'/%3E%3C/svg%3E");
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14h-2V9h-2V7h4v10z'/%3E%3C/svg%3E");
+        }
+        
+        .float-nav-button:nth-child(3) .float-nav-icon {
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E");
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z'/%3E%3C/svg%3E");
+        }
+        
+        .float-nav-button:nth-child(4) .float-nav-icon {
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22l-1.92 3.32c-.12.21-.07.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z'/%3E%3C/svg%3E");
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22l-1.92 3.32c-.12.21-.07.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z'/%3E%3C/svg%3E");
+        }
+        
+        .float-nav-button:nth-child(5) .float-nav-icon {
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'/%3E%3C/svg%3E");
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z'/%3E%3C/svg%3E");
+        }
+        
+        /* 打印时隐藏导航按钮 */
+        @media print {
+            .float-nav {
+                display: none !important;
+            }
+            @page {
+                size: A4;
+                margin: 0;
+                zoom: 96%;
+                -webkit-transform: scale(0.96);
+                transform: scale(0.96);
+            }
+            html, body {
+                width: 100%;
+                height: 100%;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .character-sheet {
+                zoom: 96%;
+                -webkit-transform: scale(0.96);
+                transform: scale(0.96);
+                transform-origin: top left;
+            }
+        }
+        
+        /* 移除所有技能表元素的边框和阴影 */
+        .skills-grid, .custom-skills-grid,
+        .skill-item, .custom-skill-item,
+        .skill-row, .custom-skill-row,
+        .skills-section, .custom-skills-section,
+        .skills-container, .custom-skills-container,
+        .skills-header-row, .skills-header-item,
+        .skill-name, .custom-skill-name,
+        .skill-points, .custom-skill-points,
+        .skill-total, .custom-skill-total,
+        .skill-point-input, .custom-skill-point-input,
+        .skill-base, .skill-result,
+        .custom-skill-base, .custom-skill-result {
+                border: none !important;
+            box-shadow: none !important;
+            -webkit-box-shadow: none !important;
+            text-shadow: none !important;
+        }
+        
+        /* 覆盖任何可能导致边框出现的样式 */
+        .skill-odd-row, .skill-even-row,
+        .custom-odd-row, .custom-even-row,
+        .left-column-cell, .right-column-cell,
+        .custom-left-column-cell, .custom-right-column-cell {
+            box-shadow: none !important;
+                border: none !important;
+            }
+            
+        /* 确保背景色正确打印 */
+        * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+        /* 战斗区域 */
+        .combat-section {
+            grid-column: span 1; /* 占1列 */
+            margin-top: 5px;
+            background-color: var(--section-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 5px;
+        }
+        
+        .combat-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 3px; /* 从1px增加到3px，提供更好的行间距 */
+        }
+        
+        .combat-row {
+            display: flex;
+            align-items: center;
+            min-height: 20px; /* 从18px增加到20px，提供更好的垂直空间 */
+            white-space: nowrap; /* 确保文字不分行 */
+            margin-bottom: 1px; /* 添加小的底部边距 */
+        }
+        
+        .combat-label {
+            width: 65%; /* 进一步增加宽度比例，为更长的英文单词预留空间 */
+            font-size: 11px;
+            font-weight: normal; /* 改为正常字重，不加粗 */
+            padding-right: 5px;
+            white-space: nowrap; /* 确保文字不分行 */
+            overflow: hidden; /* 防止文本溢出 */
+            text-overflow: ellipsis; /* 文本溢出时显示省略号 */
+        }
+        
+        .combat-value {
+            width: 35%; /* 相应调整输入框区域的宽度 */
+            display: flex;
+            align-items: center;
+        }
+        
+        .combat-input {
+            width: 100%;
+            padding: 2px 4px; /* 调整为与武器输入框一致的内边距 */
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            font-size: 11px;
+            background-color: white;
+            min-height: 18px; /* 与技能行高度一致 */
+        }
+        
+        /* 确保打印时战斗区域样式一致 */
+        @media print {
+            body .character-sheet .combat-section {
+                border: 1px solid black !important; /* 使用更高优先级选择器和明确的黑色边框 */
+                border-width: 1px !important;
+                border-style: solid !important;
+                border-color: black !important;
+                box-shadow: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            .combat-input {
+                border: none !important;
+                background-color: white !important; /* 改为白色背景 */
+            }
+            
+            /* 确保打印时文字不分行 */
+            .combat-row, .combat-label {
+                white-space: nowrap !important;
+                overflow: visible !important;
+                display: flex !important;
+                align-items: center !important;
+                min-height: 20px !important; /* 更新为与常规视图一致的高度 */
+                margin-bottom: 1px !important; /* 确保打印时也有底部边距 */
+            }
+            
+            /* 打印时保持布局比例 */
+            .combat-label {
+                width: 65% !important;
+                font-weight: normal !important; /* 确保打印时文字不加粗 */
+            }
+            
+            .combat-value {
+                width: 35% !important;
+            }
+            
+            /* 确保战斗区域输入框在打印时使用白色背景 */
+            html body .character-sheet .combat-section .combat-input {
+                background-color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+
+        /* 通用区域边框样式 */
+        .section-border {
+            border: 1px solid black !important;
+            border-radius: 4px !important;
+            padding: 3px !important;
+        }
+
+        /* 应用边框样式到所有主要区域 */
+        .basic-info-section,
+        .characteristics-section,
+        .skills-section,
+        .combat-section,
+        .weapons-section,
+        .backstory-section,
+        .assets-section,
+        .spells-section,
+        .custom-page {
+            border: 1px solid black !important;
+            border-radius: 4px !important;
+            padding: 3px !important;
+        }
+
+        /* 打印样式确保边框显示 */
+        @media print {
+            .basic-info-section,
+            .characteristics-section,
+            .skills-section,
+            .combat-section,
+            .weapons-section,
+            .backstory-section,
+            .assets-section,
+            .spells-section,
+            .custom-page {
+                border: 1px solid black !important;
+                border-width: 1px !important;
+                border-style: solid !important;
+                border-color: black !important;
+                border-radius: 4px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+        }
+    </style>
+    
+    <!-- 添加专门处理打印时边框阴影的样式 -->
+    <style>
+        @media print {
+            /* 使用更高优先级的选择器移除所有潜在的边框和阴影 */
+            body .character-sheet .skills-section *,
+            body .character-sheet .custom-skills-section * {
+                border: none !important;
+                box-shadow: none !important;
+                -webkit-box-shadow: none !important;
+                -moz-box-shadow: none !important;
+                text-shadow: none !important;
+                filter: none !important;
+            }
+            
+            /* 特别处理技能行和技能项 */
+            body .skill-row,
+            body .custom-skill-row,
+            body .skill-item,
+            body .custom-skill-item,
+            body .skills-header-row,
+            body .skills-header-item {
+                border: none !important;
+                box-shadow: none !important;
+                filter: none !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            /* 确保打印时保持棋盘格效果 */
+            body .skill-row:nth-child(odd) .skill-item {
+                background-color: #ffffff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            body .skill-row:nth-child(even) .skill-item {
+                background-color: #f0f0f0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            /* 自定义技能区域打印棋盘格效果 */
+            body .custom-skill-row:nth-child(odd) .custom-skill-item {
+                background-color: #ffffff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            body .custom-skill-row:nth-child(even) .custom-skill-item {
+                background-color: #f0f0f0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 页面标题 -->
+    <div class="page-title">COC 7版人物卡</div>
+    
+    <!-- 悬浮导航按钮组 -->
+    <div class="float-nav">
+        <div class="float-nav-button" id="page-nav-btn" title="翻页">
+            <div class="float-nav-icon"></div>
+        </div>
+        <div class="float-nav-button">
+            <div class="float-nav-icon"></div>
+        </div>
+        <div class="float-nav-button">
+            <div class="float-nav-icon"></div>
+        </div>
+        <div class="float-nav-button">
+            <div class="float-nav-icon"></div>
+        </div>
+        <div class="float-nav-button">
+            <div class="float-nav-icon"></div>
+        </div>
+    </div>
+    
+    <div class="character-sheet">
+        <!-- 调查员信息 -->
+        <div class="sheet-section basic-info-section">
+            <div class="section-title">调查员 Investigator</div>
+            <div class="field-row">
+                <div class="field-label">姓名</div>
+                <input type="text" class="field-input">
+            </div>
+            <div class="field-row">
+                <div class="field-label">玩家</div>
+                <input type="text" class="field-input">
+            </div>
+            <div class="field-row double">
+                <div class="field-group">
+                    <div class="field-label">时代</div>
+                    <input type="text" class="field-input">
+                </div>
+                <div class="field-group">
+                    <div class="field-label">职业</div>
+                    <input type="text" class="field-input">
+                </div>
+            </div>
+            <div class="field-row double">
+                <div class="field-group">
+                    <div class="field-label">年龄</div>
+                    <input type="text" class="field-input">
+                </div>
+                <div class="field-group">
+                    <div class="field-label">性别</div>
+                    <input type="text" class="field-input">
+                </div>
+            </div>
+            <div class="field-row double">
+                <div class="field-group">
+                    <div class="field-label">住地</div>
+                    <input type="text" class="field-input">
+                </div>
+                <div class="field-group">
+                    <div class="field-label">故乡</div>
+                    <input type="text" class="field-input">
+                </div>
+            </div>
+        </div>
+
+        <!-- 属性 -->
+        <div class="sheet-section characteristics-section">
+            <div class="section-title">
+                <span style="font-size: 14px !important; font-weight: bold;">属性 Characteristics</span>
+                <div class="total-attr">总点数：<span id="total-attr">0</span></div>
+            </div>
+            <div class="characteristics-grid">
+                <div class="characteristic-item">
+                    <div class="char-label">力量 STR</div>
+                    <input type="number" class="char-value" id="str">
+                </div>
+                <div class="characteristic-item">
+                    <div class="char-label">体质 CON</div>
+                    <input type="number" class="char-value" id="con">
+                </div>
+                <div class="characteristic-item">
+                    <div class="char-label">敏捷 DEX</div>
+                    <input type="number" class="char-value" id="dex">
+                </div>
+                <div class="characteristic-item">
+                    <div class="char-label">外貌 APP</div>
+                    <input type="number" class="char-value" id="app">
+                </div>
+                <div class="characteristic-item">
+                    <div class="char-label">体型 SIZ</div>
+                    <input type="number" class="char-value" id="siz">
+                </div>
+                <div class="characteristic-item">
+                    <div class="char-label">教育 EDU</div>
+                    <input type="number" class="char-value" id="edu">
+                </div>
+                <div class="characteristic-item">
+                    <div class="char-label">智力 INT</div>
+                    <input type="number" class="char-value" id="int">
+                </div>
+                <div class="characteristic-item">
+                    <div class="char-label">意志 POW</div>
+                    <input type="number" class="char-value" id="pow">
+                </div>
+                <div class="characteristic-item">
+                    <div class="char-label">幸运 Luc</div>
+                    <input type="number" class="char-value" id="luc">
+                </div>
+            </div>
+        </div>
+
+        <!-- 头像区域 -->
+        <div class="sheet-section avatar-section">
+            <div class="section-title">头像 Portrait</div>
+            <div class="avatar-container">
+                <img id="avatar-preview" class="avatar-img">
+                <div class="avatar-placeholder">
+                    <div class="avatar-placeholder-icon">📷</div>
+                    <div class="avatar-placeholder-text">点击上传头像</div>
+                </div>
+            </div>
+            <input type="file" id="avatar-upload" accept="image/*" class="hidden-file-input">
+        </div>
+
+        <!-- 属性状态区 -->
+        <div class="sheet-section stats-section">
+            <div class="section-title">角色状态 Status</div>
+            <div class="stats-container">
+                <!-- 理智值 -->
+                <div class="stat-box">
+                    <div class="stat-title">理智值 SAN</div>
+                    <div class="stat-content">
+                        <div class="stat-item">
+                            <div class="stat-label">当前 Current</div>
+                            <input type="number" class="stat-value" id="current-san" maxlength="2">
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">起始 Start</div>
+                            <input type="number" class="stat-value" id="start-san" maxlength="2">
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">最大 Max</div>
+                            <input type="number" class="stat-value" id="max-san" maxlength="2">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 生命值 -->
+                <div class="stat-box">
+                    <div class="stat-title">生命值 HP</div>
+                    <div class="stat-content">
+                        <div class="stat-item">
+                            <div class="stat-label">当前 Current</div>
+                            <input type="number" class="stat-value" id="current-hp" maxlength="2">
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">最大 Max</div>
+                            <input type="number" class="stat-value" id="max-hp" maxlength="2">
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">临时 Temp</div>
+                            <input type="number" class="stat-value" id="temp-hp" maxlength="2">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 魔法值 -->
+                <div class="stat-box">
+                    <div class="stat-title">魔法值 MP</div>
+                    <div class="stat-content">
+                        <div class="stat-item">
+                            <div class="stat-label">当前 Current</div>
+                            <input type="number" class="stat-value" id="current-mp" maxlength="2">
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">最大 Max</div>
+                            <input type="number" class="stat-value" id="max-mp" maxlength="2">
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">临时 Temp</div>
+                            <input type="number" class="stat-value" id="temp-mp" maxlength="2">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 技能区域 -->
+        <div class="sheet-section skills-section">
+            <div class="section-title" style="margin-bottom: 0; padding-bottom: 1px; white-space: nowrap !important;">
+                <span style="font-size: 14px !important; font-weight: bold; white-space: nowrap !important;">技能 Skills</span>
+                <div class="skills-header" style="margin-bottom: 0; padding-bottom: 0; flex-wrap: nowrap; white-space: nowrap;">
+                    <div class="points-container" style="padding: 0; white-space: nowrap; flex-shrink: 0;">
+                        <div class="points-label" style="white-space: nowrap;">职业点数</div>
+                        <input type="text" class="points-input" id="occupation-points" maxlength="3">
+                        <div class="points-remaining" style="white-space: nowrap; display: flex; align-items: center;">剩余:&nbsp;<span id="occupation-remaining">0</span></div>
+                    </div>
+                    <div class="points-container" style="padding: 0; white-space: nowrap; flex-shrink: 0;">
+                        <div class="points-label" style="white-space: nowrap;">兴趣点数</div>
+                        <input type="text" class="points-input" id="interest-points" maxlength="3">
+                        <div class="points-remaining" style="white-space: nowrap; display: flex; align-items: center;">剩余:&nbsp;<span id="interest-remaining">0</span></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="skills-header-row">
+                <div class="skills-header-item">
+                    <div class="skills-header-name">技能名</div>
+                    <div class="skills-header-points">
+                        <div class="skills-header-base">基础</div>
+                        <div class="skills-header-occupation">职业</div>
+                        <div class="skills-header-interest">兴趣</div>
+                        <div class="skills-header-growth">成长</div>
+                    </div>
+                    <div class="skills-header-total">
+                        <div class="skills-header-success">成功</div>
+                        <div class="skills-header-success">困难</div>
+                        <div class="skills-header-success">极难</div>
+                    </div>
+                </div>
+                <div class="skills-header-item">
+                    <div class="skills-header-name">技能名</div>
+                    <div class="skills-header-points">
+                        <div class="skills-header-base">基础</div>
+                        <div class="skills-header-occupation">职业</div>
+                        <div class="skills-header-interest">兴趣</div>
+                        <div class="skills-header-growth">成长</div>
+                    </div>
+                    <div class="skills-header-total">
+                        <div class="skills-header-success">成功</div>
+                        <div class="skills-header-success">困难</div>
+                        <div class="skills-header-success">极难</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="skills-grid" id="skills-container">
+                <!-- 技能列表将由JavaScript动态生成 -->
+            </div>
+        </div>
+        
+        <!-- 武器区域 -->
+        <div class="sheet-section weapon-section">
+            <div class="section-title">
+                <span style="font-size: 14px !important; font-weight: bold; white-space: nowrap !important;">武器 Weapon</span>
+            </div>
+            
+            <div class="weapon-header-row">
+                <div class="weapon-header-item weapon-name">武器名称</div>
+                <div class="weapon-header-item weapon-damage">伤害</div>
+                <div class="weapon-header-item weapon-feature">特性</div>
+            </div>
+            
+            <div class="weapon-grid">
+                <!-- 武器行1 -->
+                <div class="weapon-row">
+                    <div class="weapon-name">
+                        <div class="weapon-name-text"></div>
+                        <input type="text" class="weapon-name-input" placeholder="输入武器名称">
+                    </div>
+                    <div class="weapon-damage">
+                        <div class="weapon-damage-text"></div>
+                        <input type="text" class="weapon-damage-input" placeholder="输入伤害值">
+                    </div>
+                    <div class="weapon-feature">
+                        <div class="weapon-feature-text"></div>
+                        <input type="text" class="weapon-feature-input" placeholder="输入特性">
+                    </div>
+                </div>
+                
+                <!-- 武器行2 -->
+                <div class="weapon-row">
+                    <div class="weapon-name">
+                        <div class="weapon-name-text"></div>
+                        <input type="text" class="weapon-name-input" placeholder="输入武器名称">
+                    </div>
+                    <div class="weapon-damage">
+                        <div class="weapon-damage-text"></div>
+                        <input type="text" class="weapon-damage-input" placeholder="输入伤害值">
+                    </div>
+                    <div class="weapon-feature">
+                        <div class="weapon-feature-text"></div>
+                        <input type="text" class="weapon-feature-input" placeholder="输入特性">
+                    </div>
+                </div>
+                
+                <!-- 武器行3 -->
+                <div class="weapon-row">
+                    <div class="weapon-name">
+                        <div class="weapon-name-text"></div>
+                        <input type="text" class="weapon-name-input" placeholder="输入武器名称">
+                    </div>
+                    <div class="weapon-damage">
+                        <div class="weapon-damage-text"></div>
+                        <input type="text" class="weapon-damage-input" placeholder="输入伤害值">
+                    </div>
+                    <div class="weapon-feature">
+                        <div class="weapon-feature-text"></div>
+                        <input type="text" class="weapon-feature-input" placeholder="输入特性">
+                    </div>
+                </div>
+                
+                <!-- 武器行4 -->
+                <div class="weapon-row">
+                    <div class="weapon-name">
+                        <div class="weapon-name-text"></div>
+                        <input type="text" class="weapon-name-input" placeholder="输入武器名称">
+                    </div>
+                    <div class="weapon-damage">
+                        <div class="weapon-damage-text"></div>
+                        <input type="text" class="weapon-damage-input" placeholder="输入伤害值">
+                    </div>
+                    <div class="weapon-feature">
+                        <div class="weapon-feature-text"></div>
+                        <input type="text" class="weapon-feature-input" placeholder="输入特性">
+                    </div>
+                </div>
+                
+                <!-- 武器行5 -->
+                <div class="weapon-row">
+                    <div class="weapon-name">
+                        <div class="weapon-name-text"></div>
+                        <input type="text" class="weapon-name-input" placeholder="输入武器名称">
+                    </div>
+                    <div class="weapon-damage">
+                        <div class="weapon-damage-text"></div>
+                        <input type="text" class="weapon-damage-input" placeholder="输入伤害值">
+                    </div>
+                    <div class="weapon-feature">
+                        <div class="weapon-feature-text"></div>
+                        <input type="text" class="weapon-feature-input" placeholder="输入特性">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 战斗区域 -->
+        <div class="sheet-section combat-section">
+            <div class="section-title">
+                <span style="font-size: 14px !important; font-weight: bold; white-space: nowrap !important;">战斗 Combat</span>
+            </div>
+            
+            <div class="combat-grid">
+                <!-- 伤害加值 -->
+                <div class="combat-row">
+                    <div class="combat-label" title="伤害加值 Damage Bonus">伤害加值 Damage Bonus</div>
+                    <div class="combat-value">
+                        <input type="number" class="combat-input" id="damage-bonus" maxlength="3" min="0" max="999">
+                    </div>
+                </div>
+                
+                <!-- 精神加值 -->
+                <div class="combat-row">
+                    <div class="combat-label" title="精神加值 Spirit Bonus">精神加值 Spirit Bonus</div>
+                    <div class="combat-value">
+                        <input type="number" class="combat-input" id="spirit-bonus" maxlength="3" min="0" max="999">
+                    </div>
+                </div>
+                
+                <!-- 精神力 -->
+                <div class="combat-row">
+                    <div class="combat-label" title="精神力 Spirit">精神力 Spirit</div>
+                    <div class="combat-value">
+                        <input type="number" class="combat-input" id="spirit" maxlength="3" min="0" max="999">
+                    </div>
+                </div>
+                
+                <!-- 体格 -->
+                <div class="combat-row">
+                    <div class="combat-label" title="体格 Build">体格 Build</div>
+                    <div class="combat-value">
+                        <input type="number" class="combat-input" id="build" maxlength="3" min="0" max="999">
+                    </div>
+                </div>
+                
+                <!-- 护甲 -->
+                <div class="combat-row">
+                    <div class="combat-label" title="护甲 Armor">护甲 Armor</div>
+                    <div class="combat-value">
+                        <input type="number" class="combat-input" id="armor" maxlength="3" min="0" max="999">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 子技能选择模态窗口 -->
+    <div id="subtype-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">选择子技能</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="subtype-list" class="subtype-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分页符 - 专门设计为不产生空白页 -->
+    <div class="page-break" style="display:none; height:0; margin:0; padding:0; position:absolute; visibility:hidden;"></div>
+
+    <!-- 自定义技能页 -->
+    <div class="custom-page">
+        <!-- 调查员引用区域 -->
+        <div class="investigator-reference">
+            <div class="section-title">
+                调查员 Investigator
+            </div>
+            <div class="investigator-info">
+                <div class="investigator-data">
+                    <div class="investigator-field">
+                        <div class="investigator-label">姓名:</div>
+                        <div class="investigator-value" id="ref-name">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 自定义技能区域 -->
+        <div class="sheet-section custom-skills-section">
+            <div class="section-title">
+                <span style="font-size: 14px !important; font-weight: bold; white-space: nowrap !important;">自定义技能 Custom Skills</span>
+            </div>
+            
+            <div class="skills-header-row">
+                <div class="skills-header-item">
+                    <div class="skills-header-name">技能名</div>
+                    <div class="skills-header-points">
+                        <div class="skills-header-base">基础</div>
+                        <div class="skills-header-occupation">职业</div>
+                        <div class="skills-header-interest">兴趣</div>
+                        <div class="skills-header-growth">成长</div>
+                    </div>
+                    <div class="skills-header-total">
+                        <div class="skills-header-success">成功</div>
+                        <div class="skills-header-success">困难</div>
+                        <div class="skills-header-success">极难</div>
+                    </div>
+                </div>
+                <div class="skills-header-item">
+                    <div class="skills-header-name">技能名</div>
+                    <div class="skills-header-points">
+                        <div class="skills-header-base">基础</div>
+                        <div class="skills-header-occupation">职业</div>
+                        <div class="skills-header-interest">兴趣</div>
+                        <div class="skills-header-growth">成长</div>
+                    </div>
+                    <div class="skills-header-total">
+                        <div class="skills-header-success">成功</div>
+                        <div class="skills-header-success">困难</div>
+                        <div class="skills-header-success">极难</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="custom-skills-grid" id="custom-skills-container">
+                <!-- 动态生成20行自定义技能 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 技能数据
+        const skillsData = [
+            { name: "信用评级", base: 0 },
+            { name: "克苏鲁神话", base: 0 },
+            { name: "侦查", base: 25 },
+            { name: "聆听", base: 20 },
+            { name: "图书馆使用", base: 20 },
+            { name: "计算机使用", base: 5 },
+            { name: "潜行", base: 20 },
+            { name: "追踪", base: 10 },
+            { name: "导航", base: 10 },
+            { name: "话术", base: 5 },
+            { name: "说服", base: 10 },
+            { name: "取悦", base: 15 },
+            { name: "恐吓", base: 15 },
+            { name: "心理学", base: 10 },
+            { name: "母语", base: "edu", subtypes: ["汉语", "英语", "日语", "法语", "俄语", "德语", "韩语", "粤语", "拉丁语", "荷兰语", "挪威语", "丹麦", "印度语", "西班牙语", "葡萄牙语", "阿拉伯语"], rows: 1 },
+            { name: "外语", base: 1, subtypes: ["汉语", "英语", "日语", "法语", "俄语", "德语", "韩语", "粤语", "拉丁语", "荷兰语", "挪威语", "丹麦", "印度语", "西班牙语", "葡萄牙语", "阿拉伯语"], rows: 2 },
+            { name: "闪避", base: "halfDex" },
+            { name: "格斗", base: -1, subtypes: [
+                { name: "斗殴", base: 25 },
+                { name: "链锯", base: 10 },
+                { name: "刀剑", base: 20 },
+                { name: "矛", base: 20 },
+                { name: "斧", base: 15 },
+                { name: "绞索", base: 15 },
+                { name: "链枷", base: 10 },
+                { name: "鞭", base: 5 }
+            ], rows: 3 },
+            { name: "射击", base: -1, subtypes: [
+                { name: "手枪", base: 20 },
+                { name: "步枪/霰弹枪", base: 25 },
+                { name: "冲锋枪", base: 15 },
+                { name: "弓弩", base: 15 },
+                { name: "机枪", base: 10 },
+                { name: "重武器", base: 10 }
+            ], rows: 3 },
+            { name: "投掷", base: 20 },
+            { name: "急救", base: 30 },
+            { name: "医学", base: 1 },
+            { name: "精神分析", base: 1 },
+            { name: "攀爬", base: 20 },
+            { name: "跳跃", base: 20 },
+            { name: "游泳", base: 20 },
+            { name: "博物学", base: 10 },
+            { name: "神秘学", base: 5 },
+            { name: "考古学", base: 1 },
+            { name: "人类学", base: 1 },
+            { name: "估价", base: 5 },
+            { name: "会计", base: 5 },
+            { name: "法律", base: 5 },
+            { name: "历史", base: 5 },
+            { name: "电子学", base: 1 },
+            { name: "科学", base: -1, subtypes: [
+                { name: "数学", base: 10 },
+                { name: "地质学", base: 1 },
+                { name: "化学", base: 1 },
+                { name: "生物学", base: 1 },
+                { name: "天文学", base: 1 },
+                { name: "物理", base: 1 },
+                { name: "药学", base: 1 },
+                { name: "植物学", base: 1 },
+                { name: "动物学", base: 1 },
+                { name: "密码学", base: 1 },
+                { name: "工程学", base: 1 },
+                { name: "气象学", base: 1 },
+                { name: "鉴证", base: 1 }
+            ], rows: 3 },
+            { name: "乔装", base: 5 },
+            { name: "妙手", base: 10 },
+            { name: "锁匠", base: 1 },
+            { name: "机械维修", base: 10 },
+            { name: "电气维修", base: 10 },
+            { name: "驯兽", base: 5 },
+            { name: "技艺", base: -1, subtypes: [
+                { name: "表演", base: 5 },
+                { name: "音乐", base: 5 },
+                { name: "绘画", base: 5 },
+                { name: "艺术", base: 5 },
+                { name: "摄影", base: 5 },
+                { name: "写作", base: 5 },
+                { name: "书法", base: 5 },
+                { name: "打字", base: 5 },
+                { name: "速记", base: 5 },
+                { name: "伪造", base: 5 },
+                { name: "烹饪", base: 5 },
+                { name: "裁缝", base: 5 },
+                { name: "理发", base: 5 },
+                { name: "技术制图", base: 5 },
+                { name: "耕作", base: 5 },
+                { name: "木工", base: 5 },
+                { name: "铁匠", base: 5 },
+                { name: "焊接", base: 5 },
+                { name: "管道工", base: 5 }
+            ], rows: 3 },
+            { name: "生存", base: -1, subtypes: [
+                { name: "沙漠", base: 5 },
+                { name: "森林", base: 5 },
+                { name: "荒岛", base: 5 },
+                { name: "高山", base: 5 },
+                { name: "海上", base: 5 }
+            ], rows: 3 },
+            { name: "汽车驾驶", base: 20 },
+            { name: "骑术", base: 5 },
+            { name: "操作重型机械", base: 1 },
+            { name: "驾驶", base: -1, subtypes: [
+                { name: "船", base: 1 },
+                { name: "马车", base: 1 },
+                { name: "飞行器", base: 25 }
+            ], rows: 1 }
+        ];
+
+        // DOM加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 非负整数校验函数
+            function validateNonNegativeInteger(input) {
+                const value = input.value.trim();
+                // 允许空值
+                if (value === '') {
+                    return;
+                }
+                // 检查是否为非负整数
+                const parsedValue = parseInt(value, 10);
+                if (isNaN(parsedValue) || parsedValue < 0 || parsedValue.toString() !== value) {
+                    // 输入无效，重置为0或空值
+                    input.value = input.dataset.lastValidValue || '';
+                } else {
+                    // 保存有效值
+                    input.dataset.lastValidValue = parsedValue.toString();
+                }
+            }
+            
+            // 为所有数字输入框添加校验
+            function applyValidation() {
+                const numberInputs = document.querySelectorAll('input[type="number"]');
+                numberInputs.forEach(input => {
+                    // 更改为文本输入框
+                    input.type = 'text';
+                    
+                    // 添加输入验证
+                    input.addEventListener('input', function() {
+                        validateNonNegativeInteger(this);
+                    });
+                    
+                    // 在失焦时再次验证
+                    input.addEventListener('blur', function() {
+                        validateNonNegativeInteger(this);
+                        // 触发其他可能的事件监听器
+                        if (this.classList.contains('skill-point-input') || 
+                            this.classList.contains('char-value')) {
+                            this.dispatchEvent(new Event('input'));
+                        }
+                    });
+                });
+            }
+            
+            // 应用输入验证
+            applyValidation();
+            
+            // 初始化技能列表后立即计算一次闪避值
+            setTimeout(function() {
+                updateDodgeValue();
+                // 初始化所有成功等级的数据属性
+                document.querySelectorAll('.skill-result').forEach(result => {
+                    if (result.textContent === '0' || result.textContent === '') {
+                        result.dataset.filled = "false";
+                    } else {
+                        result.dataset.filled = "true";
+                    }
+                });
+                
+                // 应用列交替风格
+                applyColumnStyles();
+            }, 100);
+            
+            // 添加应用列样式的函数
+            function applyColumnStyles() {
+                // 为每行添加奇偶行标记类
+                document.querySelectorAll('.skill-row').forEach((row, rowIndex) => {
+                    // 移除可能已存在的类
+                    row.classList.remove('odd-row', 'even-row');
+                    
+                    // 添加奇偶行标记类
+                    if (rowIndex % 2 === 0) {
+                        row.classList.add('even-row');
+                    } else {
+                        row.classList.add('odd-row');
+                    }
+                    
+                    // 为每个单元格添加列标记类
+                    const cells = row.querySelectorAll('.skill-item');
+                    if (cells.length > 0) {
+                        cells[0].classList.remove('left-column-cell', 'right-column-cell');
+                        cells[0].classList.add('left-column-cell');
+                        
+                        if (cells[1]) {
+                            cells[1].classList.remove('left-column-cell', 'right-column-cell');
+                            cells[1].classList.add('right-column-cell');
+                        }
+                    }
+                });
+            }
+            
+            // 添加打印前处理函数
+            window.addEventListener('beforeprint', function() {
+                // 隐藏未选择值的下拉菜单
+                document.querySelectorAll('select.skill-subtype').forEach(select => {
+                    if (select.value === '' || select.value === 'custom') {
+                        select.classList.add('empty-select');
+                    }
+                });
+                
+                // 标记为0的技能基础值 - 确保显示"0"且不会被隐藏
+                document.querySelectorAll('.skill-base').forEach(base => {
+                    if (base.textContent === '' || base.textContent === '0') {
+                        base.dataset.zero = "true";
+                        // 确保空值显示为"0"
+                        if (base.textContent === '') {
+                            base.textContent = "0";
+                        }
+                        // 确保一定可见
+                        base.style.visibility = 'visible';
+                        base.style.color = 'var(--text-color)';
+                    } else {
+                        base.dataset.zero = "false";
+                    }
+                    // 让CSS规则决定背景色
+                    base.style.backgroundColor = 'var(--section-bg)';
+                });
+                
+                // 标记未填写的成功等级 - 确保显示"0"且不会被隐藏
+                document.querySelectorAll('.skill-result').forEach(result => {
+                    if (result.textContent === '' || result.textContent === '0') {
+                        result.dataset.filled = "false";
+                        // 确保空值显示为"0"
+                        if (result.textContent === '') {
+                            result.textContent = "0";
+                        }
+                        // 确保一定可见
+                        result.style.visibility = 'visible';
+                        result.style.color = 'var(--text-color)';
+                    } else {
+                        result.dataset.filled = "true";
+                    }
+                    // 让CSS规则决定背景色
+                    result.style.backgroundColor = 'var(--section-bg)';
+                });
+                
+                // 确保棋盘格类名正确应用
+                document.querySelectorAll('.skill-row').forEach((row, rowIndex) => {
+                    // 添加奇偶行标记类
+                    row.classList.remove('odd-row', 'even-row');
+                    if (rowIndex % 2 === 0) {
+                        row.classList.add('even-row');
+                    } else {
+                        row.classList.add('odd-row');
+                    }
+                    
+                    // 为每个单元格添加列标记类并确保样式正确
+                    const cells = row.querySelectorAll('.skill-item');
+                    if (cells.length > 0) {
+                        cells[0].classList.remove('left-column-cell', 'right-column-cell');
+                        cells[0].classList.add('left-column-cell');
+                        
+                        if (cells[1]) {
+                            cells[1].classList.remove('left-column-cell', 'right-column-cell');
+                            cells[1].classList.add('right-column-cell');
+                        }
+                    }
+                    
+                    // 特殊处理：强制设置单元格样式以确保棋盘格效果
+                    cells.forEach(cell => {
+                        // 保留可见性属性，但确保内容可见
+                        if (cell.style.visibility === 'hidden') {
+                            cell.style.visibility = 'visible';
+                            cell.style.color = 'transparent';
+                        } else {
+                            cell.style.visibility = 'visible';
+                            cell.style.color = 'var(--text-color)';
+                        }
+                        
+                        // 移除任何可能冲突的背景色样式
+                        cell.style.removeProperty('background-color');
+                    });
+                });
+                
+                // 添加强制打印颜色属性到body元素
+                document.body.setAttribute('style', 
+                    'print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; color-adjust: exact !important;');
+                
+                // 强制浏览器渲染样式变化
+                document.body.offsetHeight;
+            });
+            
+            // 打印后恢复下拉菜单显示
+            window.addEventListener('afterprint', function() {
+                document.querySelectorAll('select.skill-subtype').forEach(select => {
+                    select.classList.remove('empty-select');
+                });
+                
+                // 恢复空值的显示（可选，如果需要在打印后恢复空白显示）
+                /*
+                document.querySelectorAll('.skill-base[data-zero="true"]').forEach(base => {
+                    if (base.textContent === "0") {
+                        base.textContent = "";
+                    }
+                });
+                
+                document.querySelectorAll('.skill-result[data-filled="false"]').forEach(result => {
+                    if (result.textContent === "0") {
+                        result.textContent = "";
+                    }
+                });
+                */
+            });
+            
+            // 初始化头像上传功能
+            const avatarUpload = document.getElementById('avatar-upload');
+            const avatarPreview = document.getElementById('avatar-preview');
+            const avatarContainer = document.querySelector('.avatar-container');
+            const avatarPlaceholder = document.querySelector('.avatar-placeholder');
+            
+            // 点击头像容器触发文件选择
+            avatarContainer.addEventListener('click', function() {
+                avatarUpload.click();
+            });
+            
+            avatarUpload.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        avatarPreview.src = event.target.result;
+                        // 有图片后隐藏占位符
+                        avatarPlaceholder.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // 检查是否有预设头像
+            avatarPreview.addEventListener('load', function() {
+                if (avatarPreview.src && avatarPreview.src !== window.location.href) {
+                    avatarPlaceholder.style.display = 'none';
+                }
+            });
+
+            // 初始化属性计算
+            const strInput = document.getElementById('str');
+            const conInput = document.getElementById('con');
+            const dexInput = document.getElementById('dex');
+            const appInput = document.getElementById('app');
+            const sizInput = document.getElementById('siz');
+            const eduInput = document.getElementById('edu');
+            const intInput = document.getElementById('int');
+            const powInput = document.getElementById('pow');
+            const lucInput = document.getElementById('luc');
+            const totalAttr = document.getElementById('total-attr');
+            
+            const attrInputs = [strInput, conInput, dexInput, appInput, sizInput, eduInput, intInput, powInput, lucInput];
+            
+            attrInputs.forEach(input => {
+                input.addEventListener('input', calculateTotalAttr);
+            });
+            
+            function calculateTotalAttr() {
+                let total = 0;
+                attrInputs.forEach(input => {
+                    total += parseInt(input.value || 0);
+                });
+                totalAttr.textContent = total;
+                
+                // 更新闪避值（敏捷的一半）
+                updateDodgeValue();
+            }
+            
+            function updateDodgeValue() {
+                // 确保在敏捷值未填写时默认为0
+                const dexValue = parseInt(dexInput.value || 0);
+                const dodgeBase = Math.floor(dexValue / 2);
+                
+                // 查找闪避技能并更新基础值
+                document.querySelectorAll('.skill-item').forEach(item => {
+                    if (item.dataset.skillName === "闪避") {
+                        const baseElement = item.querySelector('.skill-base');
+                        if (baseElement) {
+                            baseElement.textContent = dodgeBase;
+                            // 更新数据属性，用于打印时控制显示
+                            baseElement.dataset.zero = dodgeBase === 0 ? "true" : "false";
+                            // 触发重新计算总值
+                            const inputs = item.querySelectorAll('.skill-point-input');
+                            inputs.forEach(input => {
+                                input.dispatchEvent(new Event('input'));
+                            });
+                        }
+                    }
+                });
+            }
+
+            // 生成技能列表
+            const skillsContainer = document.getElementById('skills-container');
+            
+            // 职业点数和兴趣点数计算
+            const occupationPoints = document.getElementById('occupation-points');
+            const interestPoints = document.getElementById('interest-points');
+            const occupationRemaining = document.getElementById('occupation-remaining');
+            const interestRemaining = document.getElementById('interest-remaining');
+            
+            occupationPoints.addEventListener('input', calculateRemainingPoints);
+            interestPoints.addEventListener('input', calculateRemainingPoints);
+            
+            function calculateRemainingPoints() {
+                let occupationUsed = 0;
+                let interestUsed = 0;
+                
+                document.querySelectorAll('.skill-item').forEach(item => {
+                    const occInput = item.querySelector('.occupation-points');
+                    const intInput = item.querySelector('.interest-points');
+                    
+                    if (occInput) {
+                        occupationUsed += parseInt(occInput.value || 0);
+                    }
+                    
+                    if (intInput) {
+                        interestUsed += parseInt(intInput.value || 0);
+                    }
+                });
+                
+                const totalOccupation = parseInt(occupationPoints.value || 0);
+                const totalInterest = parseInt(interestPoints.value || 0);
+                
+                occupationRemaining.textContent = totalOccupation - occupationUsed;
+                interestRemaining.textContent = totalInterest - interestUsed;
+            }
+            
+            // 创建技能项函数
+            function createSkillItem(skill) {
+                const skillItem = document.createElement('div');
+                skillItem.className = 'skill-item';
+                
+                skillItem.dataset.skillName = skill.name;
+                
+                // 职业技能复选框
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'skill-checkbox';
+                skillItem.appendChild(checkbox);
+                
+                // 技能名称
+                const nameContainer = document.createElement('div');
+                nameContainer.className = 'skill-name';
+                
+                const nameText = document.createElement('div');
+                nameText.className = 'skill-name-text';
+                nameText.textContent = skill.name;
+                nameContainer.appendChild(nameText);
+                
+                // 添加子技能选择（如果有）
+                if (skill.subtypes && Array.isArray(skill.subtypes) && !skill.subtypes[0].name) {
+                    // 创建选择按钮
+                    const selectBtn = document.createElement('div');
+                    selectBtn.className = 'skill-subtype-btn';
+                    selectBtn.textContent = '选择...';
+                    selectBtn.dataset.skillName = skill.name;
+                    selectBtn.addEventListener('click', function() {
+                        openSubtypeModal(skill, this);
+                    });
+                    
+                    // 创建选中后的显示区域
+                    const subtypeDisplay = document.createElement('span');
+                    subtypeDisplay.className = 'skill-subtype-display';
+                    subtypeDisplay.style.display = 'none';
+                    
+                    nameContainer.appendChild(selectBtn);
+                    nameContainer.appendChild(subtypeDisplay);
+                }
+                
+                skillItem.appendChild(nameContainer);
+                
+                // 基础值和点数分配
+                const pointsContainer = document.createElement('div');
+                pointsContainer.className = 'skill-points';
+                
+                // 基础值
+                const baseValue = document.createElement('div');
+                baseValue.className = 'skill-base';
+                
+                // 处理特殊基础值
+                if (skill.base === "halfDex") {
+                    const dexValue = parseInt(document.getElementById('dex').value || 0);
+                    baseValue.textContent = Math.floor(dexValue / 2);
+                } else if (skill.base === "edu") {
+                    // 初始时母语显示基础值为0，不从教育值获取
+                    baseValue.textContent = '0';
+                    // 设置特殊标识，以便后续更新，但初始不激活
+                    baseValue.dataset.baseType = "edu-inactive";
+                } else {
+                    baseValue.textContent = skill.base;
+                }
+                
+                pointsContainer.appendChild(baseValue);
+                
+                // 职业点数
+                const occPoints = document.createElement('input');
+                occPoints.type = 'text';
+                occPoints.className = 'skill-point-input occupation-points';
+                occPoints.dataset.min = 0;
+                occPoints.maxLength = 3; // 限制最多输入3位数字
+                occPoints.addEventListener('input', function() {
+                    validateNonNegativeInteger(this);
+                });
+                occPoints.addEventListener('blur', function() {
+                    validateNonNegativeInteger(this);
+                });
+                pointsContainer.appendChild(occPoints);
+                
+                // 兴趣点数
+                const intPoints = document.createElement('input');
+                intPoints.type = 'text';
+                intPoints.className = 'skill-point-input interest-points';
+                intPoints.dataset.min = 0;
+                intPoints.maxLength = 3; // 限制最多输入3位数字
+                intPoints.addEventListener('input', function() {
+                    validateNonNegativeInteger(this);
+                });
+                intPoints.addEventListener('blur', function() {
+                    validateNonNegativeInteger(this);
+                });
+                pointsContainer.appendChild(intPoints);
+                
+                // 成长点数
+                const growthPoints = document.createElement('input');
+                growthPoints.type = 'text';
+                growthPoints.className = 'skill-point-input growth-points';
+                growthPoints.dataset.min = 0;
+                growthPoints.maxLength = 3; // 限制最多输入3位数字
+                growthPoints.addEventListener('input', function() {
+                    validateNonNegativeInteger(this);
+                });
+                growthPoints.addEventListener('blur', function() {
+                    validateNonNegativeInteger(this);
+                });
+                pointsContainer.appendChild(growthPoints);
+                
+                skillItem.appendChild(pointsContainer);
+                
+                // 成功率
+                const totalContainer = document.createElement('div');
+                totalContainer.className = 'skill-total';
+                
+                // 常规成功
+                const regularSuccess = document.createElement('div');
+                regularSuccess.className = 'skill-result regular-success';
+                
+                // 困难成功
+                const hardSuccess = document.createElement('div');
+                hardSuccess.className = 'skill-result hard-success';
+                
+                // 极难成功
+                const extremeSuccess = document.createElement('div');
+                extremeSuccess.className = 'skill-result extreme-success';
+                
+                // 设置初始成功率值
+                if (skill.base === "edu") {
+                    // 母语技能初始显示基础值为0
+                    regularSuccess.textContent = '0';
+                    hardSuccess.textContent = '0';
+                    extremeSuccess.textContent = '0';
+                    
+                    // 设置已填充标记
+                    regularSuccess.dataset.filled = "true";
+                    hardSuccess.dataset.filled = "true";
+                    extremeSuccess.dataset.filled = "true";
+                } else {
+                    regularSuccess.textContent = skill.base;
+                    hardSuccess.textContent = Math.floor(skill.base / 2);
+                    extremeSuccess.textContent = Math.floor(skill.base / 5);
+                    
+                    // 设置已填充标记
+                    if (skill.base > 0) regularSuccess.dataset.filled = "true";
+                    if (Math.floor(skill.base / 2) > 0) hardSuccess.dataset.filled = "true";
+                    if (Math.floor(skill.base / 5) > 0) extremeSuccess.dataset.filled = "true";
+                }
+                
+                totalContainer.appendChild(regularSuccess);
+                totalContainer.appendChild(hardSuccess);
+                totalContainer.appendChild(extremeSuccess);
+                
+                skillItem.appendChild(totalContainer);
+                
+                // 添加点数变更监听器
+                const pointInputs = [occPoints, intPoints, growthPoints];
+                pointInputs.forEach(input => {
+                    input.addEventListener('input', function() {
+                        // 计算总值
+                        const base = skill.base === "halfDex" 
+                            ? Math.floor(parseInt(document.getElementById('dex').value || 0) / 2)
+                            : skill.base === "edu"
+                            ? (baseValue.dataset.baseType === "edu-active" 
+                               ? (document.getElementById('edu').value ? parseInt(document.getElementById('edu').value) : 0)
+                               : 0)
+                            : (typeof skill.base === 'number' ? skill.base : 0);
+                        
+                        const occ = parseInt(occPoints.value || 0);
+                        const int = parseInt(intPoints.value || 0);
+                        const growth = parseInt(growthPoints.value || 0);
+                        
+                        // 处理教育值为空的情况
+                        if (base === '') {
+                            // 如果教育值为空，则成功率也为空
+                            regularSuccess.textContent = '';
+                            hardSuccess.textContent = '';
+                            extremeSuccess.textContent = '';
+                            
+                            // 移除填充标记
+                            delete regularSuccess.dataset.filled;
+                            delete hardSuccess.dataset.filled;
+                            delete extremeSuccess.dataset.filled;
+                            
+                            // 更新剩余点数
+                            calculateRemainingPoints();
+                            return;
+                        }
+                        
+                        const total = base + occ + int + growth;
+                        
+                        // 更新成功率
+                        regularSuccess.textContent = total;
+                        hardSuccess.textContent = Math.floor(total / 2);
+                        extremeSuccess.textContent = Math.floor(total / 5);
+                        
+                        // 设置数据属性以便打印时控制显示
+                        regularSuccess.dataset.filled = total > 0 ? "true" : "false";
+                        hardSuccess.dataset.filled = Math.floor(total / 2) > 0 ? "true" : "false";
+                        extremeSuccess.dataset.filled = Math.floor(total / 5) > 0 ? "true" : "false";
+                        
+                        // 更新剩余点数
+                        calculateRemainingPoints();
+                    });
+                });
+                
+                return skillItem;
+            }
+            
+            // 创建有子技能的技能项函数
+            function createSkillItemWithSubtypes(skill) {
+                const skillItem = document.createElement('div');
+                skillItem.className = 'skill-item';
+                
+                skillItem.dataset.skillName = skill.name;
+                
+                // 职业技能复选框
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'skill-checkbox';
+                skillItem.appendChild(checkbox);
+                
+                // 技能名称
+                const nameContainer = document.createElement('div');
+                nameContainer.className = 'skill-name';
+                
+                const nameText = document.createElement('div');
+                nameText.className = 'skill-name-text';
+                nameText.textContent = skill.name + ": ";
+                nameText.style.width = 'auto';
+                nameText.style.minWidth = 'unset';
+                nameContainer.appendChild(nameText);
+                
+                // 添加子技能选择按钮
+                const selectBtn = document.createElement('div');
+                selectBtn.className = 'skill-subtype-btn';
+                selectBtn.textContent = '选择...';
+                selectBtn.dataset.skillName = skill.name;
+                selectBtn.addEventListener('click', function() {
+                    openSubtypeModal(skill, this);
+                });
+                
+                // 创建选中后的显示区域
+                const subtypeDisplay = document.createElement('span');
+                subtypeDisplay.className = 'skill-subtype-display';
+                subtypeDisplay.style.display = 'none';
+                
+                nameContainer.appendChild(selectBtn);
+                nameContainer.appendChild(subtypeDisplay);
+                
+                skillItem.appendChild(nameContainer);
+                
+                // 基础值和点数分配
+                const pointsContainer = document.createElement('div');
+                pointsContainer.className = 'skill-points';
+                
+                // 基础值
+                const baseValue = document.createElement('div');
+                baseValue.className = 'skill-base';
+                baseValue.textContent = '0'; // 默认值，会根据选择的子技能更新
+                pointsContainer.appendChild(baseValue);
+                
+                // 职业点数
+                const occPoints = document.createElement('input');
+                occPoints.type = 'text';
+                occPoints.className = 'skill-point-input occupation-points';
+                occPoints.dataset.min = 0;
+                occPoints.maxLength = 3; // 限制最多输入3位数字
+                occPoints.addEventListener('input', function() {
+                    validateNonNegativeInteger(this);
+                });
+                occPoints.addEventListener('blur', function() {
+                    validateNonNegativeInteger(this);
+                });
+                pointsContainer.appendChild(occPoints);
+                
+                // 兴趣点数
+                const intPoints = document.createElement('input');
+                intPoints.type = 'text';
+                intPoints.className = 'skill-point-input interest-points';
+                intPoints.dataset.min = 0;
+                intPoints.maxLength = 3; // 限制最多输入3位数字
+                intPoints.addEventListener('input', function() {
+                    validateNonNegativeInteger(this);
+                });
+                intPoints.addEventListener('blur', function() {
+                    validateNonNegativeInteger(this);
+                });
+                pointsContainer.appendChild(intPoints);
+                
+                // 成长点数
+                const growthPoints = document.createElement('input');
+                growthPoints.type = 'text';
+                growthPoints.className = 'skill-point-input growth-points';
+                growthPoints.dataset.min = 0;
+                growthPoints.maxLength = 3; // 限制最多输入3位数字
+                growthPoints.addEventListener('input', function() {
+                    validateNonNegativeInteger(this);
+                });
+                growthPoints.addEventListener('blur', function() {
+                    validateNonNegativeInteger(this);
+                });
+                pointsContainer.appendChild(growthPoints);
+                
+                skillItem.appendChild(pointsContainer);
+                
+                // 成功率
+                const totalContainer = document.createElement('div');
+                totalContainer.className = 'skill-total';
+                
+                // 常规成功
+                const regularSuccess = document.createElement('div');
+                regularSuccess.className = 'skill-result regular-success';
+                regularSuccess.textContent = '0';
+                totalContainer.appendChild(regularSuccess);
+                
+                // 困难成功
+                const hardSuccess = document.createElement('div');
+                hardSuccess.className = 'skill-result hard-success';
+                hardSuccess.textContent = '0';
+                totalContainer.appendChild(hardSuccess);
+                
+                // 极难成功
+                const extremeSuccess = document.createElement('div');
+                extremeSuccess.className = 'skill-result extreme-success';
+                extremeSuccess.textContent = '0';
+                totalContainer.appendChild(extremeSuccess);
+                
+                skillItem.appendChild(totalContainer);
+                
+                // 更新基础值的函数
+                function updateBaseValue(newBase) {
+                    baseValue.textContent = newBase;
+                    updateSuccessValues();
+                }
+                
+                // 更新成功率的函数
+                function updateSuccessValues() {
+                    const base = parseInt(baseValue.textContent || 0);
+                    const occ = parseInt(occPoints.value || 0);
+                    const int = parseInt(intPoints.value || 0);
+                    const growth = parseInt(growthPoints.value || 0);
+                    
+                    const total = base + occ + int + growth;
+                    
+                    regularSuccess.textContent = total;
+                    hardSuccess.textContent = Math.floor(total / 2);
+                    extremeSuccess.textContent = Math.floor(total / 5);
+                    
+                    // 设置数据属性以便打印时控制显示
+                    regularSuccess.dataset.filled = total > 0 ? "true" : "false";
+                    hardSuccess.dataset.filled = Math.floor(total / 2) > 0 ? "true" : "false";
+                    extremeSuccess.dataset.filled = Math.floor(total / 5) > 0 ? "true" : "false";
+                    
+                    // 更新剩余点数
+                    calculateRemainingPoints();
+                }
+                
+                // 添加点数变更监听器
+                const pointInputs = [occPoints, intPoints, growthPoints];
+                pointInputs.forEach(input => {
+                    input.addEventListener('input', updateSuccessValues);
+                });
+                
+                return skillItem;
+            }
+            
+            // 修改技能生成代码，按basic.txt的顺序排列技能
+            // 清空原有的skills-container内容
+            skillsContainer.innerHTML = '';
+
+            // 按照basic.txt的顺序重新组织技能数据
+            const orderedSkills = [
+                "信用评级", "克苏鲁神话", "侦查", "聆听", "图书馆使用", "计算机使用", 
+                "潜行", "追踪", "导航", "话术", "说服", "取悦", "恐吓", "心理学", 
+                "母语", "外语", "闪避", "格斗", "射击", "投掷", "急救", "医学", "精神分析", 
+                "攀爬", "跳跃", "游泳", "博物学", "神秘学", "考古学", "人类学", "估价", 
+                "会计", "法律", "历史", "电子学", "科学", "乔装", "妙手", "锁匠", 
+                "机械维修", "电气维修", "驯兽", "技艺", "生存", "汽车驾驶", "骑术", "操作重型机械", "驾驶"
+            ];
+
+            // 创建映射，便于查找技能数据
+            const skillMap = {};
+            skillsData.forEach(skill => {
+                skillMap[skill.name] = skill;
+            });
+
+            // 计算技能项总数和每列的技能项数
+            let totalItems = 0;
+            const skillItemCounts = orderedSkills.map(skillName => {
+                const skill = skillMap[skillName];
+                if (!skill) return 0;
+                
+                if (skill.subtypes && skill.rows && skill.rows > 0) {
+                    return skill.rows;
+                } else {
+                    return 1;
+                }
+            });
+            
+            totalItems = skillItemCounts.reduce((sum, count) => sum + count, 0);
+            const itemsPerColumn = Math.ceil(totalItems / 2);
+            
+            // 生成所有技能项
+            const allSkillItems = [];
+            
+            // 处理排序后的技能
+            for (const skillName of orderedSkills) {
+                const skill = skillMap[skillName];
+                
+                // 跳过未找到的技能
+                if (!skill) continue;
+                
+                if (skill.subtypes && skill.rows && skill.rows > 0) {
+                    // 带子技能的技能，生成指定数量的子技能项
+                    const count = skill.rows || 1;
+                    
+                    for (let i = 0; i < count; i++) {
+                        // 创建子技能项
+                        const skillItem = createSkillItemWithSubtypes(skill);
+                        skillItem.classList.add('subtype-skill');
+                        allSkillItems.push(skillItem);
+                    }
+                } else {
+                    // 普通技能，直接添加
+                    const skillItem = createSkillItem(skill);
+                    allSkillItems.push(skillItem);
+                }
+            }
+            
+            // 按行生成技能网格
+            for (let i = 0; i < Math.ceil(allSkillItems.length / 2); i++) {
+                const row = document.createElement('div');
+                row.className = 'skill-row';
+                // 添加奇偶行标记类
+                if (i % 2 === 0) {
+                    row.classList.add('even-row');
+                } else {
+                    row.classList.add('odd-row');
+                }
+                
+                // 左侧列
+                if (i < allSkillItems.length) {
+                    allSkillItems[i].classList.add('left-column-cell');
+                    row.appendChild(allSkillItems[i]);
+                } else {
+                    const emptyItem = document.createElement('div');
+                    emptyItem.className = 'skill-item left-column-cell';
+                    emptyItem.style.visibility = 'hidden';
+                    row.appendChild(emptyItem);
+                }
+                
+                // 右侧列
+                const rightIndex = i + itemsPerColumn;
+                if (rightIndex < allSkillItems.length) {
+                    allSkillItems[rightIndex].classList.add('right-column-cell');
+                    row.appendChild(allSkillItems[rightIndex]);
+                } else {
+                    const emptyItem = document.createElement('div');
+                    emptyItem.className = 'skill-item right-column-cell';
+                    emptyItem.style.visibility = 'hidden';
+                    row.appendChild(emptyItem);
+                }
+                
+                skillsContainer.appendChild(row);
+            }
+            
+            // 添加子技能选择模态窗口功能
+            const modal = document.getElementById('subtype-modal');
+            const closeBtn = document.querySelector('.close-modal');
+            const subtypeList = document.getElementById('subtype-list');
+            
+            let currentSkill = null;
+            let currentButton = null;
+            
+            // 打开模态窗口
+            function openSubtypeModal(skill, button) {
+                currentSkill = skill;
+                currentButton = button;
+                
+                // 清空列表
+                subtypeList.innerHTML = '';
+                
+                // 添加分类标题
+                const categoryTitle = document.createElement('div');
+                categoryTitle.className = 'subtype-category';
+                categoryTitle.textContent = skill.name + '子技能';
+                subtypeList.appendChild(categoryTitle);
+                
+                // 填充子技能列表
+                if (skill.subtypes) {
+                    if (Array.isArray(skill.subtypes) && !skill.subtypes[0].name) {
+                        // 普通字符串数组
+                        skill.subtypes.forEach(subtype => {
+                            addSubtypeItem(subtype, skill.base);  // 修改这里，使用技能的base值
+                        });
+                    } else {
+                        // 对象数组
+                        skill.subtypes.forEach(subtype => {
+                            const name = typeof subtype === 'object' ? subtype.name : subtype;
+                            const base = typeof subtype === 'object' ? subtype.base : skill.base;
+                            addSubtypeItem(name, base);
+                        });
+                    }
+                }
+                
+                // 显示模态窗口
+                modal.style.display = 'block';
+                
+                // 自动聚焦自定义输入框
+                setTimeout(() => customInput.focus(), 300);
+            }
+            
+            // 添加子技能项
+            function addSubtypeItem(name, base) {
+                const item = document.createElement('div');
+                item.className = 'subtype-item';
+                item.textContent = name;
+                item.addEventListener('click', function() {
+                    selectSubtype(name, base);
+                });
+                subtypeList.appendChild(item);
+            }
+            
+            // 选择子技能
+            function selectSubtype(name, base) {
+                if (!currentButton || !currentSkill) return;
+                
+                // 找到父元素
+                const skillItem = currentButton.closest('.skill-item');
+                if (!skillItem) return;
+                
+                // 更新显示
+                const subtypeDisplay = skillItem.querySelector('.skill-subtype-display');
+                subtypeDisplay.textContent = name;
+                subtypeDisplay.style.display = 'inline-block';
+                
+                // 不再隐藏选择按钮，而是改变其文本
+                currentButton.textContent = '更改';
+                currentButton.style.display = 'inline-block'; // 确保按钮仍然可见
+                
+                // 添加类来区分选择前后的状态
+                currentButton.classList.add('has-selection');
+                
+                // 更新基础值 - 特殊处理母语技能
+                const baseElement = skillItem.querySelector('.skill-base');
+                if (baseElement) {
+                    // 检查是否为母语技能
+                    if (currentSkill.name === '母语' && currentSkill.base === 'edu') {
+                        // 选择子技能后，激活教育值关联
+                        baseElement.dataset.baseType = "edu-active";
+                        // 使用教育值
+                        const eduInput = document.getElementById('edu');
+                        const eduValue = eduInput && eduInput.value ? parseInt(eduInput.value) : 0;
+                        baseElement.textContent = eduValue;
+                        
+                        // 立即更新成功率
+                        setTimeout(updateLanguageBaseValues, 0);
+                    } else {
+                        // 其他技能使用原来的逻辑
+                    const baseValue = typeof base === 'string' || typeof base === 'number' ? base : currentSkill.base;
+                    baseElement.textContent = baseValue;
+                    }
+                    
+                    // 触发值更新
+                    const inputs = skillItem.querySelectorAll('.skill-point-input');
+                    if (inputs.length) {
+                        inputs[0].dispatchEvent(new Event('input'));
+                    }
+                }
+                
+                // 关闭模态窗口
+                closeModal();
+            }
+            
+            // 关闭模态窗口
+            function closeModal() {
+                modal.style.display = 'none';
+                currentSkill = null;
+                currentButton = null;
+            }
+            
+            // 点击关闭按钮
+            closeBtn.addEventListener('click', closeModal);
+            
+            // 点击模态窗口外部关闭
+            window.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // 按ESC键关闭
+            window.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.style.display === 'block') {
+                    closeModal();
+                }
+            });
+
+            // 生成自定义技能行
+            const customSkillsContainer = document.getElementById('custom-skills-container');
+            if (customSkillsContainer) {
+                const totalCustomSkills = 86; // 生成86条自定义技能记录
+                const customSkillsPerRow = 2; // 每行2条
+                const totalRows = Math.ceil(totalCustomSkills / customSkillsPerRow);
+                
+                // 生成所有行
+                for (let i = 0; i < totalRows; i++) {
+                    const row = document.createElement('div');
+                    row.className = 'custom-skill-row';
+                    // 添加奇偶行标记类
+                    if (i % 2 === 0) {
+                        row.classList.add('custom-even-row');
+                    } else {
+                        row.classList.add('custom-odd-row');
+                    }
+                    
+                    // 第一列
+                    const item1 = createCustomSkillItem(i * 2);
+                    item1.classList.add('custom-left-column-cell');
+                    row.appendChild(item1);
+                    
+                    // 第二列
+                    if (i * 2 + 1 < totalCustomSkills) {
+                        const item2 = createCustomSkillItem(i * 2 + 1);
+                        item2.classList.add('custom-right-column-cell');
+                        row.appendChild(item2);
+                    } else {
+                        // 如果没有足够的技能填满行，添加空项
+                        const emptyItem = document.createElement('div');
+                        emptyItem.className = 'custom-skill-item custom-right-column-cell';
+                        emptyItem.style.visibility = 'hidden';
+                        row.appendChild(emptyItem);
+                    }
+                    
+                    customSkillsContainer.appendChild(row);
+                }
+            }
+
+            // 立即同步调查员信息
+            setTimeout(syncInvestigatorInfo, 200);
+
+            // 为所有姓名输入框添加事件监听器
+            const nameInputs = document.querySelectorAll('.sheet-section:first-child input.field-input');
+            nameInputs.forEach(input => {
+                input.addEventListener('input', syncInvestigatorInfo);
+                input.addEventListener('change', syncInvestigatorInfo);
+                input.addEventListener('blur', syncInvestigatorInfo);
+            });
+
+            // 武器区域的交互
+            setupWeaponEvents();
+
+            // 添加教育值变化监听器，用于更新母语技能的基础值
+            const eduInputElem = document.getElementById('edu');
+            eduInputElem.addEventListener('input', updateLanguageBaseValues);
+            eduInputElem.addEventListener('change', updateLanguageBaseValues);
+            
+            // 初始更新一次母语技能基础值
+            setTimeout(updateLanguageBaseValues, 500);
+            
+            // 再次确保在页面完全加载后更新一次
+            setTimeout(updateLanguageBaseValues, 1500);
+
+            // 战斗区域的交互
+            setupCombatEvents();
+
+            // 初始化页面显示和导航功能
+            setupPageNavigation();
+        });
+
+        // 创建自定义技能项目
+        function createCustomSkillItem(index) {
+            const skillItem = document.createElement('div');
+            skillItem.className = 'custom-skill-item';
+            skillItem.dataset.index = index;
+            
+            // 技能名称输入
+            const nameContainer = document.createElement('div');
+            nameContainer.className = 'custom-skill-name';
+            
+            const nameInput = document.createElement('input');
+            nameInput.type = 'text';
+            nameInput.className = 'custom-skill-name-input';
+            nameInput.placeholder = '输入技能名称...';
+            nameContainer.appendChild(nameInput);
+            
+            skillItem.appendChild(nameContainer);
+            
+            // 基础值和点数分配
+            const pointsContainer = document.createElement('div');
+            pointsContainer.className = 'custom-skill-points';
+            
+            // 基础值 - 将类型从input改为div，固定为0
+            const baseValue = document.createElement('div');
+            baseValue.className = 'custom-skill-base';
+            baseValue.textContent = '0'; // 默认设置为0
+            baseValue.dataset.value = '0';
+            pointsContainer.appendChild(baseValue);
+            
+            // 职业点数
+            const occPoints = document.createElement('input');
+            occPoints.type = 'text';
+            occPoints.className = 'custom-skill-point-input custom-occupation-points';
+            occPoints.dataset.min = 0;
+            occPoints.maxLength = 3;
+            occPoints.addEventListener('input', function() {
+                validateNonNegativeInteger(this);
+                updateCustomSkillTotals(skillItem);
+            });
+            occPoints.addEventListener('blur', function() {
+                validateNonNegativeInteger(this);
+                updateCustomSkillTotals(skillItem);
+            });
+            pointsContainer.appendChild(occPoints);
+            
+            // 兴趣点数
+            const intPoints = document.createElement('input');
+            intPoints.type = 'text';
+            intPoints.className = 'custom-skill-point-input custom-interest-points';
+            intPoints.dataset.min = 0;
+            intPoints.maxLength = 3;
+            intPoints.addEventListener('input', function() {
+                validateNonNegativeInteger(this);
+                updateCustomSkillTotals(skillItem);
+            });
+            intPoints.addEventListener('blur', function() {
+                validateNonNegativeInteger(this);
+                updateCustomSkillTotals(skillItem);
+            });
+            pointsContainer.appendChild(intPoints);
+            
+            // 成长点数
+            const growthPoints = document.createElement('input');
+            growthPoints.type = 'text';
+            growthPoints.className = 'custom-skill-point-input custom-growth-points';
+            growthPoints.dataset.min = 0;
+            growthPoints.maxLength = 3;
+            growthPoints.addEventListener('input', function() {
+                validateNonNegativeInteger(this);
+                updateCustomSkillTotals(skillItem);
+            });
+            growthPoints.addEventListener('blur', function() {
+                validateNonNegativeInteger(this);
+                updateCustomSkillTotals(skillItem);
+            });
+            pointsContainer.appendChild(growthPoints);
+            
+            skillItem.appendChild(pointsContainer);
+            
+            // 成功率
+            const totalContainer = document.createElement('div');
+            totalContainer.className = 'custom-skill-total';
+            
+            // 常规成功
+            const regularSuccess = document.createElement('div');
+            regularSuccess.className = 'custom-skill-result custom-regular-success';
+            regularSuccess.textContent = '0';
+            regularSuccess.dataset.filled = "true"; // 设置为true使其在打印时显示
+            totalContainer.appendChild(regularSuccess);
+            
+            // 困难成功
+            const hardSuccess = document.createElement('div');
+            hardSuccess.className = 'custom-skill-result custom-hard-success';
+            hardSuccess.textContent = '0';
+            hardSuccess.dataset.filled = "true"; // 设置为true使其在打印时显示
+            totalContainer.appendChild(hardSuccess);
+            
+            // 极难成功
+            const extremeSuccess = document.createElement('div');
+            extremeSuccess.className = 'custom-skill-result custom-extreme-success';
+            extremeSuccess.textContent = '0';
+            extremeSuccess.dataset.filled = "true"; // 设置为true使其在打印时显示
+            totalContainer.appendChild(extremeSuccess);
+            
+            skillItem.appendChild(totalContainer);
+            
+            // 立即更新一次技能总值
+            setTimeout(function() {
+                updateCustomSkillTotals(skillItem);
+            }, 0);
+            
+            return skillItem;
+        }
+        
+        // 更新自定义技能总值函数
+        function updateCustomSkillTotals(skillItem) {
+            const baseValue = skillItem.querySelector('.custom-skill-base');
+            const occInput = skillItem.querySelector('.custom-occupation-points');
+            const intInput = skillItem.querySelector('.custom-interest-points');
+            const growthInput = skillItem.querySelector('.custom-growth-points');
+            
+            // 基础值固定为0
+            const base = 0;
+            const occ = parseInt(occInput.value || 0);
+            const int = parseInt(intInput.value || 0);
+            const growth = parseInt(growthInput.value || 0);
+            
+            const total = base + occ + int + growth;
+            
+            const regularSuccess = skillItem.querySelector('.custom-regular-success');
+            const hardSuccess = skillItem.querySelector('.custom-hard-success');
+            const extremeSuccess = skillItem.querySelector('.custom-extreme-success');
+            
+            regularSuccess.textContent = total;
+            hardSuccess.textContent = Math.floor(total / 2);
+            extremeSuccess.textContent = Math.floor(total / 5);
+            
+            // 设置数据属性以便打印时控制显示
+            regularSuccess.dataset.filled = total > 0 ? "true" : "true"; // 始终显示
+            hardSuccess.dataset.filled = total > 0 ? "true" : "true"; // 始终显示
+            extremeSuccess.dataset.filled = total > 0 ? "true" : "true"; // 始终显示
+        }
+        
+        // 同步调查员信息到引用区域
+        function syncInvestigatorInfo() {
+            // 尝试多种选择器找到姓名输入框
+            const nameInputs = [
+                document.querySelector('.sheet-section:first-child .field-row:first-child .field-input'),
+                document.querySelector('.sheet-section:first-child .field-row:first-child input'),
+                document.querySelector('.field-row:first-child .field-input'),
+                document.querySelector('input.field-input')
+            ].filter(el => el !== null);
+            
+            const refName = document.getElementById('ref-name');
+            
+            console.log('可能的姓名输入框:', nameInputs);
+            
+            if (nameInputs.length > 0 && refName) {
+                const nameInput = nameInputs[0];
+                refName.textContent = nameInput.value || '-';
+                console.log('同步姓名成功:', nameInput.value);
+                
+                // 确保同步机制持续工作
+                nameInput.addEventListener('input', function() {
+                    refName.textContent = this.value || '-';
+                });
+            } else {
+                console.log('未找到姓名输入框或引用元素', nameInputs, refName);
+            }
+        }
+
+        // 在页面完全加载后执行同步
+        window.addEventListener('load', function() {
+            console.log('页面加载完成，准备同步姓名');
+            setTimeout(syncInvestigatorInfo, 500);
+        });
+
+        // 初始化武器区域的事件处理
+        function setupWeaponEvents() {
+            const weaponNames = document.querySelectorAll('.weapon-name');
+            const weaponDamages = document.querySelectorAll('.weapon-damage');
+            const weaponFeatures = document.querySelectorAll('.weapon-feature');
+            
+            // 为所有武器名称区域添加点击事件
+            weaponNames.forEach(nameCell => {
+                nameCell.addEventListener('click', function() {
+                    showInputField(this, '.weapon-name-input');
+                });
+            });
+            
+            // 为所有武器伤害区域添加点击事件
+            weaponDamages.forEach(damageCell => {
+                damageCell.addEventListener('click', function() {
+                    showInputField(this, '.weapon-damage-input');
+                });
+            });
+            
+            // 为所有武器特性区域添加点击事件
+            weaponFeatures.forEach(featureCell => {
+                featureCell.addEventListener('click', function() {
+                    showInputField(this, '.weapon-feature-input');
+                });
+            });
+            
+            // 为所有武器输入框添加失去焦点和按键事件
+            document.querySelectorAll('.weapon-name-input, .weapon-damage-input, .weapon-feature-input').forEach(input => {
+                // 失去焦点时隐藏输入框并更新显示文本
+                input.addEventListener('blur', function() {
+                    updateWeaponField(this);
+                });
+                
+                // 按Enter键时也执行同样的操作
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        updateWeaponField(this);
+                        e.preventDefault();
+                    }
+                });
+            });
+        }
+        
+        // 显示输入框
+        function showInputField(cell, inputSelector) {
+            const input = cell.querySelector(inputSelector);
+            const textElement = cell.querySelector('div[class$="-text"]');
+            
+            // 如果文本不为空，则将其设置为输入框的值
+            if (textElement.textContent.trim() !== '') {
+                input.value = textElement.textContent;
+            } else {
+                input.value = '';
+            }
+            
+            // 显示输入框并聚焦
+            input.style.display = 'block';
+            input.focus();
+        }
+        
+        // 更新武器区域的显示
+        function updateWeaponField(input) {
+            const cell = input.parentElement;
+            const textElement = cell.querySelector('div[class$="-text"]');
+            
+            // 获取输入的值
+            const value = input.value.trim();
+            
+            // 更新显示文本，空值时显示空字符串，不显示横杠
+            textElement.textContent = value === '' ? '' : value;
+            
+            // 隐藏输入框
+            input.style.display = 'none';
+        }
+
+        // 更新母语技能基础值的函数
+        function updateLanguageBaseValues() {
+            // 获取教育值，但不默认为0
+            const eduInput = document.getElementById('edu');
+            const eduValue = eduInput && eduInput.value ? parseInt(eduInput.value) : 0;
+            
+            // 遍历所有技能项
+            document.querySelectorAll('.skill-item').forEach(item => {
+                const nameText = item.querySelector('.skill-name-text');
+                const baseElement = item.querySelector('.skill-base');
+                
+                // 只处理已激活的母语技能（已选择子技能的）
+                if (baseElement && baseElement.dataset.baseType === "edu-active") {
+                    // 更新基础值为教育值
+                    baseElement.textContent = eduValue;
+                    
+                    // 获取点数输入值
+                    const occValue = parseInt(item.querySelector('.occupation-points')?.value || 0);
+                    const intValue = parseInt(item.querySelector('.interest-points')?.value || 0);
+                    const growthValue = parseInt(item.querySelector('.growth-points')?.value || 0);
+                    
+                    // 计算总值
+                    const total = eduValue + occValue + intValue + growthValue;
+                    
+                    // 更新成功率显示
+                    const results = item.querySelectorAll('.skill-result');
+                    if (results.length >= 3) {
+                        // 更新成功率
+                        results[0].textContent = total;
+                        results[1].textContent = Math.floor(total / 2);
+                        results[2].textContent = Math.floor(total / 5);
+                        
+                        // 设置填充标记
+                        if (total > 0) results[0].dataset.filled = "true";
+                        else delete results[0].dataset.filled;
+                        
+                        if (Math.floor(total / 2) > 0) results[1].dataset.filled = "true";
+                        else delete results[1].dataset.filled;
+                        
+                        if (Math.floor(total / 5) > 0) results[2].dataset.filled = "true";
+                        else delete results[2].dataset.filled;
+                    }
+                }
+            });
+        }
+        
+        // 添加初始化时触发EDU输入框的更新事件
+        document.addEventListener('DOMContentLoaded', function() {
+            // 确保在技能加载后执行
+            setTimeout(function() {
+                // 调用更新函数，但不设置默认值
+                updateLanguageBaseValues();
+            }, 1000);
+        });
+
+        // 初始化战斗区域的事件处理
+        function setupCombatEvents() {
+            // 获取所有战斗区域的输入框
+            const combatInputs = document.querySelectorAll('.combat-input');
+            
+            // 为每个输入框添加事件监听，自动保存用户输入
+            combatInputs.forEach(input => {
+                // 从本地存储加载已保存的值
+                const savedValue = localStorage.getItem(input.id);
+                if (savedValue) {
+                    input.value = savedValue;
+                }
+                
+                // 监听输入变化，限制最大3位数字
+                input.addEventListener('input', function() {
+                    // 确保输入值不超过3位数字
+                    if (this.value > 999) {
+                        this.value = 999;
+                    }
+                    
+                    // 保存到本地存储
+                    localStorage.setItem(this.id, this.value);
+                });
+                
+                // 添加失焦事件以确保数据保存
+                input.addEventListener('blur', function() {
+                    // 再次检查确保值的有效性
+                    if (this.value === '') {
+                        this.value = 0;
+                    } else if (this.value > 999) {
+                        this.value = 999;
+                    }
+                    
+                    localStorage.setItem(this.id, this.value);
+                });
+            });
+        }
+
+        // 初始化页面显示和导航功能
+        function setupPageNavigation() {
+            // 获取所有页面元素
+            const mainPage = document.querySelector('.character-sheet');
+            const customPage = document.querySelector('.custom-page');
+            const pageNavBtn = document.getElementById('page-nav-btn');
+            const allPages = [mainPage, customPage];
+            const pageTitle = document.querySelector('.page-title');
+            
+            // 页面标题配置
+            const titles = [
+                "COC 7版人物卡 - 主页面",
+                "COC 7版人物卡 - 自定义技能页"
+            ];
+            
+            // 当前页面索引
+            let currentPageIndex = 0;
+            
+            // 更新页面标题函数
+            function updatePageTitle() {
+                pageTitle.textContent = titles[currentPageIndex];
+            }
+            
+            // 初始状态：设置初始标题，隐藏除主页面外的所有页面
+            updatePageTitle();
+            allPages.forEach((page, index) => {
+                if (index !== 0) {
+                    page.style.display = 'none';
+                }
+            });
+            
+            // 添加翻页按钮点击事件
+            pageNavBtn.addEventListener('click', function() {
+                // 隐藏当前页面
+                allPages[currentPageIndex].style.display = 'none';
+                
+                // 更新页面索引（循环切换）
+                currentPageIndex = (currentPageIndex + 1) % allPages.length;
+                
+                // 更新页面标题
+                updatePageTitle();
+                
+                // 显示新的当前页面
+                allPages[currentPageIndex].style.display = allPages[currentPageIndex].classList.contains('custom-page') ? 'flex' : 'grid';
+            });
+            
+            // 添加打印前处理：只打印当前页面
+            window.addEventListener('beforeprint', function pagePrintHandler(e) {
+                // 彻底隐藏所有分页符，防止产生空白页
+                document.querySelectorAll('.page-break').forEach(pb => {
+                    pb.style.display = 'none';
+                    pb.style.height = '0';
+                    pb.style.margin = '0';
+                    pb.style.padding = '0';
+                    pb.style.visibility = 'hidden';
+                    pb.style.position = 'absolute';
+                    pb.style.pageBreakAfter = 'avoid';
+                    pb.style.pageBreakBefore = 'avoid';
+                });
+                
+                // 只打印当前页面，隐藏其他页面
+                allPages.forEach((page, index) => {
+                    if (index !== currentPageIndex) {
+                        page.dataset.originalDisplay = page.style.display;
+                        page.style.display = 'none';
+                    } else {
+                        // 确保当前页面正确显示
+                        page.style.display = page.classList.contains('custom-page') ? 'flex' : 'grid';
+                        
+                        // 移除当前页面的外边框和阴影
+                        page.style.border = 'none';
+                        page.style.boxShadow = 'none';
+                        page.style.margin = '0';
+                        page.style.padding = '0';
+                        
+                        // 确保内部区域边框正常显示
+                        page.querySelectorAll('.sheet-section').forEach(section => {
+                            section.style.border = '1px solid var(--border-color)';
+                            section.style.margin = '2px';
+                        });
+                    }
+                });
+                
+                // 移除可能导致空白页的元素
+                document.querySelectorAll('body > *:not(.character-sheet):not(.custom-page):not(.page-title):not(.float-nav)').forEach(el => {
+                    if (el.tagName !== 'SCRIPT' && el.tagName !== 'STYLE') {
+                        el.dataset.originalDisplay = el.style.display;
+                        el.style.display = 'none';
+                    }
+                });
+                
+                // 设置HTML和body样式，防止生成多余页面
+                document.documentElement.style.margin = '0';
+                document.documentElement.style.padding = '0';
+                document.body.style.margin = '0';
+                document.body.style.padding = '0';
+                document.body.style.height = 'auto';
+                document.body.style.overflow = 'visible';
+                
+                // 强制浏览器渲染样式变化
+                document.body.offsetHeight;
+            });
+            
+            // 打印后处理：恢复页面显示
+            window.addEventListener('afterprint', function pageAfterPrintHandler(e) {
+                // 恢复页面显示
+                allPages.forEach((page, index) => {
+                    if (index !== currentPageIndex) {
+                        page.style.display = 'none';
+                    } else {
+                        // 恢复当前页面显示
+                        page.style.display = page.classList.contains('custom-page') ? 'flex' : 'grid';
+                        
+                        // 恢复页面的边框和样式
+                        page.style.border = '1px solid var(--border-color)';
+                        page.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.1)';
+                        page.style.margin = '2px auto 10px auto';
+                        page.style.padding = '5px';
+                        
+                        // 恢复内部区域的样式
+                        page.querySelectorAll('.sheet-section').forEach(section => {
+                            section.style.border = '';
+                            section.style.margin = '';
+                        });
+                    }
+                });
+                
+                // 恢复其他元素的显示
+                document.querySelectorAll('[data-original-display]').forEach(el => {
+                    if (el.dataset.originalDisplay) {
+                        el.style.display = el.dataset.originalDisplay;
+                        delete el.dataset.originalDisplay;
+                    }
+                });
+                
+                // 恢复HTML和body样式
+                document.documentElement.style.margin = '';
+                document.documentElement.style.padding = '';
+                document.body.style.margin = '';
+                document.body.style.padding = '';
+                document.body.style.height = '';
+                document.body.style.overflow = '';
+            });
+        }
+
+        // 添加打印前的缩放设置
+        window.addEventListener('beforeprint', function() {
+            document.body.style.zoom = '96%';
+            const sheets = document.querySelectorAll('.character-sheet');
+            sheets.forEach(sheet => {
+                sheet.style.transform = 'scale(0.96)';
+                sheet.style.transformOrigin = 'top left';
+            });
+        });
+
+        // 打印后恢复正常缩放
+        window.addEventListener('afterprint', function() {
+            document.body.style.zoom = '100%';
+            const sheets = document.querySelectorAll('.character-sheet');
+            sheets.forEach(sheet => {
+                sheet.style.transform = 'none';
+            });
+        });
+    </script>
+    
+    <!-- 额外的打印样式，确保战斗区域边框可见 -->
+    <style>
+        @media print {
+            /* 使用最高优先级确保战斗区域边框在打印时可见 */
+            html body .character-sheet .combat-section {
+                border: 1px solid black !important;
+                border-width: 1px !important;
+                border-style: solid !important;
+                border-color: black !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            /* 确保不显示最外层边框 */
+            html body .character-sheet,
+            html body .custom-page {
+                border: none !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* 确保战斗区域标签文字不加粗 */
+            html body .character-sheet .combat-section .combat-label {
+                font-weight: normal !important;
+            }
+            
+            /* 确保战斗区域行间距在打印时保持一致 */
+            html body .character-sheet .combat-section .combat-grid {
+                gap: 3px !important;
+            }
+            
+            html body .character-sheet .combat-section .combat-row {
+                min-height: 20px !important;
+                margin-bottom: 1px !important;
+            }
+            
+            /* 确保宽度比例在打印时保持一致 */
+            html body .character-sheet .combat-section .combat-label {
+                width: 65% !important;
+                font-weight: normal !important;
+            }
+            
+            html body .character-sheet .combat-section .combat-value {
+                width: 35% !important;
+            }
+            
+            /* 确保战斗区域输入框在打印时使用白色背景 */
+            html body .character-sheet .combat-section .combat-input {
+                background-color: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            
+            /* 确保所有颜色和边框在打印时正确显示 */
+            html body * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            /* 防止打印空白页的额外强化设置 */
+            @page {
+                margin: 0.5cm !important;
+                size: A4 portrait !important;
+            }
+            
+            /* 确保文档没有多余内容 */
+            html::after, body::after, .character-sheet::after, .custom-page::after {
+                content: none !important;
+                display: none !important;
+            }
+            
+            /* 隐藏所有可能导致空白页的元素 */
+            html body *:empty:not(input):not(textarea):not(.modal *):not(script):not(style) {
+                display: none !important;
+            }
+        }
+    </style>
+</body>
+</html>
