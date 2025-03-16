@@ -42,7 +42,7 @@
         }
         
         /* A4纸张在屏幕上的尺寸调整，确保标题在外部 */
-        .character-sheet, .custom-page {
+        .character-sheet, .custom-page, .items-page {
             margin-top: 10px !important; /* 增加顶部边距，确保标题与页面有明显分隔 */
             border-top: 1px dashed #ccc; /* 添加虚线边框，视觉上区分标题和页面 */
         }
@@ -70,7 +70,7 @@
             }
             
             /* 保持原始页面布局，但移除外部边框和阴影 */
-            .character-sheet, .custom-page {
+            .character-sheet, .custom-page, .items-page {
                 margin: 0 !important;
                 border: none !important; /* 移除黑色外边框 */
                 border-top: none !important;
@@ -132,7 +132,7 @@
             flex-direction: column;
             align-items: center;
         }
-        .character-sheet, .custom-page {
+        .character-sheet, .custom-page, .items-page {
             border: 1px solid var(--border-color);
             padding: 5px;
             background-color: white;
@@ -155,7 +155,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
-            min-height: 29.7cm; /* 使用固定的A4高度 */
+            min-height: 29cm; /* 使用固定的A4高度 */
             max-height: none; /* 移除最大高度限制 */
         }
         
@@ -170,7 +170,7 @@
                 padding: 0;
                 margin: 0;
             }
-            .character-sheet, .custom-page {
+            .character-sheet, .custom-page, .items-page {
                 width: 21cm;
                 height: 29.7cm;
                 margin: 0;
@@ -179,10 +179,10 @@
                 border: none;
             }
             
-            .custom-page {
+            .custom-page, .items-page {
                 margin-top: 0;
-                page-break-before: always;
-                min-height: 29.7cm; /* 确保打印时也有正确的最小高度 */
+                page-break-before: avoid;
+                min-height: 28.6cm; /* 确保打印时也有正确的最小高度 */
                 padding-bottom: 0 !important; /* 移除底部内边距 */
             }
         }
@@ -1690,7 +1690,7 @@
             }
             
             /* 防止意外分页 */
-            .character-sheet, .custom-page {
+            .character-sheet, .custom-page, .items-page {
                 page-break-inside: avoid;
                 max-height: none; /* 打印时移除最大高度限制 */
                 box-shadow: none;
@@ -2524,6 +2524,7 @@
             border: 1px solid var(--border-color); /* 给整个道具区域添加边框 */
             padding: 0; /* 确保没有内边距 */
             background-color: var(--section-bg); /* 确保背景色一致 */
+            width: 100%;
         }
 
         /* 当items-section内部的section-title需要特殊样式 */
@@ -2531,6 +2532,7 @@
             padding: 3px 5px;
             margin: 0; /* 移除标题边距 */
             border-bottom: 1px solid var(--border-color);
+            width: 100%;
         }
 
         /* 道具表头样式 */
@@ -2544,6 +2546,7 @@
             padding: 0;
             border: none; /* 移除表头边框 */
             border-bottom: 1px solid var(--border-color); /* 只保留底部边框作为分隔线 */
+            width: 100%;
         }
         
         .items-header-item {
@@ -2551,6 +2554,7 @@
             font-weight: bold;
             font-size: 11px;
             text-align: center;
+            width: 100%;
         }
 
         .items-header-item:last-child {
@@ -2562,6 +2566,7 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            width: 100%;
         }
 
         /* 道具列表样式 */
@@ -2572,6 +2577,7 @@
             border: none; /* 移除列表的边框 */
             min-height: 600px; /* 添加最小高度，确保即使没有足够多的道具项，也保持一定的高度 */
             gap: 2px; /* 添加行间距 */
+            width: 100%;
         }
 
         /* 道具项目样式 */
@@ -2580,11 +2586,12 @@
             grid-template-columns: 1fr 0.6fr 2.4fr;
             border-bottom: none; /* 移除底部边框 */
             min-height: 30px;
+            width: 100%;
         }
 
         /* 奇偶行背景色 */
         .item-row:nth-child(odd) {
-            background-color: #ffffff; /* 奇数行白色背景 */
+            background-color: #ffffff; /* 奇数行白色背景 */     
         }
 
         .item-row:nth-child(even) {
@@ -2596,6 +2603,7 @@
             border-right: none; /* 移除右侧边框 */
             display: flex;
             align-items: center;
+            width: 100%;
         }
 
         .item-cell:last-child {
@@ -2624,12 +2632,14 @@
             outline: none;
             box-shadow: none;
             background-color: transparent;
+            width: 100%;
         }
 
         .category-select-btn:focus, .category-select-btn:hover {
             border: none;
             outline: none;
             box-shadow: none;
+            width: 100%;
         }
 
         /* 道具表头标签样式 */
@@ -2644,12 +2654,6 @@
 
         /* 打印时道具页样式调整 */
         @media print {
-            .items-page {
-                box-shadow: none !important;
-                border: none !important;
-                margin: 0 !important;
-                padding: 0.5cm !important;
-            }
             
             .category-button {
                 border: none !important;

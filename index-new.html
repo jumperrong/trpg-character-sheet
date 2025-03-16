@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COC 7版人物卡 - 主页面</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- 页面标题 -->
+    <div class="page-title">COC 7版人物卡 - 主页面</div>
+
+    <!-- 角色卡主页面 -->
+    <div class="character-sheet">
+        <!-- 基本信息 -->
+        <div class="sheet-section basic-info-section section-border">
+            <div class="section-title">
+                <span>调查员 Investigator</span>
+                <div class="checkbox-row" style="margin: 0; padding: 0;">
+                    <input type="checkbox" id="is-partner">
+                    <label for="is-partner">伙伴</label>
+                </div>
+            </div>
+            <table class="info-table" style="width:100%; border-collapse:collapse;">
+                <tr class="field-row">
+                    <td class="field-label">姓名</td>
+                    <td colspan="3"><input type="text" id="character-name" class="field-input" placeholder=""></td>
+                </tr>
+                <tr class="field-row">
+                    <td class="field-label">玩家</td>
+                    <td colspan="3"><input type="text" id="player-name" class="field-input" placeholder=""></td>
+                </tr>
+                <tr class="field-row">
+                    <td class="field-label">年代</td>
+                    <td><input type="text" id="era" class="field-input" placeholder=""></td>
+                    <td class="field-label">职业</td>
+                    <td><input type="text" id="occupation" class="field-input" placeholder=""></td>
+                </tr>
+                <tr class="field-row">
+                    <td class="field-label">年龄</td>
+                    <td><input type="text" id="age" class="field-input" placeholder=""></td>
+                    <td class="field-label">性别</td>
+                    <td><input type="text" id="gender" class="field-input" placeholder=""></td>
+                </tr>
+                <tr class="field-row">
+                    <td class="field-label">住地</td>
+                    <td><input type="text" id="residence" class="field-input" placeholder=""></td>
+                    <td class="field-label">故乡</td>
+                    <td><input type="text" id="birthplace" class="field-input" placeholder=""></td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- 角色属性 -->
+        <div class="sheet-section characteristics-section section-border">
+            <div class="section-title">
+                <span>属性 Characteristics</span>
+                <div class="total-attr" style="margin: 0;">总点数：0</div>
+            </div>
+            <div class="characteristics-grid">
+                <div class="characteristic-item">
+                    <span class="char-label">力量 STR</span>
+                    <input type="text" id="str" class="char-value" maxlength="3">
+                </div>
+                <div class="characteristic-item">
+                    <span class="char-label">体质 CON</span>
+                    <input type="text" id="con" class="char-value" maxlength="3">
+                </div>
+                <div class="characteristic-item">
+                    <span class="char-label">体型 SIZ</span>
+                    <input type="text" id="siz" class="char-value" maxlength="3">
+                </div>
+                <div class="characteristic-item">
+                    <span class="char-label">敏捷 DEX</span>
+                    <input type="text" id="dex" class="char-value" maxlength="3">
+                </div>
+                <div class="characteristic-item">
+                    <span class="char-label">外貌 APP</span>
+                    <input type="text" id="app" class="char-value" maxlength="3">
+                </div>
+                <div class="characteristic-item">
+                    <span class="char-label">智力 INT</span>
+                    <input type="text" id="int" class="char-value" maxlength="3">
+                </div>
+                <div class="characteristic-item">
+                    <span class="char-label">意志 POW</span>
+                    <input type="text" id="pow" class="char-value" maxlength="3">
+                </div>
+                <div class="characteristic-item">
+                    <span class="char-label">教育 EDU</span>
+                    <input type="text" id="edu" class="char-value" maxlength="3">
+                </div>
+                <div class="characteristic-item">
+                    <span class="char-label">幸运 LUC</span>
+                    <input type="text" id="luc" class="char-value" maxlength="3">
+                </div>
+            </div>
+        </div>
+
+        <!-- 角色形象 -->
+        <div class="sheet-section avatar-section section-border">
+            <div class="section-title">头像 Portrait</div>
+            <div class="avatar-container" id="avatar-container">
+                <img id="avatar-img" class="avatar-img" src="" alt="" style="display: none;">
+                <div class="avatar-placeholder">
+                    <div class="avatar-placeholder-text">点击上传头像</div>
+                </div>
+            </div>
+            <input type="file" id="avatar-upload" class="hidden-file-input" accept="image/*">
+        </div>
+        
+        <!-- 状态信息 -->
+        <div class="sheet-section stats-section section-border">
+            <div class="section-title">角色状态 Status</div>
+            <div class="stats-container">
+                <!-- 理智值 -->
+                <div class="stat-box">
+                    <div class="stat-title">理智值 SAN</div>
+                    <div class="stat-grid">
+                        <div class="stat-row">
+                            <div class="stat-label">当前</div>
+                            <input type="text" class="stat-value sanity-current" maxlength="2">
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-label">起始</div>
+                            <input type="text" class="stat-value sanity-start" maxlength="2">
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-label">最大</div>
+                            <input type="text" class="stat-value sanity-max" maxlength="2" value="99">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 生命值 -->
+                <div class="stat-box">
+                    <div class="stat-title">生命值 HP</div>
+                    <div class="stat-grid">
+                        <div class="stat-row">
+                            <div class="stat-label">当前 Current</div>
+                            <input type="text" class="stat-value health-current" maxlength="2">
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-label">最大 Max</div>
+                            <input type="text" class="stat-value health-max" maxlength="2">
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-label">临时 Temp</div>
+                            <input type="text" class="stat-value health-temp" maxlength="2">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 魔法值 -->
+                <div class="stat-box">
+                    <div class="stat-title">魔法值 MP</div>
+                    <div class="stat-grid">
+                        <div class="stat-row">
+                            <div class="stat-label">当前 Current</div>
+                            <input type="text" class="stat-value magic-current" maxlength="2">
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-label">最大 Max</div>
+                            <input type="text" class="stat-value magic-max" maxlength="2">
+                        </div>
+                        <div class="stat-row">
+                            <div class="stat-label">临时 Temp</div>
+                            <input type="text" class="stat-value magic-temp" maxlength="2">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 技能部分 -->
+        <div class="skills-section section-border">
+            <div class="section-title">
+                <span>技能 Skills</span>
+                <span class="total-attr">
+                    <div class="points-container">
+                        <span class="points-label">职业点数:</span>
+                        <input type="text" id="occupation-points" class="points-input" value="0" maxlength="3">
+                        <span class="points-remaining">剩余: <span id="occupation-remaining">0</span></span>
+                    </div>
+                    <div class="points-container">
+                        <span class="points-label">兴趣点数:</span>
+                        <input type="text" id="interest-points" class="points-input" value="0" maxlength="3">
+                        <span class="points-remaining">剩余: <span id="interest-remaining">0</span></span>
+                    </div>
+                </span>
+            </div>
+            <div class="skills-container">
+                <!-- 技能表格会由JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 武器部分 -->
+        <div class="weapons-section section-border">
+            <div class="section-title">武器 Weapon</div>
+            <div class="weapons-table">
+                <div class="weapon-row weapon-header">
+                    <div class="weapon-cell">武器名称</div>
+                    <div class="weapon-cell">伤害</div>
+                    <div class="weapon-cell">特性</div>
+                </div>
+                <!-- 武器列表会由JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 战斗信息 -->
+        <div class="combat-section section-border">
+            <div class="section-title">战斗 Combat</div>
+            <div class="combat-stats">
+                <!-- 伤害加值 -->
+                <div class="combat-row">
+                    <div class="combat-label">伤害加值 Damage Bonus</div>
+                    <div class="combat-value">
+                        <input type="text" id="damage-bonus" class="combat-input" readonly>
+                    </div>
+                </div>
+                <!-- 精神伤害加值 -->
+                <div class="combat-row">
+                    <div class="combat-label">精神加值 Spirit Bonus</div>
+                    <div class="combat-value">
+                        <input type="text" id="spirit-bonus" class="combat-input">
+                    </div>
+                </div>
+                <!-- 体格 -->
+                <div class="combat-row">
+                    <div class="combat-label">体格 Build</div>
+                    <div class="combat-value">
+                        <input type="text" id="build" class="combat-input">
+                    </div>
+                </div>
+                <!-- 护甲 -->
+                <div class="combat-row">
+                    <div class="combat-label">护甲 Armor</div>
+                    <div class="combat-value">
+                        <input type="text" id="armor" class="combat-input">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 悬浮按钮组 -->
+    <div class="float-buttons">
+        <button class="float-button" id="print-button" title="打印">⎙</button>
+        <button class="float-button" title="功能2">◈</button>
+        <button class="float-button" title="功能3">◇</button>
+        <button class="float-button" title="功能4">□</button>
+        <button class="float-button" title="功能5">○</button>
+    </div>
+
+    <!-- 打印选择模态框 -->
+    <div class="modal" id="print-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>选择要打印的页面</h2>
+            </div>
+            <div class="modal-body">
+                <div class="print-option">
+                    <input type="checkbox" id="print-character" checked>
+                    <label for="print-character">角色信息页</label>
+                </div>
+                <div class="print-option">
+                    <input type="checkbox" id="print-custom-skills">
+                    <label for="print-custom-skills">自定义技能页</label>
+                </div>
+                <div class="print-option">
+                    <input type="checkbox" id="print-items">
+                    <label for="print-items">物品页</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-button" id="cancel-print">取消</button>
+                <button class="modal-button" id="confirm-print">打印</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
