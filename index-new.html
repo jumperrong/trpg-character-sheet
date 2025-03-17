@@ -10,10 +10,17 @@
 </head>
 <body>
     <!-- 页面标题 -->
-    <div class="page-title">COC 7版人物卡 - 主页面</div>
+    <div class="page-title">
+        <span>COC 7版人物卡</span>
+        <!-- Tab 切换 -->
+        <div class="tab-container">
+            <div class="tab active" data-tab="main-sheet">主页面</div>
+            <div class="tab" data-tab="custom-skills">自定义技能</div>
+        </div>
+    </div>
 
     <!-- 角色卡主页面 -->
-    <div class="character-sheet">
+    <div class="character-sheet tab-content active" id="main-sheet">
         <!-- 基本信息 -->
         <div class="sheet-section basic-info-section section-border">
             <div class="section-title">
@@ -200,12 +207,27 @@
         <div class="weapons-section section-border">
             <div class="section-title">武器 Weapon</div>
             <div class="weapons-table">
-                <div class="weapon-row weapon-header">
-                    <div class="weapon-cell">武器名称</div>
-                    <div class="weapon-cell">伤害</div>
-                    <div class="weapon-cell">特性</div>
+                <!-- 四行用户输入的武器行 -->
+                <div class="weapon-row">
+                    <div class="weapon-cell"><input type="text" class="weapon-name" placeholder="武器名称"></div>
+                    <div class="weapon-cell"><input type="text" class="weapon-damage" placeholder="伤害"></div>
+                    <div class="weapon-cell"><input type="text" class="weapon-feature" placeholder="特性"></div>
                 </div>
-                <!-- 武器列表会由JavaScript动态生成 -->
+                <div class="weapon-row">
+                    <div class="weapon-cell"><input type="text" class="weapon-name" placeholder="武器名称"></div>
+                    <div class="weapon-cell"><input type="text" class="weapon-damage" placeholder="伤害"></div>
+                    <div class="weapon-cell"><input type="text" class="weapon-feature" placeholder="特性"></div>
+                </div>
+                <div class="weapon-row">
+                    <div class="weapon-cell"><input type="text" class="weapon-name" placeholder="武器名称"></div>
+                    <div class="weapon-cell"><input type="text" class="weapon-damage" placeholder="伤害"></div>
+                    <div class="weapon-cell"><input type="text" class="weapon-feature" placeholder="特性"></div>
+                </div>
+                <div class="weapon-row">
+                    <div class="weapon-cell"><input type="text" class="weapon-name" placeholder="武器名称"></div>
+                    <div class="weapon-cell"><input type="text" class="weapon-damage" placeholder="伤害"></div>
+                    <div class="weapon-cell"><input type="text" class="weapon-feature" placeholder="特性"></div>
+                </div>
             </div>
         </div>
 
@@ -241,6 +263,50 @@
                         <input type="text" id="armor" class="combat-input">
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义技能页面 -->
+    <div class="character-sheet tab-content" id="custom-skills">
+        <!-- 调查员信息区域 -->
+        <div class="sheet-section basic-info-section section-border">
+            <div class="section-title">
+                <span>调查员 Investigator</span>
+                <span class="investigator-name">姓名：<span id="custom-character-name"></span></span>
+            </div>
+        </div>
+
+        <!-- 自定义技能区域 -->
+        <div class="sheet-section custom-skills-section section-border">
+            <div class="section-title">自定义技能 Custom Skills</div>
+            <div class="custom-skills-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 95px; text-align: left;">技能名</th>
+                            <th style="width: 30px;">基础</th>
+                            <th style="width: 30px;">职业</th>
+                            <th style="width: 30px;">兴趣</th>
+                            <th style="width: 30px;">成长</th>
+                            <th style="width: 30px;">成功</th>
+                            <th style="width: 30px;">困难</th>
+                            <th style="width: 30px;">极难</th>
+                            <th style="width: 20px;"></th>
+                            <th style="width: 95px; text-align: left;">技能名</th>
+                            <th style="width: 30px;">基础</th>
+                            <th style="width: 30px;">职业</th>
+                            <th style="width: 30px;">兴趣</th>
+                            <th style="width: 30px;">成长</th>
+                            <th style="width: 30px;">成功</th>
+                            <th style="width: 30px;">困难</th>
+                            <th style="width: 30px;">极难</th>
+                        </tr>
+                    </thead>
+                    <tbody id="custom-skills-body">
+                        <!-- 动态生成的技能行将被插入这里 -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
