@@ -1002,8 +1002,50 @@ input[type="number"] {
     align-items: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    color: #666;
+    color: #555;
     font-size: 18px;
+    position: relative; /* 为提示文字定位 */
+}
+
+.float-button i {
+    font-size: 18px; /* 图标大小 */
+}
+
+/* 悬浮提示文字 */
+.button-tooltip {
+    position: absolute;
+    right: 50px; /* 位于按钮左侧 */
+    background-color: rgba(70, 70, 70, 0.9);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(10px);
+    transition: all 0.3s ease;
+    pointer-events: none; /* 防止提示文字影响鼠标事件 */
+    z-index: 1001;
+}
+
+/* 提示文字三角形箭头 */
+.button-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -6px;
+    transform: translateY(-50%);
+    border-width: 6px 0 6px 6px;
+    border-style: solid;
+    border-color: transparent transparent transparent rgba(70, 70, 70, 0.9);
+}
+
+/* 鼠标悬浮时显示提示文字 */
+.float-button:hover .button-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
 }
 
 .float-button:hover {

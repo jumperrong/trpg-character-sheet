@@ -158,6 +158,9 @@ function initCharacterSheet() {
     // 初始化打印功能
     initPrint();
     
+    // 初始化重置和帮助按钮
+    initResetAndHelp();
+    
     // 确保在页面加载完成后更新一次衍生属性（包括理智值）
     setTimeout(() => {
         console.log('页面加载完成后更新衍生属性');
@@ -1509,5 +1512,27 @@ function updateMotherTongueBaseValue() {
                 calculateSkillSuccess(skillRow);
             }
         }
+    });
+}
+
+// 初始化重置和帮助按钮
+function initResetAndHelp() {
+    // 重置按钮点击事件
+    document.getElementById('reset-button').addEventListener('click', function() {
+        if (confirm('确定要重置所有数据吗？此操作不可撤销。')) {
+            localStorage.removeItem('characterData');
+            window.location.reload();
+        }
+    });
+    
+    // 帮助按钮点击事件
+    document.getElementById('help-button').addEventListener('click', function() {
+        alert('COC 7版角色卡使用说明：\n\n' +
+              '1. 填写角色基本信息\n' +
+              '2. 分配属性点数\n' +
+              '3. 选择职业并分配职业点数和兴趣点数\n' +
+              '4. 添加武器和装备\n' +
+              '5. 使用保存按钮保存角色数据\n' +
+              '6. 使用打印按钮打印角色卡');
     });
 }
