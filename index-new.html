@@ -16,6 +16,7 @@
         <div class="tab-container">
             <div class="tab active" data-tab="main-sheet">主页面</div>
             <div class="tab" data-tab="custom-skills">自定义技能</div>
+            <div class="tab" data-tab="items">道具</div>
         </div>
     </div>
 
@@ -310,6 +311,39 @@
         </div>
     </div>
 
+    <!-- 道具页面 -->
+    <div class="character-sheet tab-content" id="items">
+        <!-- 调查员信息区域 -->
+        <div class="sheet-section basic-info-section section-border">
+            <div class="section-title">
+                <span>调查员 Investigator</span>
+                <span class="investigator-name">姓名：<span id="items-character-name"></span></span>
+            </div>
+        </div>
+
+        <!-- 道具区域 -->
+        <div class="sheet-section items-section section-border">
+            <div class="section-title">道具 Items</div>
+            <div class="items-container">
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">名称</th>
+                            <th style="width: 10%;">类型</th>
+                            <th style="width: 25%;">备注</th>
+                            <th style="width: 15%;">名称</th>
+                            <th style="width: 10%;">类型</th>
+                            <th style="width: 25%;">备注</th>
+                        </tr>
+                    </thead>
+                    <tbody id="items-body">
+                        <!-- 道具行将被动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- 悬浮按钮组 -->
     <div class="float-buttons">
         <button class="float-button" id="print-button">
@@ -318,12 +352,22 @@
         </button>
         <button class="float-button" id="save-button">
             <i class="fas fa-save"></i>
-            <span class="button-tooltip">保存数据</span>
+            <span class="button-tooltip">保存到本地缓存</span>
         </button>
-        <button class="float-button" id="load-button">
-            <i class="fas fa-file-import"></i>
-            <span class="button-tooltip">加载数据</span>
-        </button>
+        <div class="float-button-container">
+            <button class="float-button" id="io-button">
+                <i class="fas fa-file-export"></i>
+                <span class="button-tooltip">导入/导出数据</span>
+            </button>
+            <div class="dropdown-menu" id="io-dropdown">
+                <button id="export-button">
+                    <i class="fas fa-file-export"></i> 导出数据
+                </button>
+                <button id="import-button">
+                    <i class="fas fa-file-import"></i> 导入数据
+                </button>
+            </div>
+        </div>
         <button class="float-button" id="reset-button">
             <i class="fas fa-undo-alt"></i>
             <span class="button-tooltip">重置数据</span>
@@ -334,29 +378,60 @@
         </button>
     </div>
 
-    <!-- 打印选择模态框 -->
+    <!-- 打印模态框 -->
     <div class="modal" id="print-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>选择要打印的页面</h2>
+                <h2>选择打印页面</h2>
             </div>
             <div class="modal-body">
                 <div class="print-option">
                     <input type="checkbox" id="print-character" checked>
-                    <label for="print-character">角色信息页</label>
+                    <label for="print-character">打印主页面</label>
                 </div>
                 <div class="print-option">
-                    <input type="checkbox" id="print-custom-skills">
-                    <label for="print-custom-skills">自定义技能页</label>
+                    <input type="checkbox" id="print-custom-skills" checked>
+                    <label for="print-custom-skills">打印自定义技能页</label>
                 </div>
                 <div class="print-option">
-                    <input type="checkbox" id="print-items">
-                    <label for="print-items">物品页</label>
+                    <input type="checkbox" id="print-items" checked>
+                    <label for="print-items">打印道具页（可显示所有80个道具项目）</label>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="modal-button" id="cancel-print">取消</button>
-                <button class="modal-button" id="confirm-print">打印</button>
+                <button id="cancel-print" class="modal-button">取消</button>
+                <button id="confirm-print" class="modal-button">打印</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 帮助模态框 -->
+    <div class="modal" id="help-modal">
+        <div class="modal-content" id="help-modal-content">
+            <div class="modal-header">
+                <h2>帮助</h2>
+            </div>
+            <div class="modal-body" id="help-modal-body">
+                <!-- 帮助内容将由JavaScript动态填充 -->
+            </div>
+            <div class="modal-footer">
+                <button id="close-help" class="modal-button">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑模态框 -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content" id="edit-modal-content">
+            <div class="modal-header">
+                <h2>编辑备注</h2>
+            </div>
+            <div class="modal-body">
+                <textarea id="edit-textarea"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-edit" class="modal-button">取消</button>
+                <button id="save-edit" class="modal-button">保存</button>
             </div>
         </div>
     </div>

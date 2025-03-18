@@ -205,49 +205,285 @@ body {
 }
 
 @media print {
-    .custom-skills-container {
+    @page {
+        size: A4;
+        margin: 0.5cm; /* 标准页边距，与其他页面一致 */
+    }
+    
+    body {
+        margin: 0;
         padding: 0;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
     }
-    
-    .custom-skills-container table {
-        page-break-inside: avoid;
-    }
-    
-    .custom-skills-container th,
-    .custom-skills-container td {
-        border: 1px solid #ddd !important;
-    }
-    
-    .header-section,
-    .footer-section,
-    .no-print {
+
+    .page-title {
         display: none !important;
     }
+
+    html {
+        padding-top: 0 !important;
+    }
+
+    .float-nav, #print-modal, .float-buttons, #edit-modal { 
+        display: none !important; 
+    }
+
+    .subtype-select-button {
+        display: none !important;
+    }
+
+    /* 隐藏武器表头文字 */
+    .weapons-table .weapon-header {
+        display: none !important;
+    }
+
+    /* 确保编辑模态框在打印时不可见 */
+    .modal, #edit-modal, #edit-modal-content, .modal-content {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        z-index: -1 !important;
+    }
+
+    /* 道具页面充满整个页面的样式 */
+    #items {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        display: block !important;
+        position: relative !important;
+        overflow: visible !important;
+        height: 100vh !important; /* 使其占据整个视口高度 */
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
     
-    /* 在打印时隐藏武器区域输入框的提示文字 */
+    /* 调查员信息区域进一步压缩 */
+    #items .basic-info-section {
+        margin: 0 !important;
+        padding: 0 !important;
+        min-height: 0 !important;
+        max-height: 20px !important; /* 限制最大高度 */
+    }
+
+    #items .basic-info-section .section-title {
+        padding: 0 5px !important;
+        margin: 0 !important;
+        height: auto !important;
+        min-height: 14px !important;
+        max-height: 16px !important;
+        font-size: 9px !important; /* 减小字体 */
+    }
+
+    #items .investigator-name {
+        font-size: 9px !important;
+        margin: 0 !important;
+    }
+    
+    /* 道具区域占据更多空间 */
+    .items-section {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border-width: 1px !important;
+        height: calc(100vh - 20px) !important; /* 减去调查员信息区域的高度 */
+    }
+    
+    .items-section .section-title {
+        padding: 0 4px !important;
+        margin: 0 !important;
+        height: auto !important;
+        min-height: 14px !important;
+        max-height: 16px !important;
+        font-size: 9px !important; /* 减小字体 */
+    }
+    
+    /* 表格容器最大化 */
+    .items-container {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        width: 100% !important;
+        height: calc(100vh - 36px) !important; /* 减去标题区域的高度 */
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* 表格最大化 */
+    .items-table {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        height: 100% !important;
+        max-height: none !important;
+        width: 100% !important;
+        font-size: 8px !important; /* 进一步减小字体 */
+        margin: 0 !important;
+        border-spacing: 0 !important;
+    }
+    
+    /* 表格头部压缩 */
+    .items-table thead {
+        height: 16px !important;
+    }
+    
+    /* 调整表头高度 */
+    .items-table th {
+        height: 16px !important;
+        font-size: 8px !important;
+        padding: 0 !important;
+    }
+    
+    /* 表格体部分最大化 */
+    .items-table tbody {
+        height: calc(100% - 16px) !important;
+    }
+    
+    /* 调整表格行高 */
+    .items-table tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        height: 16px !important; /* 进一步减小行高 */
+    }
+    
+    /* 表格单元格调整 */
+    .items-table td, 
+    .items-table th {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        padding: 0 !important;
+        height: 16px !important; /* 进一步减小单元格高度 */
+        vertical-align: middle !important;
+    }
+    
+    /* 输入框高度调整 */
+    .items-table input {
+        height: 14px !important; /* 进一步减小输入框高度 */
+        line-height: 14px !important;
+        font-size: 8px !important; /* 进一步减小字体 */
+        padding: 0 1px !important;
+        color: black !important; /* 确保文字颜色为黑色 */
+        opacity: 1 !important; /* 确保不透明 */
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background: transparent !important;
+    }
+    
+    /* 增加可显示的行数至48行 */
+    /* #items-body tr:nth-child(n+49) {
+        display: none !important; 
+    } */
+    
+    /* 恢复重要的通用打印样式 */
+    .character-sheet {
+        transform: none !important;
+        margin: 0 !important;
+        padding: 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* 优化items特定的character-sheet */
+    .character-sheet.tab-content#items {
+        padding: 0 !important;
+    }
+    
+    .character-sheet table,
+    .character-sheet .weapons-table,
+    .character-sheet .skills-table {
+        page-break-inside: avoid;
+        border-collapse: collapse;
+        width: 100% !important;
+    }
+    
+    .character-sheet * {
+        box-sizing: border-box !important;
+    }
+
+    .section-title {
+        background-color: var(--section-bg) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .weapon-row:nth-child(odd):not(.weapon-header) {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .weapon-row:nth-child(even):not(.weapon-header) {
+        background-color: var(--table-row-alt) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .skills-column .skill-row:nth-child(even) {
+        background-color: var(--table-row-alt) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+    
+    .skills-column .skill-row:nth-child(odd) {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 确保自定义技能页在打印时没有多余的边距 */
+    #custom-skills {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    #custom-skills .sheet-section {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .character-sheet.tab-content#custom-skills {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 确保在打印时所有输入框的占位符都不显示 */
+    input::placeholder,
+    .items-table input::placeholder,
+    .custom-skills-container input::placeholder,
     .weapon-cell input::placeholder {
         color: transparent !important;
         opacity: 0 !important;
+        display: none !important;
+        visibility: hidden !important;
     }
     
-    /* 在打印时隐藏自定义技能页输入框的提示文字 */
-    .custom-skills-container input::placeholder {
-        color: transparent !important;
-        opacity: 0 !important;
+    /* 确保所有输入框的文本在打印时是可见的 */
+    input[type="text"] {
+        color: black !important;
+        opacity: 1 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background: transparent !important;
     }
     
-    /* 使用JavaScript将空技能名行的值标记为打印隐藏类 */
-    .print-empty-skill {
-        color: transparent !important;
-        opacity: 0 !important;
-        border-color: transparent !important;
+    /* 针对道具表特别处理 */
+    .items-table .item-name,
+    .items-table .item-type-input,
+    .items-table .item-note {
+        color: black !important;
+        opacity: 1 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background: transparent !important;
+        -webkit-text-fill-color: black !important; /* Safari和iOS的特殊处理 */
     }
     
-    /* 移除CSS选择器方法，因为它在表格结构中不起作用 */
-    .custom-skills-container tr td:first-child input:placeholder-shown ~ td input,
-    .custom-skills-container tr td:first-child input[value=""] ~ td input,
-    .custom-skills-container tr td:first-child input:not([value]) ~ td input {
-        /* 移除此规则 */
+    /* 确保输入框内容可见 */
+    input:not([value=""]) {
+        color: black !important;
+        opacity: 1 !important;
     }
 }
 
@@ -758,111 +994,18 @@ body {
     background: transparent;
 }
 
-/* 打印样式 */
-@media print {
-    @page {
-        size: A4;
-        margin: 0.5cm;
-    }
-    
-    body {
-        margin: 0;
-        padding: 0;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-
-    .page-title {
-        display: none !important;
-    }
-
-    html {
-        padding-top: 0 !important;
-    }
-
-    .float-nav, #print-modal, .float-buttons { 
-        display: none !important; 
-    }
-
-    .subtype-select-button {
-        display: none !important;
-    }
-
-    /* 隐藏武器表头文字 */
-    .weapons-table .weapon-header {
-        display: none !important;
-    }
-
-    .character-sheet {
-        transform: none !important;
-        margin: 0 !important;
-        padding: 10px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-    
-    .character-sheet table,
-    .character-sheet .weapons-table,
-    .character-sheet .skills-table {
-        page-break-inside: avoid;
-        border-collapse: collapse;
-        width: 100% !important;
-    }
-    
-    .character-sheet * {
-        box-sizing: border-box !important;
-    }
-
-    .section-title {
-        background-color: var(--section-bg) !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-
-    .weapon-row:nth-child(odd):not(.weapon-header) {
-        background-color: white !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    .weapon-row:nth-child(even):not(.weapon-header) {
-        background-color: var(--table-row-alt) !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-
-    .skills-column .skill-row:nth-child(even) {
-        background-color: var(--table-row-alt) !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    
-    .skills-column .skill-row:nth-child(odd) {
-        background-color: white !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-
-    /* 确保自定义技能页在打印时没有多余的边距 */
-    #custom-skills {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    
-    #custom-skills .sheet-section {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    
-    .character-sheet.tab-content#custom-skills {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-}
-
 /* 打印选项相关的样式 */
 .print-hidden {
     display: none !important;
+}
+
+/* 在打印时隐藏空技能和道具的值 */
+@media print {
+    .print-empty-skill {
+        color: transparent !important;
+        border: none !important;
+        background: transparent !important;
+    }
 }
 
 /* 通用字段样式 */
@@ -1496,4 +1639,342 @@ input[type="number"] {
 /* 移除sheet-section可能存在的内边距 */
 .sheet-section {
     padding: 0;
+}
+
+/* 道具页面样式 */
+#items {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+#items .basic-info-section {
+    margin-bottom: 0;
+}
+
+#items.active {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0;
+}
+
+.items-container {
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: 1px solid #ddd;
+}
+
+.items-table th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: 2px;
+    font-weight: normal;
+    font-size: 11px;
+    text-align: center;
+    height: 22px;
+}
+
+.items-table td {
+    padding: 1px;
+    vertical-align: middle;
+}
+
+.items-table input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 2px;
+    font-size: 11px;
+    box-sizing: border-box;
+}
+
+/* 确保右侧道具和左侧道具之间有明显分隔 */
+.items-table td:nth-child(3) {
+    border-right: 1px solid #ddd;
+}
+
+/* 为奇偶行设置不同背景色 */
+.items-table tr.even-row {
+    background-color: #f2f2f2;
+}
+
+.items-table tr.odd-row {
+    background-color: white;
+}
+
+/* 确保输入框在单元格中垂直居中 */
+.items-table .item-name,
+.items-table .item-type-input,
+.items-table .item-note {
+    height: 20px;
+    line-height: 20px;
+}
+
+.items-table .item-type {
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.items-table .item-type input {
+    text-align: center;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    border-bottom: 1px dotted #999;
+}
+
+.items-table .item-type-button {
+    display: inline-block;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin-left: 3px;
+    font-size: 9px;
+    cursor: pointer;
+}
+
+@media print {
+    .items-container {
+        padding: 0;
+    }
+    
+    .items-table {
+        page-break-inside: avoid;
+    }
+    
+    .items-table th,
+    .items-table td {
+        border: 1px solid #ddd !important;
+    }
+    
+    /* 在打印时隐藏道具页输入框的提示文字 */
+    .items-container input::placeholder {
+        color: transparent !important;
+        opacity: 0 !important;
+    }
+    
+    .item-type-button {
+        display: none !important;
+    }
+}
+
+/* 导入/导出下拉菜单样式 */
+.float-button-container {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    z-index: 1000;
+    right: 0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.dropdown-menu button {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+.dropdown-menu button:hover {
+    background-color: #e9e9e9;
+}
+
+.dropdown-menu button i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+.float-button-container:hover .dropdown-menu {
+    display: block;
+}
+
+/* 帮助模态框样式 */
+#help-modal-content {
+    max-width: 600px;
+    width: 90%;
+}
+
+#help-modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+    line-height: 1.5;
+}
+
+#help-modal-body p {
+    margin-bottom: 10px;
+}
+
+#help-modal-body h3 {
+    margin-top: 15px;
+    margin-bottom: 8px;
+    color: var(--header-bg);
+}
+
+#help-modal-body ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+#help-modal-body li {
+    margin-bottom: 5px;
+}
+
+#help-modal-body .credits {
+    margin-top: 20px;
+    font-style: italic;
+    color: #666;
+}
+
+/* Tooltip 样式 */
+.tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: pre-wrap;
+    z-index: 1001;
+    display: none;
+    max-width: 300px;
+    word-wrap: break-word;
+}
+
+@media print {
+    .tooltip {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+}
+
+/* 编辑模态框样式优化 */
+#edit-modal {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1002;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+
+#edit-modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+#edit-modal-content {
+    background-color: white;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    transition: transform 0.3s ease;
+    transform: translateY(-20px);
+    box-sizing: border-box;
+}
+
+#edit-modal.active #edit-modal-content {
+    transform: translateY(0);
+}
+
+#edit-modal textarea {
+    width: calc(100% - 20px); /* 减去padding的宽度 */
+    height: auto;
+    min-height: 200px;
+    font-size: 14px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+#edit-modal .modal-footer {
+    text-align: right;
+    margin-top: 10px;
+}
+
+#edit-modal .modal-button {
+    padding: 5px 15px;
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+/* 道具区域标题调整 */
+.items-section .section-title {
+    padding: 1px 4px !important;
+    margin: 0 !important;
+    height: auto !important;
+    min-height: 16px !important;
+}
+
+/* 优化单元格比例 - 名称列宽度增加，备注列宽度增加 */
+.items-table th:nth-child(1), .items-table td:nth-child(1), 
+.items-table th:nth-child(4), .items-table td:nth-child(4) {
+    width: 18% !important; /* 名称列宽度 */
+}
+
+.items-table th:nth-child(2), .items-table td:nth-child(2),
+.items-table th:nth-child(5), .items-table td:nth-child(5) {
+    width: 9% !important; /* 类型列宽度 */
+}
+
+.items-table th:nth-child(3), .items-table td:nth-child(3),
+.items-table th:nth-child(6), .items-table td:nth-child(6) {
+    width: 23% !important; /* 备注列宽度 */
+}
+
+/* 确保打印时背景色和边框显示 */
+.items-table tr.even-row {
+    background-color: #f2f2f2 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+.items-table tr.odd-row {
+    background-color: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+}
+
+.items-table td, .items-table th {
+    border: 1px solid #ddd !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
 }
