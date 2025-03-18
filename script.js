@@ -1693,6 +1693,43 @@ function initPrint() {
                 if (customInfoSection) {
                     customInfoSection.classList.remove('print-hidden');
                 }
+                
+                // 在打印前标记空技能名行，使其数值在打印时不显示
+                const customSkillsTable = document.getElementById('custom-skills-body');
+                if (customSkillsTable) {
+                    const rows = customSkillsTable.querySelectorAll('tr');
+                    rows.forEach(row => {
+                        // 获取左右两侧的技能名输入框
+                        const leftNameInput = row.querySelector('td:nth-child(1) input');
+                        const rightNameInput = row.querySelector('td:nth-child(9) input');
+                        
+                        // 如果左侧技能名为空，隐藏左侧的所有数值
+                        if (leftNameInput && !leftNameInput.value.trim()) {
+                            for (let i = 2; i <= 8; i++) { // 从第2个到第8个单元格
+                                const cell = row.querySelector(`td:nth-child(${i})`);
+                                if (cell) {
+                                    const inputs = cell.querySelectorAll('input');
+                                    inputs.forEach(input => {
+                                        input.classList.add('print-empty-skill');
+                                    });
+                                }
+                            }
+                        }
+                        
+                        // 如果右侧技能名为空，隐藏右侧的所有数值
+                        if (rightNameInput && !rightNameInput.value.trim()) {
+                            for (let i = 10; i <= 16; i++) { // 从第10个到第16个单元格
+                                const cell = row.querySelector(`td:nth-child(${i})`);
+                                if (cell) {
+                                    const inputs = cell.querySelectorAll('input');
+                                    inputs.forEach(input => {
+                                        input.classList.add('print-empty-skill');
+                                    });
+                                }
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -1712,6 +1749,12 @@ function initPrint() {
                 /* 默认隐藏所有标签内容 */
                 .tab-content {
                     display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                    height: 0 !important;
+                    overflow: hidden !important;
+                    position: absolute !important;
+                    left: -9999px !important;
                 }
                 
                 /* 调整打印布局，确保内容不会重叠 */
@@ -1722,14 +1765,13 @@ function initPrint() {
                 
                 /* 重置定位，防止内容重叠 */
                 .tab-content.print-visible {
-                    display: block !important;
-                    position: static !important;
-                    opacity: 1 !important;
                     visibility: visible !important;
+                    opacity: 1 !important;
                     overflow: visible !important;
                     height: auto !important;
                     page-break-after: always !important;
                     margin-bottom: 20px !important;
+                    left: 0 !important;
                 }
         `;
         
@@ -1738,13 +1780,17 @@ function initPrint() {
             styleContent += `
                 /* 显示主页面 */
                 #main-sheet {
-                    display: block !important;
+                    display: grid !important; /* 使用grid布局，与原始布局一致 */
+                    grid-template-columns: 3fr 2fr !important;
+                    grid-template-rows: auto auto auto auto !important; 
+                    gap: 2px !important;
                     position: static !important;
                     opacity: 1 !important;
                     z-index: 1 !important;
                     visibility: visible !important;
                     overflow: visible !important;
                     height: auto !important;
+                    width: 100% !important;
                     page-break-after: always !important;
                 }
             `;
@@ -1758,7 +1804,8 @@ function initPrint() {
             styleContent += `
                 /* 显示自定义技能页 */
                 #custom-skills {
-                    display: block !important;
+                    display: flex !important; /* 使用flex布局，与原始布局一致 */
+                    flex-direction: column !important;
                     position: static !important;
                     opacity: 1 !important;
                     z-index: 1 !important;
@@ -1768,18 +1815,21 @@ function initPrint() {
                     margin: 0 !important;
                     padding: 0 !important;
                     background-color: white !important;
+                    width: 100% !important;
                 }
                 
-                /* 确保自定义技能页顶部没有空白 */
+                /* 确保自定义技能页内部布局正确 */
                 #custom-skills .sheet-section {
                     margin: 0 !important;
                     padding: 0 !important;
+                    width: 100% !important;
                 }
                 
-                /* 调整调查员信息区域 */
-                #custom-skills .basic-info-section {
-                    margin: 0 !important;
-                    padding: 0 !important;
+                /* 保持表格布局不变 */
+                #custom-skills .custom-skills-container table {
+                    width: 100% !important;
+                    border-collapse: collapse !important;
+                    table-layout: fixed !important;
                 }
             `;
             
@@ -1809,6 +1859,11 @@ function initPrint() {
             // 移除临时添加的标记类
             document.querySelectorAll('.tab-content.print-visible').forEach(element => {
                 element.classList.remove('print-visible');
+            });
+            
+            // 移除空技能名行的标记
+            document.querySelectorAll('.print-empty-skill').forEach(element => {
+                element.classList.remove('print-empty-skill');
             });
             
                 // 打印完成后恢复显示所有部分
@@ -1876,12 +1931,7 @@ function initCustomSkillsTable() {
         const leftTds = createCustomSkillItem();
         leftTds.forEach(td => row.appendChild(td));
         
-        // 添加一个空的分隔列
-        const separator = document.createElement('td');
-        separator.style.width = '20px';
-        row.appendChild(separator);
-        
-        // 创建右侧技能项
+        // 创建右侧技能项（移除了中间的分隔列）
         const rightTds = createCustomSkillItem();
         rightTds.forEach(td => row.appendChild(td));
         

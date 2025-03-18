@@ -121,9 +121,10 @@ body {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    margin: 0 !important;
+    margin: 0;
     border-spacing: 0 !important;
     box-sizing: border-box;
+    border: 1px solid #ddd;
 }
 
 .custom-skills-container thead {
@@ -140,6 +141,27 @@ body {
     padding: 0 !important;
 }
 
+.custom-skills-container tr {
+    border-bottom: 1px solid #ddd;
+}
+
+.custom-skills-container tr:last-child {
+    border-bottom: none;
+}
+
+.custom-skills-container th,
+.custom-skills-container td {
+    padding: 1px !important;
+    margin: 0 !important;
+    border-right: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+.custom-skills-container th:last-child,
+.custom-skills-container td:last-child {
+    border-right: none;
+}
+
 .custom-skills-container th {
     background-color: #f2f2f2;
     border-bottom: 1px solid #ddd;
@@ -148,6 +170,7 @@ body {
     font-size: 11px;
     text-align: center;
     height: 22px;
+    border-right: 1px solid #ddd;
 }
 
 .custom-skills-container th:first-child {
@@ -192,13 +215,39 @@ body {
     
     .custom-skills-container th,
     .custom-skills-container td {
-        border: 1px solid #ddd;
+        border: 1px solid #ddd !important;
     }
     
     .header-section,
     .footer-section,
     .no-print {
         display: none !important;
+    }
+    
+    /* 在打印时隐藏武器区域输入框的提示文字 */
+    .weapon-cell input::placeholder {
+        color: transparent !important;
+        opacity: 0 !important;
+    }
+    
+    /* 在打印时隐藏自定义技能页输入框的提示文字 */
+    .custom-skills-container input::placeholder {
+        color: transparent !important;
+        opacity: 0 !important;
+    }
+    
+    /* 使用JavaScript将空技能名行的值标记为打印隐藏类 */
+    .print-empty-skill {
+        color: transparent !important;
+        opacity: 0 !important;
+        border-color: transparent !important;
+    }
+    
+    /* 移除CSS选择器方法，因为它在表格结构中不起作用 */
+    .custom-skills-container tr td:first-child input:placeholder-shown ~ td input,
+    .custom-skills-container tr td:first-child input[value=""] ~ td input,
+    .custom-skills-container tr td:first-child input:not([value]) ~ td input {
+        /* 移除此规则 */
     }
 }
 
