@@ -49,10 +49,10 @@
 
 1. 克隆仓库到本地
 ```
-git clone https://github.com/yourusername/trpg-character-sheet.git
+git clone https://github.com/jumperrong/trpg-character-sheet.git
 ```
 
-2. 直接在浏览器中打开`index.html`或`index-new.html`文件
+2. 直接在浏览器中打开`index.html`文件
 3. 也可以使用任何静态网页服务器进行托管
 
 ## 技术栈
