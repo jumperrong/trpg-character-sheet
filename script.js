@@ -596,9 +596,11 @@ function createSingleSkill(container, skillData) {
             // 获取父技能名称
             const parentSkillName = skillData.parentSkill || "技能";
             nameSpan.textContent = parentSkillName;
+            nameSpan.setAttribute('data-skill', parentSkillName);
             skillRow.classList.add('sub-skill-row');
         } else {
             nameSpan.textContent = skillData.name;
+            nameSpan.setAttribute('data-skill', skillData.name);
         }
         
         nameCell.appendChild(nameSpan);
@@ -836,23 +838,31 @@ function createSubtypeModal(skillData, selectedSubtypeElement, skillRow) {
             item.dataset.name = subtype.name;
             item.dataset.base = subtype.base;
             
-            // 添加点击事件
+            // 点击子技能时的处理
             item.addEventListener('click', function() {
-                const name = this.dataset.name;
-                const base = this.dataset.base;
+                // 获取子技能名称和基础值
+                const subtypeName = subtype.name;
+                const subtypeBase = subtype.base || baseValue;
                 
-                // 更新选中的子技能名称
-                selectedSubtypeElement.textContent = name;
+                // 更新选中的子技能显示
+                selectedSubtypeElement.textContent = subtypeName;
                 
                 // 更新基础值
-                const baseInput = skillRow.querySelector('.base-value');
-                baseInput.value = base;
+                if (subtypeBase !== undefined) {
+                    const baseInput = skillRow.querySelector('.base-value');
+                    if (baseInput) {
+                        baseInput.value = subtypeBase;
+                    }
+                }
                 
-                // 更新成功率
+                // 重新计算成功率
                 calculateSkillSuccess(skillRow);
                 
                 // 关闭弹窗
-                modal.classList.remove('active');
+                document.body.removeChild(modal);
+                
+                // 触发保存
+                saveCharacter(false);
             });
             
             subtypeList.appendChild(item);
@@ -909,6 +919,22 @@ function calculateSkillSuccess(skillRow) {
         const occupationPoints = parseInt(skillRow.querySelector('.occupation-points').value) || 0;
         const interestPoints = parseInt(skillRow.querySelector('.interest-points').value) || 0;
         const growthPoints = parseInt(skillRow.querySelector('.growth-points').value) || 0;
+        
+        // 设置职业、兴趣和成长点数为0时显示为空
+        const occupationInput = skillRow.querySelector('.occupation-points');
+        if (occupationInput && occupationPoints === 0) {
+            occupationInput.value = '';
+        }
+        
+        const interestInput = skillRow.querySelector('.interest-points');
+        if (interestInput && interestPoints === 0) {
+            interestInput.value = '';
+        }
+        
+        const growthInput = skillRow.querySelector('.growth-points');
+        if (growthInput && growthPoints === 0) {
+            growthInput.value = '';
+        }
         
         // 计算总值
         const total = baseValue + occupationPoints + interestPoints + growthPoints;
@@ -1190,14 +1216,22 @@ function saveCharacter(showAlert = true) {
         document.querySelectorAll('.skill-row').forEach(skillRow => {
             const nameElement = skillRow.querySelector('.skill-name span');
             if (nameElement) {
+                const skillName = nameElement.textContent.trim();
                 const skillData = {
-                    name: nameElement.textContent,
+                    name: skillName,
                     checked: skillRow.querySelector('.skill-check').checked,
                     base: skillRow.querySelector('.base-value').value,
                     occupation: skillRow.querySelector('.occupation-points').value,
                     interest: skillRow.querySelector('.interest-points').value,
                     growth: skillRow.querySelector('.growth-points').value
                 };
+                
+                // 获取子类型技能的名称
+                const subtypeElement = skillRow.querySelector('.selected-subtype');
+                if (subtypeElement && subtypeElement.textContent.trim()) {
+                    skillData.subtype = subtypeElement.textContent.trim();
+                }
+                
                 characterData.skills.skillsList.push(skillData);
             }
         });
@@ -1217,7 +1251,7 @@ function saveCharacter(showAlert = true) {
         
         // 收集道具数据
         characterData.items = [];
-        const itemInputs = document.querySelectorAll('#items-body input[data-item-index]');
+        const itemInputs = document.querySelectorAll('#items-body input[data-item-index], #items-body textarea[data-item-index]');
         const itemsMap = {};
         
         // 收集所有输入框的数据
@@ -1247,8 +1281,7 @@ function saveCharacter(showAlert = true) {
                 input.setAttribute('value', input.value);
             } else if (input.classList.contains('item-note')) {
                 itemsMap[itemIndex].note = input.value;
-                // 更新value属性，确保打印时可见
-                input.setAttribute('value', input.value);
+                // 对于textarea不需要设置value属性
             }
         });
         
@@ -1263,8 +1296,11 @@ function saveCharacter(showAlert = true) {
         // 收集自定义技能数据
         characterData.customSkills = [];
         const customSkillRows = document.querySelectorAll('#custom-skills-body tr');
+        
+        // 修改为先收集所有左侧技能，再收集所有右侧技能
+        // 先收集左侧技能
         customSkillRows.forEach(row => {
-            // 获取该行中所有技能输入框
+            // 获取该行的左侧技能输入框
             const cells = Array.from(row.children);
             
             // 左侧技能项
@@ -1275,6 +1311,18 @@ function saveCharacter(showAlert = true) {
                 growth: cells[4]?.querySelector('.skill-growth')?.value || '0'
             };
             
+            // 只保存有名称的技能
+            if (leftSkill.name.trim()) {
+                characterData.customSkills.push(leftSkill);
+                console.log(`保存自定义技能: ${leftSkill.name}`);
+            }
+        });
+        
+        // 再收集右侧技能
+        customSkillRows.forEach(row => {
+            // 获取该行的右侧技能输入框
+            const cells = Array.from(row.children);
+            
             // 右侧技能项
             const rightSkill = {
                 name: cells[8]?.querySelector('.skill-name')?.value || '',
@@ -1284,11 +1332,6 @@ function saveCharacter(showAlert = true) {
             };
             
             // 只保存有名称的技能
-            if (leftSkill.name.trim()) {
-                characterData.customSkills.push(leftSkill);
-                console.log(`保存自定义技能: ${leftSkill.name}`);
-            }
-            
             if (rightSkill.name.trim()) {
                 characterData.customSkills.push(rightSkill);
                 console.log(`保存自定义技能: ${rightSkill.name}`);
@@ -1449,18 +1492,78 @@ function loadCharacter(skipAlert = false) {
                         
                         // 设置职业点数
                         const occupationInput = skillRow.querySelector('.occupation-points');
-                        if (occupationInput) occupationInput.value = skillData.occupation || '0';
+                        if (occupationInput) {
+                            const occValue = skillData.occupation || '0';
+                            occupationInput.value = (occValue === '0') ? '' : occValue;
+                        }
                         
                         // 设置兴趣点数
                         const interestInput = skillRow.querySelector('.interest-points');
-                        if (interestInput) interestInput.value = skillData.interest || '0';
+                        if (interestInput) {
+                            const intValue = skillData.interest || '0';
+                            interestInput.value = (intValue === '0') ? '' : intValue;
+                        }
                         
                         // 设置成长点数
                         const growthInput = skillRow.querySelector('.growth-points');
-                        if (growthInput) growthInput.value = skillData.growth || '0';
+                        if (growthInput) {
+                            const growthValue = skillData.growth || '0';
+                            growthInput.value = (growthValue === '0') ? '' : growthValue;
+                        }
+                        
+                        // 恢复子类型技能名称
+                        if (skillData.subtype) {
+                            const subtypeElement = skillRow.querySelector('.selected-subtype');
+                            if (subtypeElement) {
+                                subtypeElement.textContent = skillData.subtype;
+                            }
+                        }
                         
                         // 计算成功率
                         calculateSkillSuccess(skillRow);
+                    } else {
+                        // 没有找到精确匹配的技能，可能是子类型技能
+                        // 查找所有技能行并检查是否有匹配的
+                        document.querySelectorAll('.skill-row').forEach(row => {
+                            const nameSpan = row.querySelector('.skill-name span');
+                            const subtypeSpan = row.querySelector('.selected-subtype');
+                            
+                            // 检查技能名和子类型是否匹配
+                            if (nameSpan && skillData.name.includes(nameSpan.textContent.trim())) {
+                                // 如果有子类型且匹配
+                                if (skillData.subtype && subtypeSpan) {
+                                    subtypeSpan.textContent = skillData.subtype;
+                                    
+                                    // 设置技能值
+                                    const baseInput = row.querySelector('.base-value');
+                                    if (baseInput) baseInput.value = skillData.base || '0';
+                                    
+                                    const occupationInput = row.querySelector('.occupation-points');
+                                    if (occupationInput) {
+                                        const occValue = skillData.occupation || '0';
+                                        occupationInput.value = (occValue === '0') ? '' : occValue;
+                                    }
+                                    
+                                    const interestInput = row.querySelector('.interest-points');
+                                    if (interestInput) {
+                                        const intValue = skillData.interest || '0';
+                                        interestInput.value = (intValue === '0') ? '' : intValue;
+                                    }
+                                    
+                                    const growthInput = row.querySelector('.growth-points');
+                                    if (growthInput) {
+                                        const growthValue = skillData.growth || '0';
+                                        growthInput.value = (growthValue === '0') ? '' : growthValue;
+                                    }
+                                    
+                                    const checkbox = row.querySelector('.skill-check');
+                                    if (checkbox) checkbox.checked = skillData.checked || false;
+                                    
+                                    // 计算成功率
+                                    calculateSkillSuccess(row);
+                                }
+                            }
+                        });
                     }
                 });
             }
@@ -1573,7 +1676,7 @@ function loadCharacter(skipAlert = false) {
                     // 查找对应索引的输入框
                     const nameInput = document.querySelector(`#items-body input.item-name[data-item-index="${itemIndex}"]`);
                     const typeInput = document.querySelector(`#items-body input.item-type-input[data-item-index="${itemIndex}"]`);
-                    const noteInput = document.querySelector(`#items-body input.item-note[data-item-index="${itemIndex}"]`);
+                    const noteInput = document.querySelector(`#items-body textarea.item-note[data-item-index="${itemIndex}"]`);
                     
                     if (nameInput) {
                         nameInput.value = item.name || '';
@@ -1587,7 +1690,7 @@ function loadCharacter(skipAlert = false) {
                     
                     if (noteInput) {
                         noteInput.value = item.note || '';
-                        noteInput.setAttribute('value', item.note || ''); // 设置属性值
+                        // textarea不需要设置value属性
                         
                         // 添加调试日志
                         if (item.note) {
@@ -1628,7 +1731,7 @@ function loadCharacter(skipAlert = false) {
                         } else if (input.className === 'skill-occupation' || 
                                   input.className === 'skill-interest' || 
                                   input.className === 'skill-growth') {
-                            input.value = '0';
+                            input.value = '';  // 设为空字符串而不是'0'
                         }
                     });
                 });
@@ -1636,42 +1739,73 @@ function loadCharacter(skipAlert = false) {
                 // 填充保存的自定义技能数据
                 if (characterData.customSkills.length > 0) {
                     let skillIndex = 0;
+                    const rowCount = rows.length;
                     
-                    for (let rowIndex = 0; rowIndex < rows.length && skillIndex < characterData.customSkills.length; rowIndex++) {
+                    // 修改为先上下填充左侧列，再上下填充右侧列
+                    // 首先填充左侧列
+                    for (let rowIndex = 0; rowIndex < rowCount && skillIndex < characterData.customSkills.length; rowIndex++) {
                         const row = rows[rowIndex];
                         const cells = Array.from(row.children);
                         
                         // 左侧技能
-                        if (skillIndex < characterData.customSkills.length) {
-                            const skill = characterData.customSkills[skillIndex++];
-                            const nameInput = cells[0]?.querySelector('.skill-name');
-                            const occInput = cells[2]?.querySelector('.skill-occupation');
-                            const intInput = cells[3]?.querySelector('.skill-interest');
-                            const growthInput = cells[4]?.querySelector('.skill-growth');
-                            
-                            if (nameInput) nameInput.value = skill.name || '';
-                            if (occInput) occInput.value = skill.occupation || '0';
-                            if (intInput) intInput.value = skill.interest || '0';
-                            if (growthInput) growthInput.value = skill.growth || '0';
-                            
-                            console.log(`加载自定义技能(左): ${skill.name}`);
+                        const skill = characterData.customSkills[skillIndex++];
+                        const nameInput = cells[0]?.querySelector('.skill-name');
+                        const occInput = cells[2]?.querySelector('.skill-occupation');
+                        const intInput = cells[3]?.querySelector('.skill-interest');
+                        const growthInput = cells[4]?.querySelector('.skill-growth');
+                        
+                        if (nameInput) nameInput.value = skill.name || '';
+                        // 设置0值为空字符串
+                        if (occInput) {
+                            const occValue = skill.occupation || '0';
+                            occInput.value = (occValue === '0') ? '' : occValue;
+                        }
+                        if (intInput) {
+                            const intValue = skill.interest || '0';
+                            intInput.value = (intValue === '0') ? '' : intValue;
+                        }
+                        if (growthInput) {
+                            const growthValue = skill.growth || '0';
+                            growthInput.value = (growthValue === '0') ? '' : growthValue;
                         }
                         
+                        console.log(`加载自定义技能(左): ${skill.name}`);
+                        
+                        // 如果已处理完所有技能，退出循环
+                        if (skillIndex >= characterData.customSkills.length) break;
+                    }
+                    
+                    // 然后填充右侧列
+                    for (let rowIndex = 0; rowIndex < rowCount && skillIndex < characterData.customSkills.length; rowIndex++) {
+                        const row = rows[rowIndex];
+                        const cells = Array.from(row.children);
+                        
                         // 右侧技能
-                        if (skillIndex < characterData.customSkills.length) {
-                            const skill = characterData.customSkills[skillIndex++];
-                            const nameInput = cells[8]?.querySelector('.skill-name');
-                            const occInput = cells[10]?.querySelector('.skill-occupation');
-                            const intInput = cells[11]?.querySelector('.skill-interest');
-                            const growthInput = cells[12]?.querySelector('.skill-growth');
-                            
-                            if (nameInput) nameInput.value = skill.name || '';
-                            if (occInput) occInput.value = skill.occupation || '0';
-                            if (intInput) intInput.value = skill.interest || '0';
-                            if (growthInput) growthInput.value = skill.growth || '0';
-                            
-                            console.log(`加载自定义技能(右): ${skill.name}`);
+                        const skill = characterData.customSkills[skillIndex++];
+                        const nameInput = cells[8]?.querySelector('.skill-name');
+                        const occInput = cells[10]?.querySelector('.skill-occupation');
+                        const intInput = cells[11]?.querySelector('.skill-interest');
+                        const growthInput = cells[12]?.querySelector('.skill-growth');
+                        
+                        if (nameInput) nameInput.value = skill.name || '';
+                        // 设置0值为空字符串
+                        if (occInput) {
+                            const occValue = skill.occupation || '0';
+                            occInput.value = (occValue === '0') ? '' : occValue;
                         }
+                        if (intInput) {
+                            const intValue = skill.interest || '0';
+                            intInput.value = (intValue === '0') ? '' : intValue;
+                        }
+                        if (growthInput) {
+                            const growthValue = skill.growth || '0';
+                            growthInput.value = (growthValue === '0') ? '' : growthValue;
+                        }
+                        
+                        console.log(`加载自定义技能(右): ${skill.name}`);
+                        
+                        // 如果已处理完所有技能，退出循环
+                        if (skillIndex >= characterData.customSkills.length) break;
                     }
                     
                     // 重新初始化自定义技能计算
@@ -1987,6 +2121,11 @@ function setupCustomSkills() {
                         const interest = parseInt(inputs.interest.value) || 0;
                         const growth = parseInt(inputs.growth.value) || 0;
                         
+                        // 设置职业、兴趣和成长点数为0时显示为空
+                        if (occupation === 0) inputs.occupation.value = '';
+                        if (interest === 0) inputs.interest.value = '';
+                        if (growth === 0) inputs.growth.value = '';
+                        
                         const total = base + occupation + interest + growth;
                         inputs.total.value = total;
                         
@@ -2025,6 +2164,11 @@ function setupCustomSkills() {
                     const occupation = parseInt(inputs.occupation.value) || 0;
                     const interest = parseInt(inputs.interest.value) || 0;
                     const growth = parseInt(inputs.growth.value) || 0;
+                    
+                    // 设置职业、兴趣和成长点数为0时显示为空
+                    if (occupation === 0) inputs.occupation.value = '';
+                    if (interest === 0) inputs.interest.value = '';
+                    if (growth === 0) inputs.growth.value = '';
                     
                     const total = base + occupation + interest + growth;
                     inputs.total.value = total;
@@ -2289,7 +2433,7 @@ function initPrint() {
                     /* 显示主页面 */
                     #main-sheet {
                         display: grid !important; /* 使用grid布局，与原始布局一致 */
-                        grid-template-columns: 3fr 2fr !important;
+                        grid-template-columns: 1fr 1.1fr 0.9fr !important;
                         grid-template-rows: auto auto auto auto !important; 
                         gap: 2px !important;
                         position: static !important;
@@ -2560,7 +2704,7 @@ function createCustomSkillItem() {
     const occInput = document.createElement('input');
     occInput.type = 'text';
     occInput.className = 'skill-occupation';
-    occInput.value = '0';
+    occInput.value = '';  // 默认为空而不是0
     occInput.style.width = '25px';
     occInput.style.textAlign = 'center';
     occInput.style.border = 'none';
@@ -2577,7 +2721,7 @@ function createCustomSkillItem() {
     const intInput = document.createElement('input');
     intInput.type = 'text';
     intInput.className = 'skill-interest';
-    intInput.value = '0';
+    intInput.value = '';  // 默认为空而不是0
     intInput.style.width = '25px';
     intInput.style.textAlign = 'center';
     intInput.style.border = 'none';
@@ -2594,7 +2738,7 @@ function createCustomSkillItem() {
     const growthInput = document.createElement('input');
     growthInput.type = 'text';
     growthInput.className = 'skill-growth';
-    growthInput.value = '0';
+    growthInput.value = '';  // 默认为空而不是0
     growthInput.style.width = '25px';
     growthInput.style.textAlign = 'center';
     growthInput.style.border = 'none';
@@ -2749,12 +2893,21 @@ function createItemCells(row, itemIndex) {
     
     // 备注/说明
     const noteCell = document.createElement('td');
-    const noteInput = document.createElement('input');
-    noteInput.type = 'text';
+    const noteInput = document.createElement('textarea');
     noteInput.className = 'item-note';
     noteInput.placeholder = '备注/说明';
     noteInput.dataset.itemIndex = itemIndex; // 添加索引属性
-    noteInput.setAttribute('value', ''); // 设置默认value属性为空字符串
+    noteInput.style.width = '100%';
+    noteInput.style.height = '18px'; // 保持初始高度固定
+    noteInput.style.maxHeight = '18px'; // 限制最大高度
+    noteInput.style.border = 'none';
+    noteInput.style.resize = 'none';
+    noteInput.style.background = 'transparent';
+    noteInput.style.fontFamily = "'Microsoft YaHei', Arial, sans-serif";
+    noteInput.style.fontSize = '11px';
+    noteInput.style.overflow = 'hidden'; // 溢出内容隐藏
+    noteInput.style.textOverflow = 'ellipsis'; // 溢出使用省略号
+    noteInput.style.whiteSpace = 'nowrap'; // 不换行显示
     noteCell.appendChild(noteInput);
     row.appendChild(noteCell);
     
@@ -2815,8 +2968,7 @@ function addNoteEvents(noteInput) {
         saveButton.onclick = function() {
             // 更新输入框的值
             noteInput.value = editTextarea.value;
-            // 设置value属性，确保打印时可见
-            noteInput.setAttribute('value', editTextarea.value);
+            // textarea不需要设置value属性
             
             // 不再自动添加"未命名道具"，而是使用道具索引作为标识
             // 直接保存到本地缓存

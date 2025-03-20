@@ -224,6 +224,14 @@ body {
     html {
         padding-top: 0 !important;
     }
+    
+    /* 确保主页面网格布局与浏览模式一致 */
+    #main-sheet {
+        display: grid !important;
+        grid-template-columns: 1fr 1.1fr 0.9fr !important;
+        grid-template-rows: auto auto auto auto !important;
+        grid-gap: 2px !important;
+    }
 
     .float-nav, #print-modal, .float-buttons, #edit-modal { 
         display: none !important; 
@@ -253,7 +261,7 @@ body {
         display: block !important;
         position: relative !important;
         overflow: visible !important;
-        height: 100vh !important; /* 使其占据整个视口高度 */
+        height: auto !important; /* 改为自适应高度，而不是100vh */
         width: 100% !important;
         max-width: 100% !important;
         padding: 0 !important;
@@ -265,20 +273,23 @@ body {
         margin: 0 !important;
         padding: 0 !important;
         min-height: 0 !important;
-        max-height: 20px !important; /* 限制最大高度 */
+        max-height: 22px !important; /* 调整为与自定义技能页一致 */
+        height: 22px !important; /* 调整为与自定义技能页一致 */
+        overflow: hidden !important;
     }
 
     #items .basic-info-section .section-title {
-        padding: 0 5px !important;
+        padding: 1px 4px !important;
         margin: 0 !important;
-        height: auto !important;
-        min-height: 14px !important;
-        max-height: 16px !important;
-        font-size: 9px !important; /* 减小字体 */
+        height: 22px !important; /* 调整为与自定义技能页一致 */
+        min-height: 16px !important;
+        max-height: 22px !important;
+        font-size: 11px !important; /* 调整为与自定义技能页一致 */
+        line-height: 22px !important;
     }
 
     #items .investigator-name {
-        font-size: 9px !important;
+        font-size: 11px !important;
         margin: 0 !important;
     }
     
@@ -290,16 +301,19 @@ body {
         margin: 0 !important;
         padding: 0 !important;
         border-width: 1px !important;
-        height: calc(100vh - 20px) !important; /* 减去调查员信息区域的高度 */
+        height: auto !important; /* 改为自适应高度 */
+        overflow: hidden !important;
     }
     
     .items-section .section-title {
         padding: 0 4px !important;
         margin: 0 !important;
-        height: auto !important;
+        height: 14px !important;
         min-height: 14px !important;
-        max-height: 16px !important;
-        font-size: 9px !important; /* 减小字体 */
+        max-height: 14px !important;
+        font-size: 8px !important;
+        line-height: 14px !important;
+        overflow: hidden !important;
     }
     
     /* 表格容器最大化 */
@@ -307,45 +321,47 @@ body {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
         width: 100% !important;
-        height: calc(100vh - 36px) !important; /* 减去标题区域的高度 */
+        height: auto !important; /* 改为自适应高度 */
         padding: 0 !important;
         margin: 0 !important;
+        overflow: hidden !important;
     }
     
     /* 表格最大化 */
     .items-table {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
-        height: 100% !important;
-        max-height: none !important;
+        height: auto !important; /* 改为自适应高度 */
         width: 100% !important;
-        font-size: 8px !important; /* 进一步减小字体 */
         margin: 0 !important;
         border-spacing: 0 !important;
     }
     
-    /* 表格头部压缩 */
+    /* 表格体部分最大化 */
+    .items-table tbody {
+        height: auto !important; /* 改为自适应高度 */
+    }
+    
+    /* 表格头部调整 */
     .items-table thead {
-        height: 16px !important;
+        height: 22px !important; /* 与自定义技能页一致 */
     }
     
     /* 调整表头高度 */
     .items-table th {
-        height: 16px !important;
-        font-size: 8px !important;
-        padding: 0 !important;
-    }
-    
-    /* 表格体部分最大化 */
-    .items-table tbody {
-        height: calc(100% - 16px) !important;
+        height: 22px !important; /* 与自定义技能页一致 */
+        font-size: 11px !important; /* 与自定义技能页一致 */
+        padding: 2px !important; /* 与自定义技能页一致 */
     }
     
     /* 调整表格行高 */
     .items-table tr {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
-        height: 16px !important; /* 进一步减小行高 */
+        height: 22px !important; /* 与自定义技能页一致 */
+        min-height: 22px !important;
+        max-height: 22px !important;
+        line-height: 22px !important;
     }
     
     /* 表格单元格调整 */
@@ -353,22 +369,30 @@ body {
     .items-table th {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
-        padding: 0 !important;
-        height: 16px !important; /* 进一步减小单元格高度 */
+        padding: 1px !important; /* 与自定义技能页一致 */
+        height: 22px !important; /* 与自定义技能页一致 */
+        min-height: 22px !important;
+        max-height: 22px !important;
         vertical-align: middle !important;
+        line-height: 22px !important;
+        overflow: hidden !important;
     }
     
     /* 输入框高度调整 */
-    .items-table input {
-        height: 14px !important; /* 进一步减小输入框高度 */
-        line-height: 14px !important;
-        font-size: 8px !important; /* 进一步减小字体 */
-        padding: 0 1px !important;
-        color: black !important; /* 确保文字颜色为黑色 */
-        opacity: 1 !important; /* 确保不透明 */
+    .items-table input,
+    .items-table textarea {
+        height: 18px !important; /* 与自定义技能页一致 */
+        min-height: 18px !important;
+        max-height: 18px !important;
+        line-height: 18px !important;
+        font-size: 11px !important; /* 与自定义技能页一致 */
+        padding: 1px 2px !important; /* 与自定义技能页一致 */
+        color: black !important;
+        opacity: 1 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         background: transparent !important;
+        overflow: hidden !important;
     }
     
     /* 增加可显示的行数至48行 */
@@ -388,6 +412,7 @@ body {
     /* 优化items特定的character-sheet */
     .character-sheet.tab-content#items {
         padding: 0 !important;
+        margin: 0 !important; /* 确保没有外边距 */
     }
     
     .character-sheet table,
@@ -450,7 +475,9 @@ body {
 
     /* 确保在打印时所有输入框的占位符都不显示 */
     input::placeholder,
+    textarea::placeholder,
     .items-table input::placeholder,
+    .items-table textarea::placeholder,
     .custom-skills-container input::placeholder,
     .weapon-cell input::placeholder {
         color: transparent !important;
@@ -460,7 +487,7 @@ body {
     }
     
     /* 确保所有输入框的文本在打印时是可见的 */
-    input[type="text"] {
+    input[type="text"], textarea {
         color: black !important;
         opacity: 1 !important;
         -webkit-print-color-adjust: exact !important;
@@ -478,12 +505,39 @@ body {
         print-color-adjust: exact !important;
         background: transparent !important;
         -webkit-text-fill-color: black !important; /* Safari和iOS的特殊处理 */
+        line-height: 18px;
+    }
+    
+    /* 针对textarea的特殊处理 */
+    .items-table .item-note {
+        outline: none;
+        overflow: hidden;
+        vertical-align: middle;
+        padding: 0 2px;
+        white-space: nowrap; /* 在打印时始终单行显示 */
+        text-overflow: ellipsis; /* 溢出内容使用省略号 */
+        min-height: 18px;
+        max-height: 18px !important;
+        height: 18px !important;
+        display: block;
+        line-height: 18px !important;
     }
     
     /* 确保输入框内容可见 */
     input:not([value=""]) {
         color: black !important;
         opacity: 1 !important;
+    }
+    
+    /* 确保技能表中的0值不显示（除基础值外） */
+    .occupation-points[value="0"],
+    .interest-points[value="0"],
+    .growth-points[value="0"],
+    .skill-occupation[value="0"],
+    .skill-interest[value="0"],
+    .skill-growth[value="0"] {
+        color: transparent !important;
+        opacity: 0 !important;
     }
 }
 
@@ -1728,7 +1782,7 @@ input[type="number"] {
     text-align: center;
     cursor: pointer;
     background-color: #f9f9f9;
-    border-bottom: 1px dotted #999;
+    border-bottom: none; /* 移除下划线 */
 }
 
 .items-table .item-type-button {
