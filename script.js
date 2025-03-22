@@ -8,10 +8,32 @@ document.addEventListener("DOMContentLoaded", function() {
         // 初始化角色卡
         initCharacterSheet();
         
-        // 如果localStorage中有保存的数据，询问是否加载
-        if (localStorage.getItem("characterData")) {
-            if (confirm("检测到有保存的角色数据，是否加载？")) {
-                loadCharacter();
+        // 检查localStorage中的数据是否有效
+        const savedData = localStorage.getItem("characterData");
+        if (savedData) {
+            try {
+                // 尝试解析JSON数据
+                const characterData = JSON.parse(savedData);
+                
+                // 验证数据结构是否完整
+                if (characterData && 
+                    characterData.basic && 
+                    (characterData.basic.characterName || 
+                     characterData.attributes && Object.values(characterData.attributes).some(val => val))) {
+                    
+                    // 数据有效，询问是否加载
+                    if (confirm("检测到有保存的角色数据，是否加载？")) {
+                        loadCharacter();
+                    }
+                } else {
+                    console.log("发现无效或空的角色数据，不提示加载");
+                    // 数据无效或为空，清除localStorage
+                    localStorage.removeItem("characterData");
+                }
+            } catch (parseError) {
+                console.error("解析保存的数据时出错:", parseError);
+                // JSON解析错误，清除localStorage
+                localStorage.removeItem("characterData");
             }
         }
         
@@ -164,8 +186,24 @@ function initCharacterSheet() {
     // 初始化重置和帮助按钮
     initResetAndHelp();
     
-    // 确保在页面加载完成后更新一次衍生属性（包括理智值）
+    // 初始化自定义技能表和道具表，确保打印时能显示
     setTimeout(() => {
+        // 初始化自定义技能表
+        const customSkillsBody = document.getElementById('custom-skills-body');
+        if (customSkillsBody && customSkillsBody.children.length === 0) {
+            console.log('页面加载时预初始化自定义技能表');
+            initCustomSkillsTable();
+            setupCustomSkills();
+        }
+        
+        // 初始化道具表
+        const itemsBody = document.getElementById('items-body');
+        if (itemsBody && itemsBody.children.length === 0) {
+            console.log('页面加载时预初始化道具表');
+            initItemsTable();
+        }
+        
+        // 更新衍生属性（包括理智值）
         console.log('页面加载完成后更新衍生属性');
         updateDerivedStats();
     }, 500);
@@ -1028,6 +1066,15 @@ function initAvatarUpload() {
             avatarUpload.click();
         });
         
+        // 添加AI绘制头像链接的点击事件，阻止冒泡
+        const aiDrawLink = document.querySelector('.ai-draw-link');
+        if (aiDrawLink) {
+            aiDrawLink.addEventListener('click', function(event) {
+                // 阻止事件冒泡，避免触发avatarContainer的点击事件
+                event.stopPropagation();
+            });
+        }
+        
         avatarUpload.addEventListener('change', function(event) {
             const file = event.target.files[0];
             
@@ -1082,6 +1129,16 @@ function exportCharacter() {
         
         // 解析数据以便格式化输出
         const characterData = JSON.parse(savedData);
+        
+        // 检查数据是否为空或无效
+        if (!characterData || !characterData.basic || 
+            (!characterData.basic.characterName && 
+             !characterData.attributes || !Object.values(characterData.attributes).some(val => val))) {
+            alert('保存的角色数据无效或为空，无法导出');
+            // 清除无效数据
+            localStorage.removeItem('characterData');
+            return;
+        }
         
         // 转换为美化后的JSON并下载
         const dataStr = JSON.stringify(characterData, null, 2);
@@ -1365,7 +1422,18 @@ function loadCharacter(skipAlert = false) {
             return;
         }
         
+        // 解析数据
         const characterData = JSON.parse(savedData);
+        
+        // 检查数据是否为空或无效
+        if (!characterData || !characterData.basic || 
+            (!characterData.basic.characterName && 
+             !characterData.attributes || !Object.values(characterData.attributes).some(val => val))) {
+            alert('保存的角色数据无效或为空');
+            // 清除无效数据
+            localStorage.removeItem('characterData');
+            return;
+        }
         
         // 基本信息
         if (characterData.basic) {
@@ -2272,6 +2340,24 @@ function initPrint() {
     // 确认打印按钮点击事件
     if (confirmPrintButton) {
     confirmPrintButton.addEventListener('click', function() {
+        // 在打印前再次确保自定义技能表和道具表已经初始化
+        if (printCustomSkillsCheckbox && printCustomSkillsCheckbox.checked) {
+            const customSkillsBody = document.getElementById('custom-skills-body');
+            if (customSkillsBody && customSkillsBody.children.length === 0) {
+                console.log('打印前初始化自定义技能表');
+                initCustomSkillsTable();
+                setupCustomSkills();
+            }
+        }
+        
+        if (printItemsCheckbox && printItemsCheckbox.checked) {
+            const itemsBody = document.getElementById('items-body');
+            if (itemsBody && itemsBody.children.length === 0) {
+                console.log('打印前初始化道具表');
+                initItemsTable();
+            }
+        }
+        
         // 根据选择控制打印内容
         const sections = [
             '.basic-info-section',

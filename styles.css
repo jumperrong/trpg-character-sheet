@@ -734,6 +734,20 @@ body {
     align-items: center;
 }
 
+/* AI绘制头像链接样式 */
+.ai-draw-link {
+    font-size: 10px;
+    color: #3366cc;
+    margin-top: 8px;
+    text-decoration: none;
+    border-bottom: 1px dotted #3366cc;
+}
+
+.ai-draw-link:hover {
+    color: #1a4aa3;
+    border-bottom: 1px solid #1a4aa3;
+}
+
 /* 状态区域样式 */
 .stats-section {
     grid-column: 1 / 4;
