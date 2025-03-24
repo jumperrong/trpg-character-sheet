@@ -550,6 +550,8 @@ body {
 
 .basic-info-section {
     grid-column: 1;
+    text-align: center;
+    padding: 5px 0;
 }
 
 .characteristics-section {
@@ -1087,12 +1089,17 @@ body {
     font-size: 11px;
     height: 18px;
     line-height: 18px;
+    padding-right: 5px;
+    white-space: nowrap;
 }
 
 .field-input {
     height: 18px; /* 固定高度 */
     font-size: 11px;
     line-height: 18px;
+    text-align: center;
+    display: block;
+    margin: 0 auto;
 }
 
 /* 子技能弹出窗口样式 */
@@ -1920,16 +1927,19 @@ input[type="number"] {
 /* Tooltip 样式 */
 .tooltip {
     position: absolute;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.8);  /* 增加背景不透明度 */
     color: white;
-    padding: 5px 10px;
+    padding: 8px 12px;  /* 增加内边距 */
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 13px;  /* 增加字体大小 */
+    line-height: 1.4;  /* 添加行高 */
     white-space: pre-wrap;
     z-index: 1001;
     display: none;
-    max-width: 300px;
+    min-width: 300px;     /* 增加最小宽度到300px */
+    max-width: 800px;     /* 增加最大宽度到800px */
     word-wrap: break-word;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);  /* 添加阴影 */
 }
 
 @media print {
@@ -2045,4 +2055,41 @@ input[type="number"] {
     border: 1px solid #ddd !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+}
+
+/* 添加负数样式 */
+.points-remaining span {
+    color: #333; /* 默认颜色 */
+}
+.points-remaining .negative {
+    color: #c00; /* 负数显示红色 */
+    font-weight: bold;
+}
+
+/* 道具备注框样式优化 */
+.item-note {
+    display: block;
+    width: 100%;
+    height: 1.5em;        /* 默认只显示一行高度 */
+    white-space: nowrap;  /* 文本不换行 */
+    overflow: hidden;     /* 隐藏溢出内容 */
+    text-overflow: ellipsis; /* 显示省略号 */
+    transition: all 0.3s; /* 添加平滑过渡效果 */
+    resize: none;         /* 禁用手动调整大小 */
+}
+
+/* 聚焦时展开显示所有行 */
+.item-note:focus {
+    height: 5em;          /* 展开高度 */
+    white-space: normal;  /* 恢复正常换行 */
+    overflow: auto;       /* 显示滚动条 */
+}
+
+/* 打印模式下显示完整内容 */
+@media print {
+    .item-note {
+        height: auto;
+        white-space: normal;
+        overflow: visible;
+    }
 }
