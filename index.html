@@ -17,6 +17,7 @@
             <div class="tab active" data-tab="main-sheet">主页面</div>
             <div class="tab" data-tab="custom-skills">自定义技能</div>
             <div class="tab" data-tab="items">道具</div>
+            <div class="tab" data-tab="notes">笔记</div>
         </div>
     </div>
 
@@ -326,7 +327,7 @@
         <div class="sheet-section items-section section-border">
             <div class="section-title">道具 Items</div>
             <div class="items-container">
-                <table class="items-table">
+                <table class="data-table items-table">
                     <thead>
                         <tr>
                             <th style="width: 15%;">名称</th>
@@ -339,6 +340,39 @@
                     </thead>
                     <tbody id="items-body">
                         <!-- 道具行将被动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 笔记页面 -->
+    <div class="character-sheet tab-content" id="notes">
+        <!-- 调查员信息区域 -->
+        <div class="sheet-section basic-info-section section-border">
+            <div class="section-title">
+                <span>调查员 Investigator</span>
+                <span class="investigator-name">姓名：<span id="notes-character-name"></span></span>
+            </div>
+        </div>
+
+        <!-- 笔记区域 (参照道具区域) -->
+        <div class="sheet-section items-section section-border">
+            <div class="section-title">笔记 Notes</div>
+            <div class="items-container">
+                <table class="data-table items-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">笔记名称</th>
+                            <th style="width: 10%;">笔记类别</th>
+                            <th style="width: 25%;">备注</th>
+                            <th style="width: 15%;">笔记名称</th>
+                            <th style="width: 10%;">笔记类别</th>
+                            <th style="width: 25%;">备注</th>
+                        </tr>
+                    </thead>
+                    <tbody id="notes-body">
+                        <!-- 动态生成 -->
                     </tbody>
                 </table>
             </div>
@@ -396,7 +430,11 @@
                 </div>
                 <div class="print-option">
                     <input type="checkbox" id="print-items" checked>
-                    <label for="print-items">打印道具页（可显示所有80个道具项目）</label>
+                    <label for="print-items">打印道具页</label>
+                </div>
+                <div class="print-option">
+                    <input type="checkbox" id="print-notes" checked>
+                    <label for="print-notes">打印笔记页</label>
                 </div>
             </div>
             <div class="modal-footer">

@@ -539,6 +539,47 @@ body {
         color: transparent !important;
         opacity: 0 !important;
     }
+
+    /* 新增精确控制规则 */
+    .tab-content:not(.print-visible) {
+        display: none !important;
+    }
+    
+    .tab-content.print-visible {
+        display: block !important;
+        position: static !important; /* 修复定位问题 */
+        left: auto !important; /* 重置错误定位 */
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        overflow: visible !important;
+        page-break-after: always;
+    }
+
+    /* 隐藏打印控制类 */
+    .print-hidden {
+        display: none !important;
+    }
+
+    /* 修改前 */
+    .items-table .item-note {
+        height: auto;
+        white-space: normal;
+        overflow: visible;
+    }
+
+    /* 修改后 */
+    .items-table .item-note,
+    #notes .note-note {
+        height: 18px !important;
+        max-height: 18px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        -webkit-line-clamp: 1 !important;
+        display: -webkit-box !important;
+        -webkit-box-orient: vertical !important;
+    }
 }
 
 /* 调查员、属性、头像区域布局 */
@@ -1755,6 +1796,16 @@ input[type="number"] {
     font-size: 11px;
     text-align: center;
     height: 22px;
+    border-right: 1px solid #ddd;
+}
+
+.items-table th:first-child {
+    text-align: left;
+    padding-left: 5px;
+}
+
+.items-table th:last-child {
+    border-right: none;
 }
 
 .items-table td {
@@ -2091,5 +2142,301 @@ input[type="number"] {
         height: auto;
         white-space: normal;
         overflow: visible;
+    }
+}
+
+/* 新增笔记页样式（复制道具页样式修改选择器） */
+#notes .items-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+#notes tr.even-row {
+    background-color: #f2f2f2;
+}
+
+#notes tr.odd-row {
+    background-color: white;
+}
+
+#notes td, #notes th {
+    border: 1px solid #ddd;
+    padding: 1px;
+    vertical-align: middle;
+}
+
+#notes .note-name,
+#notes .note-type-input,
+#notes .note-note {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 11px;
+    height: 18px;
+}
+
+/* 打印样式适配 */
+@media print {
+    #notes .items-table td,
+    #notes .items-table th {
+        border: 1px solid #ddd !important;
+    }
+}
+
+/* 修改笔记备注框样式 */
+#notes .note-note {
+    height: 18px !important;        /* 固定高度 */
+    max-height: 18px !important;    /* 禁止扩展 */
+    white-space: nowrap;            /* 禁止换行 */
+    overflow: hidden;               /* 隐藏溢出内容 */
+    text-overflow: ellipsis;        /* 显示省略号 */
+    transition: none !important;    /* 禁用过渡效果 */
+    resize: none;                   /* 禁用调整手柄 */
+}
+
+/* 移除聚焦状态的高度变化 */
+#notes .note-note:focus {
+    height: 18px !important;
+    max-height: 18px !important;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* 打印样式保持固定高度 */
+@media print {
+    #notes .note-note {
+        height: 18px !important;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+}
+
+/* 新增打印控制类 */
+#print-notes:checked ~ .notes-section {
+    display: block !important;
+}
+
+/* 统一表头样式 */
+.items-table th,
+#notes .items-table th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: 2px;
+    font-weight: normal;
+    font-size: 11px;
+    text-align: center;
+    height: 22px;
+    border-right: 1px solid #ddd;
+}
+
+/* 统一首列左对齐 */
+.items-table th:first-child,
+#notes .items-table th:first-child {
+    text-align: left;
+    padding-left: 5px;
+}
+
+/* 统一最后列边框处理 */
+.items-table th:last-child,
+#notes .items-table th:last-child {
+    border-right: none;
+}
+
+/* 新增通用表格样式 */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0;
+    border: 1px solid #ddd;
+}
+
+/* 统一表头样式 */
+.data-table th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: 2px;
+    font-weight: normal;
+    font-size: 11px;
+    text-align: center;
+    height: 22px;
+    border-right: 1px solid #ddd;
+}
+
+.data-table th:first-child {
+    text-align: left;
+    padding-left: 5px;
+}
+
+.data-table th:last-child {
+    border-right: none;
+}
+
+/* 统一单元格样式 */
+.data-table td {
+    padding: 1px;
+    vertical-align: middle;
+    height: 22px;
+    border-right: 1px solid #ddd;
+}
+
+/* 统一输入框样式 */
+.data-table input,
+.data-table textarea {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 11px;
+    height: 20px;
+    line-height: 20px;
+    padding: 2px;
+    -webkit-text-fill-color: black !important; /* Safari兼容 */
+}
+
+/* 统一备注框行为 */
+.data-table textarea {
+    resize: vertical;
+    min-height: 20px;
+    max-height: 100px;
+    white-space: pre-wrap;
+    overflow-y: auto;
+}
+
+/* 统一右侧分隔线 */
+.data-table td:nth-child(3) {
+    border-right: 1px solid #ddd;
+}
+
+/* 统一打印样式 */
+@media print {
+    .data-table textarea {
+        height: auto !important;
+        white-space: pre-wrap !important;
+        overflow: visible !important;
+    }
+}
+
+/* 1. 确保笔记页容器与页面边缘的边距完全一致 */
+#notes .items-container,
+#items .items-container {
+    width: 100%;
+    padding: 0; /* 移除内边距，使表格紧贴容器边缘 */
+    box-sizing: border-box;
+    overflow-y: auto;
+    background-color: #fff;
+}
+
+/* 2. 统一表格边框样式，确保表格紧贴页面边缘 */
+#notes .items-table,
+#items .items-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0;
+    border: 1px solid #000;
+}
+
+/* 3. 确保笔记页的section不添加额外间距 */
+#notes .sheet-section,
+#items .sheet-section {
+    padding: 0;
+    margin-bottom: 5px;
+}
+
+/* 4. 统一section-title的边距样式 */
+#notes .section-title,
+#items .section-title {
+    padding: 4px 6px;
+    margin-bottom: 0;
+    border-bottom: 1px solid #000;
+}
+
+/* 5. 修正笔记页特有样式，确保与道具页一致 */
+#notes.active .items-container {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+/* 统一占位符字体样式 - 参照自定义技能页 */
+.items-table input::placeholder,
+#notes .items-table input::placeholder,
+.items-table textarea::placeholder {
+    color: #999 !important;
+    font-size: 11px !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    opacity: 0.75 !important;
+    padding-left: 1px !important;
+}
+
+/* 统一所有输入框基础样式 */
+.items-table input,
+#notes .items-table input,
+.items-table .item-name,
+.items-table .item-type input,
+.items-table .item-note {
+    font-size: 11px !important; /* 与自定义技能页一致 */
+    height: 18px !important;
+    line-height: 18px !important;
+    padding: 0 2px !important;
+    font-family: inherit !important;
+}
+
+/* 覆盖旧的不一致样式 */
+#notes .note-name,
+#notes .note-type-input,
+#notes .note-note {
+    font-size: 11px !important; /* 与自定义技能页一致 */
+}
+
+/* 确保打印时占位符也隐藏一致 */
+@media print {
+    .items-table input::placeholder,
+    #notes .items-table input::placeholder,
+    .custom-skills-container input::placeholder {
+        color: transparent !important;
+        opacity: 0 !important;
+    }
+}
+
+/* 添加笔记页textarea样式，固定大小但允许存储多行文本 */
+#notes .items-table textarea.item-note {
+    width: 100%;
+    box-sizing: border-box;
+    height: 18px !important; /* 固定高度 */
+    max-height: 18px !important;
+    min-height: 18px !important;
+    line-height: 18px !important;
+    border: none;
+    padding: 0 2px;
+    margin: 0;
+    background: transparent;
+    resize: none; /* 禁止调整大小 */
+    overflow: hidden; /* 隐藏溢出内容 */
+    white-space: nowrap; /* 单行显示 */
+    font-family: inherit;
+    font-size: 11px; /* 与道具页一致 */
+    vertical-align: middle;
+}
+
+/* 确保聚焦时不改变大小 */
+#notes .items-table textarea.item-note:focus {
+    height: 18px !important;
+    max-height: 18px !important;
+    min-height: 18px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+}
+
+/* 打印时保持固定大小 */
+@media print {
+    #notes .items-table textarea.item-note {
+        height: 18px !important;
+        max-height: 18px !important;
+        min-height: 18px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
 }

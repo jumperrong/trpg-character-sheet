@@ -44,6 +44,22 @@ document.addEventListener("DOMContentLoaded", function() {
     } catch (error) {
         console.error("初始化出错：", error);
     }
+
+    // 监听主页面调查员姓名变化
+    const characterNameInput = document.getElementById('character-name');
+    const customCharacterName = document.getElementById('custom-character-name');
+    const itemsCharacterName = document.getElementById('items-character-name');
+    const notesCharacterName = document.getElementById('notes-character-name'); // 新增
+
+    if (characterNameInput && notesCharacterName) {
+        // 初始化时设置笔记页姓名
+        notesCharacterName.textContent = characterNameInput.value;
+        
+        // 添加输入事件监听
+        characterNameInput.addEventListener('input', function() {
+            notesCharacterName.textContent = this.value;
+        });
+    }
 });
 
 // 技能数据
@@ -168,6 +184,11 @@ const itemCategories = [
     "武器", "防具", "魔法物品", "书籍", "药品", "工具", "日常用品", "珍稀物品", "其他"
 ];
 
+// 新增笔记类别数据
+const noteCategories = [
+    "冒险", "功法", "羁绊", "待办", "其他"
+];
+
 // 初始化角色卡
 function initCharacterSheet() {
     // 初始化属性监听
@@ -218,6 +239,9 @@ function initCharacterSheet() {
         updatePointsRemaining();
         updateDerivedStats();
     }, 500);
+    
+    // 初始化笔记表（复制initItemsTable修改）
+    initNotesTable(); // 新增初始化笔记表
 }
 
 // 初始化属性
@@ -1183,46 +1207,51 @@ function initSaveLoad() {
     }
 }
 
-// 导出角色数据为JSON文件
+// 导出角色数据
 function exportCharacter() {
     try {
-        // 从localStorage获取数据
-        const savedData = localStorage.getItem('characterData');
-        if (!savedData) {
-            alert('没有找到可导出的角色数据，请先保存角色');
+        // 获取当前角色数据
+        saveCharacter(false); // 先保存当前状态，但不显示提示
+        const dataStr = localStorage.getItem('characterData');
+        if (!dataStr) {
+            alert('没有可导出的角色数据');
             return;
         }
         
-        // 解析数据以便格式化输出
-        const characterData = JSON.parse(savedData);
+        // 解析数据
+        const characterData = JSON.parse(dataStr);
         
-        // 检查数据是否为空或无效
-        if (!characterData || !characterData.basic || 
-            (!characterData.basic.characterName && 
-             !characterData.attributes || !Object.values(characterData.attributes).some(val => val))) {
-            alert('保存的角色数据无效或为空，无法导出');
-            // 清除无效数据
-            localStorage.removeItem('characterData');
-            return;
+        // 移除头像数据以减小文件大小
+        if (characterData.avatar) {
+            delete characterData.avatar; // 删除头像数据
         }
         
-        // 转换为美化后的JSON并下载
-        const dataStr = JSON.stringify(characterData, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+        // 将修改后的数据转换回JSON字符串
+        const exportDataStr = JSON.stringify(characterData, null, 2);
         
-        const exportName = characterData.basic.characterName || 'character';
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute('href', dataUri);
-        downloadAnchor.setAttribute('download', exportName + '.json');
-        downloadAnchor.style.display = 'none';
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        document.body.removeChild(downloadAnchor);
+        // 创建下载链接
+        const characterName = characterData.basic?.characterName || 'character';
+        const fileName = `${characterName}_${new Date().toISOString().split('T')[0]}.json`;
         
-        alert('角色数据已导出为 ' + exportName + '.json');
+        const blob = new Blob([exportDataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        
+        // 清理
+        setTimeout(() => {
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }, 100);
+        
+        alert('角色数据已导出');
     } catch (error) {
-        console.error('Error exporting character:', error);
-        alert('导出失败，请稍后再试。');
+        console.error('导出角色数据错误:', error);
+        alert('导出失败，请稍后再试');
     }
 }
 
@@ -1376,93 +1405,95 @@ function saveCharacter(showAlert = true) {
         });
         
         // 收集道具数据
-        characterData.items = [];
-        const itemInputs = document.querySelectorAll('#items-body input[data-item-index], #items-body textarea[data-item-index]');
-        const itemsMap = {};
+        const itemRows = document.querySelectorAll('#items-body tr');
+        const itemsData = [];
         
-        // 收集所有输入框的数据
-        itemInputs.forEach(input => {
-            // 获取道具索引
-            const itemIndex = input.dataset.itemIndex;
-            if (!itemIndex) return;
+        itemRows.forEach(row => {
+            const nameInputs = row.querySelectorAll('.item-name');
+            const typeInputs = row.querySelectorAll('.item-type input');
+            const noteInputs = row.querySelectorAll('.item-note');
             
-            // 确保为该索引创建了对象
-            if (!itemsMap[itemIndex]) {
-                itemsMap[itemIndex] = {
-                    itemIndex: parseInt(itemIndex),
-                    name: '',
-                    type: '',
-                    note: ''
-                };
-            }
-            
-            // 根据输入类型存储相应的值
-            if (input.classList.contains('item-name')) {
-                itemsMap[itemIndex].name = input.value;
-                // 更新value属性，确保打印时可见
-                input.setAttribute('value', input.value);
-            } else if (input.classList.contains('item-type-input')) {
-                itemsMap[itemIndex].type = input.value;
-                // 更新value属性，确保打印时可见
-                input.setAttribute('value', input.value);
-            } else if (input.classList.contains('item-note')) {
-                itemsMap[itemIndex].note = input.value;
-                // 对于textarea不需要设置value属性
+            for (let i = 0; i < nameInputs.length; i++) {
+                if (nameInputs[i].value || typeInputs[i].value || noteInputs[i].value) {
+                    itemsData.push({
+                        name: nameInputs[i].value,
+                        type: typeInputs[i].value,
+                        note: noteInputs[i].value
+                    });
+                }
             }
         });
         
-        // 将临时对象中的数据转换为数组，保存所有道具项，即使没有名称
-        for (const index in itemsMap) {
-            const item = itemsMap[index];
-            // 无论项目是否有名称，都保存，使用索引作为标识
-            characterData.items.push(item);
-            console.log(`保存道具数据: 索引${item.itemIndex} - 名称:${item.name || '无'}, 类型:${item.type || '无'}, 备注:${item.note ? '有' : '无'}`);
-        }
+        // 将道具数据添加到保存对象中 - 添加此行
+        characterData.items = itemsData;
+        
+        // 保存笔记数据 - 新增部分
+        const noteRows = document.querySelectorAll('#notes-body tr');
+        const notesData = [];
+        
+        noteRows.forEach(row => {
+            const nameInputs = row.querySelectorAll('.item-name');
+            const typeInputs = row.querySelectorAll('.item-type input');
+            const noteInputs = row.querySelectorAll('.item-note');
+            
+            for (let i = 0; i < nameInputs.length; i++) {
+                if (nameInputs[i].value || typeInputs[i].value || noteInputs[i].value) {
+                    notesData.push({
+                        name: nameInputs[i].value,
+                        type: typeInputs[i].value,
+                        note: noteInputs[i].value
+                    });
+                }
+            }
+        });
+        
+        // 将笔记数据添加到保存对象中
+        characterData.notes = notesData;
         
         // 收集自定义技能数据
-        characterData.customSkills = [];
+        const customSkillsData = [];
         const customSkillRows = document.querySelectorAll('#custom-skills-body tr');
         
-        // 修改为先收集所有左侧技能，再收集所有右侧技能
-        // 先收集左侧技能
         customSkillRows.forEach(row => {
-            // 获取该行的左侧技能输入框
-            const cells = Array.from(row.children);
+            // 左侧技能
+            const leftNameInput = row.querySelector('td:nth-child(1) input');
+            const leftBaseInput = row.querySelector('td:nth-child(2) input');
+            const leftOccInput = row.querySelector('td:nth-child(3) input');
+            const leftIntInput = row.querySelector('td:nth-child(4) input');
+            const leftGrowthInput = row.querySelector('td:nth-child(5) input');
             
-            // 左侧技能项
-            const leftSkill = {
-                name: cells[0]?.querySelector('.skill-name')?.value || '',
-                occupation: cells[2]?.querySelector('.skill-occupation')?.value || '0',
-                interest: cells[3]?.querySelector('.skill-interest')?.value || '0',
-                growth: cells[4]?.querySelector('.skill-growth')?.value || '0'
-            };
+            if (leftNameInput && leftNameInput.value) {
+                customSkillsData.push({
+                    name: leftNameInput.value,
+                    base: leftBaseInput ? leftBaseInput.value : '0',
+                    occupation: leftOccInput ? leftOccInput.value : '0',
+                    interest: leftIntInput ? leftIntInput.value : '0',
+                    growth: leftGrowthInput ? leftGrowthInput.value : '0',
+                    position: 'left'
+                });
+            }
             
-            // 只保存有名称的技能
-            if (leftSkill.name.trim()) {
-                characterData.customSkills.push(leftSkill);
-                console.log(`保存自定义技能: ${leftSkill.name}`);
+            // 右侧技能
+            const rightNameInput = row.querySelector('td:nth-child(9) input');
+            const rightBaseInput = row.querySelector('td:nth-child(10) input');
+            const rightOccInput = row.querySelector('td:nth-child(11) input');
+            const rightIntInput = row.querySelector('td:nth-child(12) input');
+            const rightGrowthInput = row.querySelector('td:nth-child(13) input');
+            
+            if (rightNameInput && rightNameInput.value) {
+                customSkillsData.push({
+                    name: rightNameInput.value,
+                    base: rightBaseInput ? rightBaseInput.value : '0',
+                    occupation: rightOccInput ? rightOccInput.value : '0',
+                    interest: rightIntInput ? rightIntInput.value : '0',
+                    growth: rightGrowthInput ? rightGrowthInput.value : '0',
+                    position: 'right'
+                });
             }
         });
         
-        // 再收集右侧技能
-        customSkillRows.forEach(row => {
-            // 获取该行的右侧技能输入框
-            const cells = Array.from(row.children);
-            
-            // 右侧技能项
-            const rightSkill = {
-                name: cells[8]?.querySelector('.skill-name')?.value || '',
-                occupation: cells[10]?.querySelector('.skill-occupation')?.value || '0',
-                interest: cells[11]?.querySelector('.skill-interest')?.value || '0',
-                growth: cells[12]?.querySelector('.skill-growth')?.value || '0'
-            };
-            
-            // 只保存有名称的技能
-            if (rightSkill.name.trim()) {
-                characterData.customSkills.push(rightSkill);
-                console.log(`保存自定义技能: ${rightSkill.name}`);
-            }
-        });
+        // 将自定义技能数据添加到保存对象中
+        characterData.customSkills = customSkillsData;
         
         // 将数据保存到本地存储
         const characterName = characterData.basic.characterName || 'character';
@@ -1484,15 +1515,18 @@ function saveCharacter(showAlert = true) {
 // 加载角色数据
 function loadCharacter(skipAlert = false) {
     try {
-        // 从localStorage获取数据
-        const savedData = localStorage.getItem('characterData');
-        if (!savedData) {
-            alert('没有找到保存的角色数据');
+        // 获取本地保存的数据
+        const dataStr = localStorage.getItem('characterData');
+        if (!dataStr) {
+            // 没有保存的数据
+            if (!skipAlert) {
+                alert('没有找到保存的角色数据');
+            }
             return;
         }
         
-        // 解析数据
-        const characterData = JSON.parse(savedData);
+        // 解析JSON数据
+        const characterData = JSON.parse(dataStr);
         
         // 检查数据是否为空或无效
         if (!characterData || !characterData.basic || 
@@ -1526,6 +1560,12 @@ function loadCharacter(skipAlert = false) {
             const itemsCharacterName = document.getElementById('items-character-name');
             if (itemsCharacterName) {
                 itemsCharacterName.textContent = characterData.basic.characterName || '';
+            }
+
+            // 同步更新笔记页的姓名显示
+            const notesCharacterName = document.getElementById('notes-character-name');
+            if (notesCharacterName) {
+                notesCharacterName.textContent = characterData.basic.characterName || '';
             }
         }
         
@@ -1876,110 +1916,87 @@ function loadCharacter(skipAlert = false) {
         }
         
         // 自定义技能
-        if (characterData.customSkills && Array.isArray(characterData.customSkills)) {
-            console.log('开始加载自定义技能数据');
-            
-            // 确保初始化了自定义技能表
-            const customSkillsBody = document.getElementById('custom-skills-body');
-            if (customSkillsBody) {
-                if (customSkillsBody.children.length === 0) {
-                    console.log('自定义技能表为空，初始化表格');
-                    initCustomSkillsTable();
-                }
-                
-                // 获取所有行
-                const rows = customSkillsBody.querySelectorAll('tr');
-                
-                // 先清除所有输入框的值
-                rows.forEach(row => {
-                    const inputs = row.querySelectorAll('input');
-                    inputs.forEach(input => {
-                        if (input.className === 'skill-name') {
-                            input.value = '';
-                        } else if (input.className === 'skill-occupation' || 
-                                  input.className === 'skill-interest' || 
-                                  input.className === 'skill-growth') {
-                            input.value = '';  // 设为空字符串而不是'0'
-                        }
-                    });
-                });
-                
-                // 填充保存的自定义技能数据
-                if (characterData.customSkills.length > 0) {
-                    let skillIndex = 0;
-                    const rowCount = rows.length;
-                    
-                    // 修改为先上下填充左侧列，再上下填充右侧列
-                    // 首先填充左侧列
-                    for (let rowIndex = 0; rowIndex < rowCount && skillIndex < characterData.customSkills.length; rowIndex++) {
-                        const row = rows[rowIndex];
-                        const cells = Array.from(row.children);
-                        
-                        // 左侧技能
-                        const skill = characterData.customSkills[skillIndex++];
-                        const nameInput = cells[0]?.querySelector('.skill-name');
-                        const occInput = cells[2]?.querySelector('.skill-occupation');
-                        const intInput = cells[3]?.querySelector('.skill-interest');
-                        const growthInput = cells[4]?.querySelector('.skill-growth');
-                        
-                        if (nameInput) nameInput.value = skill.name || '';
-                        // 设置0值为空字符串
-                        if (occInput) {
-                            const occValue = skill.occupation || '0';
-                            occInput.value = (occValue === '0') ? '' : occValue;
-                        }
-                        if (intInput) {
-                            const intValue = skill.interest || '0';
-                            intInput.value = (intValue === '0') ? '' : intValue;
-                        }
-                        if (growthInput) {
-                            const growthValue = skill.growth || '0';
-                            growthInput.value = (growthValue === '0') ? '' : growthValue;
-                        }
-                        
-                        console.log(`加载自定义技能(左): ${skill.name}`);
-                        
-                        // 如果已处理完所有技能，退出循环
-                        if (skillIndex >= characterData.customSkills.length) break;
-                    }
-                    
-                    // 然后填充右侧列
-                    for (let rowIndex = 0; rowIndex < rowCount && skillIndex < characterData.customSkills.length; rowIndex++) {
-                        const row = rows[rowIndex];
-                        const cells = Array.from(row.children);
-                        
-                        // 右侧技能
-                        const skill = characterData.customSkills[skillIndex++];
-                        const nameInput = cells[8]?.querySelector('.skill-name');
-                        const occInput = cells[10]?.querySelector('.skill-occupation');
-                        const intInput = cells[11]?.querySelector('.skill-interest');
-                        const growthInput = cells[12]?.querySelector('.skill-growth');
-                        
-                        if (nameInput) nameInput.value = skill.name || '';
-                        // 设置0值为空字符串
-                        if (occInput) {
-                            const occValue = skill.occupation || '0';
-                            occInput.value = (occValue === '0') ? '' : occValue;
-                        }
-                        if (intInput) {
-                            const intValue = skill.interest || '0';
-                            intInput.value = (intValue === '0') ? '' : intValue;
-                        }
-                        if (growthInput) {
-                            const growthValue = skill.growth || '0';
-                            growthInput.value = (growthValue === '0') ? '' : growthValue;
-                        }
-                        
-                        console.log(`加载自定义技能(右): ${skill.name}`);
-                        
-                        // 如果已处理完所有技能，退出循环
-                        if (skillIndex >= characterData.customSkills.length) break;
-                    }
-                    
-                    // 重新初始化自定义技能计算
-                    setupCustomSkills();
-                }
+        if (characterData.customSkills && characterData.customSkills.length > 0) {
+            // 确保自定义技能表格已初始化
+            if (document.getElementById('custom-skills-body').children.length === 0) {
+                initCustomSkillsTable();
             }
+            
+            const rows = document.querySelectorAll('#custom-skills-body tr');
+            let leftIndex = 0;
+            let rightIndex = 0;
+            
+            // 分别处理左右两侧的技能
+            characterData.customSkills.forEach(skill => {
+                let rowIndex, startCell;
+                
+                if (skill.position === 'left') {
+                    rowIndex = leftIndex;
+                    startCell = 1; // 左侧起始单元格
+                    leftIndex++;
+                } else {
+                    rowIndex = rightIndex;
+                    startCell = 9; // 右侧起始单元格
+                    rightIndex++;
+                }
+                
+                if (rowIndex < rows.length) {
+                    const row = rows[rowIndex];
+                    
+                    // 技能名称
+                    const nameInput = row.querySelector(`td:nth-child(${startCell}) input`);
+                    if (nameInput) nameInput.value = skill.name || '';
+                    
+                    // 基础值
+                    const baseInput = row.querySelector(`td:nth-child(${startCell + 1}) input`);
+                    if (baseInput) baseInput.value = skill.base || '0';
+                    
+                    // 职业点数
+                    const occInput = row.querySelector(`td:nth-child(${startCell + 2}) input`);
+                    if (occInput) occInput.value = skill.occupation === '0' ? '' : skill.occupation || '';
+                    
+                    // 兴趣点数
+                    const intInput = row.querySelector(`td:nth-child(${startCell + 3}) input`);
+                    if (intInput) intInput.value = skill.interest === '0' ? '' : skill.interest || '';
+                    
+                    // 成长点数
+                    const growthInput = row.querySelector(`td:nth-child(${startCell + 4}) input`);
+                    if (growthInput) growthInput.value = skill.growth === '0' ? '' : skill.growth || '';
+                }
+            });
+            
+            // 重新计算自定义技能的成功率
+            setupCustomSkills();
+        }
+        
+        // 在这里加载笔记数据 - 移动到try块内部
+        if (characterData.notes && characterData.notes.length > 0) {
+            // 确保笔记表格已初始化
+            if (document.getElementById('notes-body').children.length === 0) {
+                initNotesTable();
+            }
+            
+            // 获取所有输入字段
+            const noteNameInputs = document.querySelectorAll('#notes-body .item-name');
+            const noteTypeInputs = document.querySelectorAll('#notes-body .item-type input');
+            const noteNoteInputs = document.querySelectorAll('#notes-body .item-note');
+            
+            // 填充数据
+            characterData.notes.forEach((note, index) => {
+                if (index < noteNameInputs.length) {
+                    noteNameInputs[index].value = note.name || '';
+                    noteTypeInputs[index].value = note.type || '';
+                    noteNoteInputs[index].value = note.note || '';
+                    
+                    // 设置value属性，确保显示正确
+                    noteNameInputs[index].setAttribute('value', note.name || '');
+                    noteTypeInputs[index].setAttribute('value', note.type || '');
+                    noteNoteInputs[index].setAttribute('value', note.note || '');
+                }
+            });
+        } else {
+            // 初始化空的笔记表格
+            initNotesTable();
         }
         
         // 显示加载成功提示（如果不跳过）
@@ -1987,7 +2004,7 @@ function loadCharacter(skipAlert = false) {
             alert('角色数据已从本地缓存加载');
         }
     } catch (error) {
-        console.error('Error loading character:', error);
+        console.error('解析保存的数据时出错:', error);
         alert('加载失败，请稍后再试。');
     }
     
@@ -2231,14 +2248,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const characterNameInput = document.getElementById('character-name');
     const customCharacterName = document.getElementById('custom-character-name');
     const itemsCharacterName = document.getElementById('items-character-name');
+    const notesCharacterName = document.getElementById('notes-character-name'); // 新增
 
-    if (characterNameInput && customCharacterName) {
-        // 初始化时设置名称
-        customCharacterName.textContent = characterNameInput.value;
+    if (characterNameInput && notesCharacterName) {
+        // 初始化时设置笔记页姓名
+        notesCharacterName.textContent = characterNameInput.value;
         
         // 添加输入事件监听
         characterNameInput.addEventListener('input', function() {
-            customCharacterName.textContent = this.value;
+            notesCharacterName.textContent = this.value;
         });
     }
 
@@ -2443,320 +2461,35 @@ function initPrint() {
         console.error('找不到打印模态框');
     }
 
-    // 确认打印按钮点击事件
+    // 确认打印按钮点击事件（移动到initPrint函数内部）
     if (confirmPrintButton) {
     confirmPrintButton.addEventListener('click', function() {
-        // 在打印前再次确保自定义技能表和道具表已经初始化
-        if (printCustomSkillsCheckbox && printCustomSkillsCheckbox.checked) {
-            const customSkillsBody = document.getElementById('custom-skills-body');
-            if (customSkillsBody && customSkillsBody.children.length === 0) {
-                console.log('打印前初始化自定义技能表');
-                initCustomSkillsTable();
-                setupCustomSkills();
-            }
-        }
-        
-        if (printItemsCheckbox && printItemsCheckbox.checked) {
-            const itemsBody = document.getElementById('items-body');
-            if (itemsBody && itemsBody.children.length === 0) {
-                console.log('打印前初始化道具表');
-                initItemsTable();
-            }
-        }
-        
-        // 根据选择控制打印内容
-        const sections = [
-            '.basic-info-section',
-            '.characteristics-section',
-            '.avatar-section',
-            '.stats-section',
-            '.skills-section',
-            '.weapons-section',
-            '.combat-section'
-        ];
-        
-        // 根据复选框状态添加或移除打印隐藏类
-            if (printCharacterCheckbox) {
-        sections.forEach(section => {
-            const elements = document.querySelectorAll(section);
-            elements.forEach(element => {
-                if (!printCharacterCheckbox.checked) {
-                    element.classList.add('print-hidden');
-                } else {
-                    element.classList.remove('print-hidden');
-                }
-            });
+        // 获取各打印选项状态
+        const printMain = document.getElementById('print-character').checked;
+        const printSkills = document.getElementById('print-custom-skills').checked;
+        const printItems = document.getElementById('print-items').checked;
+        const printNotes = document.getElementById('print-notes').checked;
+
+        // 控制页面显示
+        const printOptions = {
+            'main-sheet': printMain,
+            'custom-skills': printSkills,
+            'items': printItems,
+            'notes': printNotes
+        };
+
+        Object.entries(printOptions).forEach(([id, shouldPrint]) => {
+            const element = document.getElementById(id);
+            element.classList.toggle('print-hidden', !shouldPrint);
+            element.classList.toggle('print-visible', shouldPrint);
         });
-            }
 
-        // 自定义技能部分
-            const customSkillsSection = document.querySelector('#custom-skills');
-            if (customSkillsSection && printCustomSkillsCheckbox) {
-            if (!printCustomSkillsCheckbox.checked) {
-                customSkillsSection.classList.add('print-hidden');
-            } else {
-                customSkillsSection.classList.remove('print-hidden');
-                    
-                    // 确保自定义技能页的调查员区域不会被隐藏
-                    const customInfoSection = customSkillsSection.querySelector('.basic-info-section');
-                    if (customInfoSection) {
-                        customInfoSection.classList.remove('print-hidden');
-                    }
-                }
-            }
-            
-            // 道具部分
-            const itemsSection = document.querySelector('#items');
-            if (itemsSection && printItemsCheckbox) {
-            if (!printItemsCheckbox.checked) {
-                itemsSection.classList.add('print-hidden');
-            } else {
-                itemsSection.classList.remove('print-hidden');
-                    
-                    // 确保道具页的调查员区域不会被隐藏
-                    const itemsInfoSection = itemsSection.querySelector('.basic-info-section');
-                    if (itemsInfoSection) {
-                        itemsInfoSection.classList.remove('print-hidden');
-                    }
-                    
-                    // 在打印前标记空道具名行，使其在打印时不显示
-                    const itemsTable = document.getElementById('items-body');
-                    if (itemsTable) {
-                        const rows = itemsTable.querySelectorAll('tr');
-                        rows.forEach(row => {
-                            // 获取道具名输入框
-                            const nameInput = row.querySelector('.item-name');
-                            
-                            // 如果道具名为空
-                            if (nameInput && !nameInput.value.trim()) {
-                                // 找到同一行中的所有输入框
-                                const inputs = row.querySelectorAll('input');
-                                inputs.forEach(input => {
-                                    input.classList.add('print-empty-skill');
-                                });
-                            }
-                        });
-                    }
-                }
-            }
-            
-            // 在打印前标记空技能名行，使其数值在打印时不显示
-            const customSkillsTable = document.getElementById('custom-skills-body');
-            if (customSkillsTable) {
-                const rows = customSkillsTable.querySelectorAll('tr');
-                rows.forEach(row => {
-                    // 获取左右两侧的技能名输入框
-                    const leftNameInput = row.querySelector('td:nth-child(1) input');
-                    const rightNameInput = row.querySelector('td:nth-child(9) input');
-                    
-                    // 如果左侧技能名为空，隐藏左侧的所有数值
-                    if (leftNameInput && !leftNameInput.value.trim()) {
-                        for (let i = 2; i <= 8; i++) { // 从第2个到第8个单元格
-                            const cell = row.querySelector(`td:nth-child(${i})`);
-                            if (cell) {
-                                const inputs = cell.querySelectorAll('input');
-                                inputs.forEach(input => {
-                                    input.classList.add('print-empty-skill');
-                                });
-                            }
-                        }
-                    }
-                    
-                    // 如果右侧技能名为空，隐藏右侧的所有数值
-                    if (rightNameInput && !rightNameInput.value.trim()) {
-                        for (let i = 10; i <= 16; i++) { // 从第10个到第16个单元格
-                            const cell = row.querySelector(`td:nth-child(${i})`);
-                            if (cell) {
-                                const inputs = cell.querySelectorAll('input');
-                                inputs.forEach(input => {
-                                    input.classList.add('print-empty-skill');
-                                });
-                            }
-                        }
-                    }
-                });
-            }
-
-            // 获取当前活动的标签页，以便打印后恢复
-            const currentActiveTab = document.querySelector('.tab.active');
-
-        // 关闭模态框
-        printModal.style.display = 'none';
-
-            // 创建一个临时样式标签，使所有要打印的内容在打印时可见
-            const tempStyle = document.createElement('style');
-            tempStyle.id = 'temp-print-style';
-            
-            // 创建针对打印的样式内容
-            let styleContent = `
-                @media print {
-                    /* 默认隐藏所有标签内容 */
-                    .tab-content {
-                        display: none !important;
-                        visibility: hidden !important;
-                        opacity: 0 !important;
-                        height: 0 !important;
-                        overflow: hidden !important;
-                        position: absolute !important;
-                        left: -9999px !important;
-                    }
-                    
-                    /* 调整打印布局，确保内容不会重叠 */
-                    body {
-                        overflow: visible !important;
-                        height: auto !important;
-                    }
-                    
-                    /* 重置定位，防止内容重叠 */
-                    .tab-content.print-visible {
-                        visibility: visible !important;
-                        opacity: 1 !important;
-                        overflow: visible !important;
-                        height: auto !important;
-                        page-break-after: always !important;
-                        margin-bottom: 20px !important;
-                        left: 0 !important;
-                    }
-            `;
-            
-            // 如果选择了打印主页面
-            if (printCharacterCheckbox && printCharacterCheckbox.checked) {
-                styleContent += `
-                    /* 显示主页面 */
-                    #main-sheet {
-                        display: grid !important; /* 使用grid布局，与原始布局一致 */
-                        grid-template-columns: 1fr 1.1fr 0.9fr !important;
-                        grid-template-rows: auto auto auto auto !important; 
-                        gap: 2px !important;
-                        position: static !important;
-                        opacity: 1 !important;
-                        z-index: 1 !important;
-                        visibility: visible !important;
-                        overflow: visible !important;
-                        height: auto !important;
-                        width: 100% !important;
-                        page-break-after: always !important;
-                    }
-                `;
-                
-                // 给主页面添加标记类，方便打印后清理
-                document.getElementById('main-sheet').classList.add('print-visible');
-            }
-            
-            // 如果选择了打印自定义技能页
-            if (printCustomSkillsCheckbox && printCustomSkillsCheckbox.checked) {
-                styleContent += `
-                    /* 显示自定义技能页 */
-                    #custom-skills {
-                        display: flex !important; /* 使用flex布局，与原始布局一致 */
-                        flex-direction: column !important;
-                        position: static !important;
-                        opacity: 1 !important;
-                        z-index: 1 !important;
-                        visibility: visible !important;
-                        overflow: visible !important;
-                        height: auto !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        background-color: white !important;
-                        width: 100% !important;
-                    }
-                    
-                    /* 确保自定义技能页内部布局正确 */
-                    #custom-skills .sheet-section {
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        width: 100% !important;
-                    }
-                    
-                    /* 保持表格布局不变 */
-                    #custom-skills .custom-skills-container table {
-                        width: 100% !important;
-                        border-collapse: collapse !important;
-                        table-layout: fixed !important;
-                    }
-                `;
-                
-                // 给自定义技能页添加标记类，方便打印后清理
-                document.getElementById('custom-skills').classList.add('print-visible');
-            }
-            
-            // 如果选择了打印道具页
-            if (printItemsCheckbox && printItemsCheckbox.checked) {
-                styleContent += `
-                    /* 显示道具页 */
-                    #items {
-                        display: flex !important; /* 使用flex布局，与原始布局一致 */
-                        flex-direction: column !important;
-                        position: static !important;
-                        opacity: 1 !important;
-                        z-index: 1 !important;
-                        visibility: visible !important;
-                        overflow: visible !important;
-                        height: auto !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        background-color: white !important;
-                        width: 100% !important;
-                    }
-                    
-                    /* 确保道具页内部布局正确 */
-                    #items .sheet-section {
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        width: 100% !important;
-                    }
-                    
-                    /* 保持表格布局不变 */
-                    #items .items-table {
-                        width: 100% !important;
-                        border-collapse: collapse !important;
-                        table-layout: fixed !important;
-                    }
-                `;
-                
-                // 给道具页添加标记类，方便打印后清理
-                document.getElementById('items').classList.add('print-visible');
-            }
-            
-            // 关闭媒体查询
-            styleContent += `
-                }
-            `;
-            
-            tempStyle.textContent = styleContent;
-            document.head.appendChild(tempStyle);
-
-            // 执行打印
-            setTimeout(() => {
-                    window.print();
-                
-                // 打印完成后清理
-                // 移除临时样式
-                const tempStyleElement = document.getElementById('temp-print-style');
-                if (tempStyleElement) {
-                    tempStyleElement.remove();
-                }
-                
-                // 移除临时添加的标记类
-                document.querySelectorAll('.tab-content.print-visible').forEach(element => {
-                    element.classList.remove('print-visible');
-                });
-                
-                // 移除空技能名行和道具名行的标记
-                document.querySelectorAll('.print-empty-skill').forEach(element => {
-                    element.classList.remove('print-empty-skill');
-                });
-                
-                // 打印完成后恢复显示所有部分
-                document.querySelectorAll('.print-hidden').forEach(element => {
-                    element.classList.remove('print-hidden');
-                });
-            }, 100);
-        });
+        // 执行打印
+        window.print();
+    });
     }
     
-    // 设置标志，表示打印功能已初始化
+    // 标记打印功能已初始化
     printInitialized = true;
 }
 
@@ -2791,6 +2524,26 @@ function initAll() {
                         addNoteEvents(noteInput);
                         noteInput.hasEventListener = true;
                         console.log('为已有道具备注框添加事件监听器');
+                    }
+                });
+            }
+        }
+        
+        // 初始化笔记页面 - 新增部分
+        const notesBody = document.getElementById('notes-body');
+        if (notesBody) {
+            if (notesBody.children.length === 0) {
+                console.log('笔记表为空，进行初始化');
+                initNotesTable();
+            } else {
+                console.log('笔记表已存在，跳过初始化');
+                // 确保所有笔记行的备注框都有事件监听
+                const noteInputs = notesBody.querySelectorAll('.item-note');
+                noteInputs.forEach(noteInput => {
+                    if (!noteInput.hasEventListener) {
+                        addNoteEvents(noteInput);
+                        noteInput.hasEventListener = true;
+                        console.log('为已有笔记备注框添加事件监听器');
                     }
                 });
             }
@@ -3285,4 +3038,135 @@ function openItemTypeModal(typeInput) {
     });
     
     document.body.appendChild(modal);
+}
+
+// 统一创建单元格函数
+function createNoteCells(row, noteIndex) {
+    // 第一列：笔记名称
+    const nameCell = document.createElement('td');
+    const nameInput = document.createElement('input');
+    nameInput.type = 'text';
+    nameInput.className = 'item-name';
+    nameInput.placeholder = '未命名';
+    nameCell.appendChild(nameInput);
+    row.appendChild(nameCell);
+
+    // 第二列：笔记类别
+    const typeCell = document.createElement('td');
+    typeCell.className = 'item-type';
+    const typeInput = document.createElement('input');
+    typeInput.type = 'text';
+    typeInput.placeholder = '分类';
+    typeInput.readOnly = true;
+    typeCell.appendChild(typeInput);
+    
+    // 这里修改为使用笔记特定的类型选择函数
+    typeCell.addEventListener('click', function() {
+        openNoteTypeModal(this.querySelector('input')); // 修改为使用笔记的类型选择函数
+    });
+    row.appendChild(typeCell);
+
+    // 第三列：备注
+    const noteCell = document.createElement('td');
+    const noteTextarea = document.createElement('textarea'); // 改为textarea
+    noteTextarea.className = 'item-note';
+    noteTextarea.placeholder = '备注';
+    noteTextarea.rows = 1; // 设置默认只显示1行
+    noteCell.appendChild(noteTextarea);
+    row.appendChild(noteCell);
+
+    // 添加备注事件监听
+    addNoteEvents(noteTextarea);
+
+    return row;
+}
+
+// 统一初始化笔记表格函数
+function initNotesTable() {
+    const itemsBody = document.getElementById('notes-body');
+    if (!itemsBody) return;
+    
+    itemsBody.innerHTML = '';
+    
+    const totalRows = 40;
+    for (let i = 0; i < totalRows; i++) {
+        const row = document.createElement('tr');
+        row.className = i % 2 === 0 ? 'even-row' : 'odd-row';
+        createNoteCells(row, i * 2);
+        createNoteCells(row, i * 2 + 1); 
+        itemsBody.appendChild(row);
+    }
+
+    // 统一输入处理
+    const allInputs = itemsBody.querySelectorAll('input');
+    allInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            this.setAttribute('value', this.value);
+        });
+    });
+    
+    // 删除这段重复代码，因为已经在createNoteCells中添加了事件监听
+    // itemsBody.querySelectorAll('.item-type').forEach(typeCell => {
+    //     typeCell.addEventListener('click', function() {
+    //         openNoteTypeModal(this.querySelector('input'));
+    //     });
+    // });
+}
+
+// 新增笔记类型选择弹窗
+function openNoteTypeModal(typeInput) {
+    // 创建模态框（如果不存在）
+    if (!document.getElementById('note-type-modal')) {
+        const modal = document.createElement('div');
+        modal.id = 'note-type-modal';
+        modal.className = 'subtype-modal';
+        
+        // 创建模态框内容
+        modal.innerHTML = `
+            <div class="subtype-modal-content">
+                <div class="subtype-modal-header">
+                    <h2>选择笔记类型</h2>
+                </div>
+                <div class="subtype-modal-body">
+                    <div class="subtype-list">
+                        <div class="subtype-item" data-type="冒险">冒险</div>
+                        <div class="subtype-item" data-type="人物">人物</div>
+                        <div class="subtype-item" data-type="功法">功法</div>
+                        <div class="subtype-item" data-type="强化">强化</div>
+                        <div class="subtype-item" data-type="待办">待办</div>
+                        <div class="subtype-item" data-type="其他">其他</div>
+                    </div>
+                </div>
+                <div class="subtype-modal-footer">
+                    <button class="subtype-modal-button" id="close-note-type-modal">取消</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // 添加类型选择事件
+        const subtypeItems = modal.querySelectorAll('.subtype-item');
+        subtypeItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const selectedType = this.getAttribute('data-type');
+                if (currentTypeInput) {
+                    currentTypeInput.value = selectedType;
+                    currentTypeInput.setAttribute('value', selectedType); // 确保属性更新
+                }
+                modal.classList.remove('active');
+            });
+        });
+        
+        // 添加关闭按钮事件
+        const closeButton = document.getElementById('close-note-type-modal');
+        closeButton.addEventListener('click', function() {
+            modal.classList.remove('active');
+        });
+    }
+    
+    // 保存当前输入框并显示模态框
+    currentTypeInput = typeInput;
+    const modal = document.getElementById('note-type-modal');
+    modal.classList.add('active');
 }
