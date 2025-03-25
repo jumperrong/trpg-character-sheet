@@ -1529,16 +1529,39 @@ function loadCharacter(skipAlert = false) {
         const characterData = JSON.parse(dataStr);
         
         // 检查数据是否为空或无效
-        if (!characterData || !characterData.basic || 
-            (!characterData.basic.characterName && 
-             !characterData.attributes || !Object.values(characterData.attributes).some(val => val))) {
+        if (!characterData || !characterData.basic) {
             alert('保存的角色数据无效或为空');
-            // 清除无效数据
             localStorage.removeItem('characterData');
             return;
         }
         
-        // 基本信息
+        // ===== 重建技能表容器开始 =====
+        console.log('完全重建技能表...');
+        
+        // 完全移除并重建技能表容器
+        const skillsContainer = document.querySelector('.skills-container');
+        if (skillsContainer) {
+            const parent = skillsContainer.parentNode;
+            
+            // 保存父元素的引用
+            const skillsSection = parent;
+            
+            // 移除旧容器
+            skillsContainer.remove();
+            
+            // 创建新容器
+            const newContainer = document.createElement('div');
+            newContainer.className = 'skills-container';
+            skillsSection.appendChild(newContainer);
+            
+            console.log('技能表容器已重建');
+        }
+        
+        // 强制重新初始化技能表
+        initSkills();
+        // ===== 重建技能表容器结束 =====
+        
+        // 基本信息加载...
         if (characterData.basic) {
             document.getElementById('character-name').value = characterData.basic.characterName || '';
             document.getElementById('player-name').value = characterData.basic.playerName || '';
@@ -1548,53 +1571,29 @@ function loadCharacter(skipAlert = false) {
             document.getElementById('gender').value = characterData.basic.gender || '';
             document.getElementById('residence').value = characterData.basic.residence || '';
             document.getElementById('birthplace').value = characterData.basic.birthplace || '';
-            document.getElementById('is-partner').checked = characterData.basic.isPartner || false;
             
-            // 同步更新自定义技能页的姓名显示
-            const customCharacterName = document.getElementById('custom-character-name');
-            if (customCharacterName) {
-                customCharacterName.textContent = characterData.basic.characterName || '';
-            }
+            // 更新所有tab页面的角色名称
+            document.getElementById('custom-character-name').textContent = characterData.basic.characterName || '';
+            document.getElementById('items-character-name').textContent = characterData.basic.characterName || '';
+            document.getElementById('notes-character-name').textContent = characterData.basic.characterName || '';
             
-            // 同步更新道具页的姓名显示
-            const itemsCharacterName = document.getElementById('items-character-name');
-            if (itemsCharacterName) {
-                itemsCharacterName.textContent = characterData.basic.characterName || '';
-            }
-
-            // 同步更新笔记页的姓名显示
-            const notesCharacterName = document.getElementById('notes-character-name');
-            if (notesCharacterName) {
-                notesCharacterName.textContent = characterData.basic.characterName || '';
+            // 伙伴复选框
+            if (document.getElementById('is-partner')) {
+                document.getElementById('is-partner').checked = characterData.basic.isPartner || false;
             }
         }
         
-        // 头像
-        if (characterData.avatar) {
-            const avatarImg = document.getElementById('avatar-img');
-            const avatarPlaceholder = document.querySelector('.avatar-placeholder');
-            avatarImg.src = characterData.avatar;
-            avatarImg.style.display = 'block';
-            avatarPlaceholder.style.display = 'none';
-        }
-        
-        // 属性
+        // 属性加载...
         if (characterData.attributes) {
-            document.getElementById('str').value = characterData.attributes.str || '';
-            document.getElementById('con').value = characterData.attributes.con || '';
-            document.getElementById('siz').value = characterData.attributes.siz || '';
-            document.getElementById('dex').value = characterData.attributes.dex || '';
-            document.getElementById('app').value = characterData.attributes.app || '';
-            document.getElementById('int').value = characterData.attributes.int || '';
-            document.getElementById('pow').value = characterData.attributes.pow || '';
-            document.getElementById('edu').value = characterData.attributes.edu || '';
-            document.getElementById('luc').value = characterData.attributes.luc || '';
-            
-            // 更新导出属性
-            updateDerivedStats();
+            Object.entries(characterData.attributes).forEach(([key, value]) => {
+                const element = document.getElementById(key);
+                if (element) {
+                    element.value = value;
+                }
+            });
         }
         
-        // 状态
+        // 状态加载...
         if (characterData.status) {
             // 理智值
             if (characterData.status.sanity) {
@@ -1919,9 +1918,9 @@ function loadCharacter(skipAlert = false) {
         if (characterData.customSkills && characterData.customSkills.length > 0) {
             // 确保自定义技能表格已初始化
             if (document.getElementById('custom-skills-body').children.length === 0) {
-                initCustomSkillsTable();
-            }
-            
+                    initCustomSkillsTable();
+                }
+                
             const rows = document.querySelectorAll('#custom-skills-body tr');
             let leftIndex = 0;
             let rightIndex = 0;
@@ -1941,11 +1940,11 @@ function loadCharacter(skipAlert = false) {
                 }
                 
                 if (rowIndex < rows.length) {
-                    const row = rows[rowIndex];
+                        const row = rows[rowIndex];
                     
                     // 技能名称
                     const nameInput = row.querySelector(`td:nth-child(${startCell}) input`);
-                    if (nameInput) nameInput.value = skill.name || '';
+                        if (nameInput) nameInput.value = skill.name || '';
                     
                     // 基础值
                     const baseInput = row.querySelector(`td:nth-child(${startCell + 1}) input`);
@@ -2008,7 +2007,7 @@ function loadCharacter(skipAlert = false) {
         alert('加载失败，请稍后再试。');
     }
     
-    // 在加载完成后添加
+    // 在加载完成后更新衍生值
     setTimeout(() => {
         updatePointsRemaining();
         updateDerivedStats();
@@ -3117,8 +3116,8 @@ function initNotesTable() {
 function openNoteTypeModal(typeInput) {
     // 创建模态框（如果不存在）
     if (!document.getElementById('note-type-modal')) {
-        const modal = document.createElement('div');
-        modal.id = 'note-type-modal';
+    const modal = document.createElement('div');
+    modal.id = 'note-type-modal';
         modal.className = 'subtype-modal';
         
         // 创建模态框内容
@@ -3169,4 +3168,59 @@ function openNoteTypeModal(typeInput) {
     currentTypeInput = typeInput;
     const modal = document.getElementById('note-type-modal');
     modal.classList.add('active');
+}
+
+// 1. 修改 DOM 加载完成事件处理，确保笔记页始终初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 原有初始化代码...
+    
+    // 强制初始化笔记页，无论DOM是否已经包含内容
+    setTimeout(function() {
+        const notesBody = document.getElementById('notes-body');
+        if (notesBody) {
+            // 检查表格是否为空或只有表头
+            if (notesBody.children.length < 2) {
+                console.log('笔记表为空或不完整，强制初始化');
+                initNotesTable();
+            }
+        }
+    }, 500); // 延迟500ms确保其他资源加载完成
+});
+
+// 2. 确保切换到笔记页面时初始化表格
+function switchTab(tabId) {
+    // 原有tab切换代码...
+    
+    // 检查是否切换到笔记页
+    if (tabId === 'notes') {
+        const notesBody = document.getElementById('notes-body');
+        if (notesBody && notesBody.children.length < 2) {
+            console.log('切换到笔记页，强制初始化笔记表');
+            initNotesTable();
+        }
+    }
+}
+
+// 3. 修改initNotesTable函数，添加强制重建机制
+function initNotesTable() {
+    const itemsBody = document.getElementById('notes-body');
+    if (!itemsBody) return;
+    
+    // 清空现有内容
+    itemsBody.innerHTML = '';
+    console.log('初始化笔记表格...');
+    
+    // 创建表格内容 - 确保生成足够行数
+    const totalRows = 40; // 保证有足够的行数
+    for (let i = 0; i < totalRows; i++) {
+        const row = document.createElement('tr');
+        row.className = i % 2 === 0 ? 'even-row' : 'odd-row';
+        createNoteCells(row, i * 2);
+        createNoteCells(row, i * 2 + 1); 
+        itemsBody.appendChild(row);
+    }
+    
+    console.log(`笔记表格已创建，共${itemsBody.children.length}行`);
+    
+    // 其余事件处理代码...
 }
