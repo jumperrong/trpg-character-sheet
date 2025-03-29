@@ -1427,26 +1427,41 @@ function saveCharacter(showAlert = true) {
         // 将道具数据添加到保存对象中 - 添加此行
         characterData.items = itemsData;
         
-        // 保存笔记数据 - 新增部分
+        // 保存笔记数据 - 按纵向顺序收集
         const noteRows = document.querySelectorAll('#notes-body tr');
         const notesData = [];
-        
-        noteRows.forEach(row => {
-            const nameInputs = row.querySelectorAll('.item-name');
-            const typeInputs = row.querySelectorAll('.item-type input');
-            const noteInputs = row.querySelectorAll('.item-note');
-            
-            for (let i = 0; i < nameInputs.length; i++) {
-                if (nameInputs[i].value || typeInputs[i].value || noteInputs[i].value) {
-                    notesData.push({
-                        name: nameInputs[i].value,
-                        type: typeInputs[i].value,
-                        note: noteInputs[i].value
-                    });
-                }
+        const totalRows = noteRows.length;
+
+        // 先收集左列数据
+        noteRows.forEach((row, rowIndex) => {
+            const leftNameInput = row.querySelector('td:nth-child(1) .item-name');
+            const leftTypeInput = row.querySelector('td:nth-child(2) .item-type-input'); // 修改选择器
+            const leftNoteInput = row.querySelector('td:nth-child(3) .item-note');
+
+            if (leftNameInput && (leftNameInput.value || leftTypeInput.value || leftNoteInput.value)) {
+                notesData.push({
+                    name: leftNameInput.value || '',
+                    type: leftTypeInput.value || '',
+                    note: leftNoteInput.value || ''
+                });
             }
         });
-        
+
+        // 再收集右列数据
+        noteRows.forEach((row, rowIndex) => {
+            const rightNameInput = row.querySelector('td:nth-child(4) .item-name');
+            const rightTypeInput = row.querySelector('td:nth-child(5) .item-type-input'); // 修改选择器
+            const rightNoteInput = row.querySelector('td:nth-child(6) .item-note');
+
+            if (rightNameInput && (rightNameInput.value || rightTypeInput.value || rightNoteInput.value)) {
+                notesData.push({
+                    name: rightNameInput.value || '',
+                    type: rightTypeInput.value || '',
+                    note: rightNoteInput.value || ''
+                });
+            }
+        });
+
         // 将笔记数据添加到保存对象中
         characterData.notes = notesData;
         
@@ -1520,7 +1535,7 @@ function loadCharacter(skipAlert = false) {
         if (!dataStr) {
             // 没有保存的数据
             if (!skipAlert) {
-                alert('没有找到保存的角色数据');
+            alert('没有找到保存的角色数据');
             }
             return;
         }
@@ -1974,28 +1989,40 @@ function loadCharacter(skipAlert = false) {
             if (document.getElementById('notes-body').children.length === 0) {
                 initNotesTable();
             }
-            
+
             // 获取所有输入字段
-            const noteNameInputs = document.querySelectorAll('#notes-body .item-name');
-            const noteTypeInputs = document.querySelectorAll('#notes-body .item-type input');
-            const noteNoteInputs = document.querySelectorAll('#notes-body .item-note');
-            
-            // 填充数据
+            const rows = document.querySelectorAll('#notes-body tr');
+            const totalRows = rows.length;
+
+            // 按纵向顺序填充数据
             characterData.notes.forEach((note, index) => {
-                if (index < noteNameInputs.length) {
-                    noteNameInputs[index].value = note.name || '';
-                    noteTypeInputs[index].value = note.type || '';
-                    noteNoteInputs[index].value = note.note || '';
+                // 计算正确的行和列位置
+                const column = Math.floor(index / totalRows); // 0为左列，1为右列
+                const row = index % totalRows;
+
+                if (row < totalRows) {
+                    const currentRow = rows[row];
+                    const startCell = column * 3; // 每组3个单元格（名称、类型、备注）
                     
-                    // 设置value属性，确保显示正确
-                    noteNameInputs[index].setAttribute('value', note.name || '');
-                    noteTypeInputs[index].setAttribute('value', note.type || '');
-                    noteNoteInputs[index].setAttribute('value', note.note || '');
+                    // 获取当前位置的输入框，修正选择器
+                    const nameInput = currentRow.querySelector(`td:nth-child(${1 + startCell * 3}) .item-name`);
+                    const typeInput = currentRow.querySelector(`td:nth-child(${2 + startCell * 3}) .item-type-input`); // 修改选择器
+                    const noteInput = currentRow.querySelector(`td:nth-child(${3 + startCell * 3}) .item-note`);
+
+                    // 填充数据
+                    if (nameInput) {
+                        nameInput.value = note.name || '';
+                        nameInput.setAttribute('value', note.name || '');
+                    }
+                    if (typeInput) {
+                        typeInput.value = note.type || '';
+                        typeInput.setAttribute('value', note.type || '');
+                    }
+                    if (noteInput) {
+                        noteInput.value = note.note || '';
+                    }
                 }
             });
-        } else {
-            // 初始化空的笔记表格
-            initNotesTable();
         }
         
         // 显示加载成功提示（如果不跳过）
@@ -2879,24 +2906,23 @@ function addNoteEvents(noteInput) {
     document.body.appendChild(tooltip);
     
     // 悬停时显示tooltip
-    noteInput.addEventListener('mouseenter', function() {
-        tooltip.textContent = noteInput.value;
-        const rect = noteInput.getBoundingClientRect();
+    noteInput.addEventListener('mouseenter', function(e) {
+        tooltip.textContent = this.value;
+        const rect = this.getBoundingClientRect();
         
-        // 检查是否有足够空间在右侧显示
-        const windowWidth = window.innerWidth;
-        const rightSpace = windowWidth - (rect.right + window.scrollX);
+        // 检查是否为右侧备注框
+        const isRightColumn = this.closest('td').cellIndex > 3;
         
-        if (rightSpace > 820) { // 留出足够空间，从520px增加到820px
-            // 显示在右侧
-            tooltip.style.left = `${rect.right + window.scrollX + 10}px`;
-            tooltip.style.top = `${rect.top + window.scrollY}px`;
-        } else {
-            // 显示在左侧
+        // 调整tooltip位置
+        if (isRightColumn) {
+            // 右侧备注框的tooltip显示在左侧
             tooltip.style.left = `${Math.max(10, rect.left + window.scrollX - 820)}px`;
-            tooltip.style.top = `${rect.top + window.scrollY}px`;
+        } else {
+            // 左侧备注框的tooltip显示在右侧
+            tooltip.style.left = `${rect.right + window.scrollX + 10}px`;
         }
         
+        tooltip.style.top = `${rect.top + window.scrollY}px`;
         tooltip.style.display = 'block';
     });
     
@@ -2925,10 +2951,6 @@ function addNoteEvents(noteInput) {
         saveButton.onclick = function() {
             // 更新输入框的值
             noteInput.value = editTextarea.value;
-            // textarea不需要设置value属性
-            
-            // 不再自动添加"未命名道具"，而是使用道具索引作为标识
-            // 直接保存到本地缓存
             
             // 关闭编辑模态框
             editModal.classList.remove('active');
@@ -3055,26 +3077,27 @@ function createNoteCells(row, noteIndex) {
     typeCell.className = 'item-type';
     const typeInput = document.createElement('input');
     typeInput.type = 'text';
-    typeInput.placeholder = '分类';
+    typeInput.className = 'item-type-input'; // 添加类名
+    typeInput.placeholder = '点击选择';
     typeInput.readOnly = true;
     typeCell.appendChild(typeInput);
     
-    // 这里修改为使用笔记特定的类型选择函数
+    // 添加点击事件
     typeCell.addEventListener('click', function() {
-        openNoteTypeModal(this.querySelector('input')); // 修改为使用笔记的类型选择函数
+        openNoteTypeModal(typeInput);
     });
     row.appendChild(typeCell);
 
     // 第三列：备注
     const noteCell = document.createElement('td');
-    const noteTextarea = document.createElement('textarea'); // 改为textarea
+    const noteTextarea = document.createElement('textarea');
     noteTextarea.className = 'item-note';
     noteTextarea.placeholder = '备注';
-    noteTextarea.rows = 1; // 设置默认只显示1行
+    noteTextarea.rows = 1;
     noteCell.appendChild(noteTextarea);
     row.appendChild(noteCell);
 
-    // 添加备注事件监听
+    // 立即添加备注事件监听
     addNoteEvents(noteTextarea);
 
     return row;
@@ -3096,78 +3119,76 @@ function initNotesTable() {
         itemsBody.appendChild(row);
     }
 
-    // 统一输入处理
-    const allInputs = itemsBody.querySelectorAll('input');
-    allInputs.forEach(input => {
-        input.addEventListener('input', function() {
-            this.setAttribute('value', this.value);
-        });
+    // 确保所有备注框都有事件监听器
+    const allNoteInputs = itemsBody.querySelectorAll('.item-note');
+    allNoteInputs.forEach(noteInput => {
+        if (!noteInput.hasEventListener) {
+            addNoteEvents(noteInput);
+        }
     });
-    
-    // 删除这段重复代码，因为已经在createNoteCells中添加了事件监听
-    // itemsBody.querySelectorAll('.item-type').forEach(typeCell => {
-    //     typeCell.addEventListener('click', function() {
-    //         openNoteTypeModal(this.querySelector('input'));
-    //     });
-    // });
 }
 
 // 新增笔记类型选择弹窗
 function openNoteTypeModal(typeInput) {
-    // 创建模态框（如果不存在）
-    if (!document.getElementById('note-type-modal')) {
+    // 移除旧的模态框
+    const oldModal = document.getElementById('note-type-modal');
+    if (oldModal) {
+        document.body.removeChild(oldModal);
+    }
+
     const modal = document.createElement('div');
     modal.id = 'note-type-modal';
-        modal.className = 'subtype-modal';
-        
-        // 创建模态框内容
-        modal.innerHTML = `
-            <div class="subtype-modal-content">
-                <div class="subtype-modal-header">
-                    <h2>选择笔记类型</h2>
-                </div>
-                <div class="subtype-modal-body">
-                    <div class="subtype-list">
-                        <div class="subtype-item" data-type="冒险">冒险</div>
-                        <div class="subtype-item" data-type="人物">人物</div>
-                        <div class="subtype-item" data-type="功法">功法</div>
-                        <div class="subtype-item" data-type="强化">强化</div>
-                        <div class="subtype-item" data-type="待办">待办</div>
-                        <div class="subtype-item" data-type="其他">其他</div>
-                    </div>
-                </div>
-                <div class="subtype-modal-footer">
-                    <button class="subtype-modal-button" id="close-note-type-modal">取消</button>
+    modal.className = 'subtype-modal active'; // 直接添加active类
+
+    // 创建模态框内容
+    modal.innerHTML = `
+        <div class="subtype-modal-content">
+            <div class="subtype-modal-header">
+                <h2>选择笔记类型</h2>
+            </div>
+            <div class="subtype-modal-body">
+                <div class="subtype-list">
+                    <div class="subtype-item" data-type="冒险">冒险</div>
+                    <div class="subtype-item" data-type="人物">人物</div>
+                    <div class="subtype-item" data-type="功法">功法</div>
+                    <div class="subtype-item" data-type="强化">强化</div>
+                    <div class="subtype-item" data-type="待办">待办</div>
+                    <div class="subtype-item" data-type="其他">其他</div>
                 </div>
             </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        // 添加类型选择事件
-        const subtypeItems = modal.querySelectorAll('.subtype-item');
-        subtypeItems.forEach(item => {
-            item.addEventListener('click', function() {
-                const selectedType = this.getAttribute('data-type');
-                if (currentTypeInput) {
-                    currentTypeInput.value = selectedType;
-                    currentTypeInput.setAttribute('value', selectedType); // 确保属性更新
-                }
-                modal.classList.remove('active');
-            });
+            <div class="subtype-modal-footer">
+                <button class="subtype-modal-button" id="close-note-type-modal">取消</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // 添加类型选择事件
+    const subtypeItems = modal.querySelectorAll('.subtype-item');
+    subtypeItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const selectedType = this.getAttribute('data-type');
+            typeInput.value = selectedType;
+            typeInput.setAttribute('value', selectedType); // 确保属性更新
+            document.body.removeChild(modal);
+            // 保存更改
+            saveCharacter(false);
         });
-        
-        // 添加关闭按钮事件
-        const closeButton = document.getElementById('close-note-type-modal');
-        closeButton.addEventListener('click', function() {
-            modal.classList.remove('active');
-        });
-    }
-    
-    // 保存当前输入框并显示模态框
-    currentTypeInput = typeInput;
-    const modal = document.getElementById('note-type-modal');
-    modal.classList.add('active');
+    });
+
+    // 添加关闭按钮事件
+    const closeButton = modal.querySelector('#close-note-type-modal');
+    closeButton.addEventListener('click', function() {
+        document.body.removeChild(modal);
+    });
+
+    // 点击模态框外部关闭
+    modal.addEventListener('click', function(event) {
+        if (event.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
 }
 
 // 1. 修改 DOM 加载完成事件处理，确保笔记页始终初始化
