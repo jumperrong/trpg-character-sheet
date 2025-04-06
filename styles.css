@@ -1,4 +1,4 @@
-/* 
+﻿/* 
  * COC 7版角色卡样式表
  * 组织结构:
  * 1. 变量和基本样式
@@ -118,10 +118,11 @@ body {
 }
 
 .custom-skills-container table {
-    width: 100%;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
     border-collapse: collapse;
     table-layout: fixed;
-    margin: 0;
     border-spacing: 0 !important;
     box-sizing: border-box;
     border: 1px solid #ddd;
@@ -253,7 +254,32 @@ body {
         opacity: 0 !important;
         z-index: -1 !important;
     }
-
+    
+    /* 恢复重要的通用打印样式 */
+    .character-sheet {
+        transform: none !important;
+        margin: 0 !important;
+        padding: 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* 确保所有页面在打印时都有统一内边距 */
+    .character-sheet.tab-content#custom-skills,
+    .character-sheet.tab-content#items,
+    .character-sheet.tab-content#notes {
+        padding: 10px !important;
+        margin: 0 !important;
+    }
+    
+    /* 确保内容容器也有适当的内边距 */
+    .custom-skills-container,
+    .items-container {
+        padding: 0 !important; /* 移除内边距，使表格与section等宽 */
+        box-sizing: border-box !important;
+        width: 100% !important;
+    }
+    
     /* 道具页面充满整个页面的样式 */
     #items {
         page-break-inside: avoid !important;
@@ -264,8 +290,6 @@ body {
         height: auto !important; /* 改为自适应高度，而不是100vh */
         width: 100% !important;
         max-width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
     }
     
     /* 调查员信息区域进一步压缩 */
@@ -299,45 +323,45 @@ body {
         break-inside: avoid !important;
         display: block !important;
         margin: 0 !important;
-        padding: 0 !important;
         border-width: 1px !important;
         height: auto !important; /* 改为自适应高度 */
         overflow: hidden !important;
     }
     
+    /* 修改道具和笔记页面的标题样式，保持与其他栏目一致 */
     .items-section .section-title {
-        padding: 0 4px !important;
+        padding: 1px 5px !important;
         margin: 0 !important;
-        height: 14px !important;
-        min-height: 14px !important;
-        max-height: 14px !important;
-        font-size: 8px !important;
-        line-height: 14px !important;
+        height: auto !important;
+        min-height: 22px !important;
+        font-size: 11px !important;
+        line-height: 22px !important;
+        font-weight: bold !important;
         overflow: hidden !important;
+        background-color: var(--section-bg) !important;
     }
     
-    /* 表格容器最大化 */
+    /* 表格容器样式 */
     .items-container {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
         width: 100% !important;
         height: auto !important; /* 改为自适应高度 */
-        padding: 0 !important;
-        margin: 0 !important;
         overflow: hidden !important;
     }
     
-    /* 表格最大化 */
+    /* 表格样式 */
     .items-table {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
         height: auto !important; /* 改为自适应高度 */
         width: 100% !important;
+        box-sizing: border-box !important;
         margin: 0 !important;
         border-spacing: 0 !important;
     }
     
-    /* 表格体部分最大化 */
+    /* 表格体部分 */
     .items-table tbody {
         height: auto !important; /* 改为自适应高度 */
     }
@@ -395,26 +419,7 @@ body {
         overflow: hidden !important;
     }
     
-    /* 增加可显示的行数至48行 */
-    /* #items-body tr:nth-child(n+49) {
-        display: none !important; 
-    } */
-    
-    /* 恢复重要的通用打印样式 */
-    .character-sheet {
-        transform: none !important;
-        margin: 0 !important;
-        padding: 10px !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-    
-    /* 优化items特定的character-sheet */
-    .character-sheet.tab-content#items {
-        padding: 0 !important;
-        margin: 0 !important; /* 确保没有外边距 */
-    }
-    
+    /* 通用样式 */
     .character-sheet table,
     .character-sheet .weapons-table,
     .character-sheet .skills-table {
@@ -455,22 +460,6 @@ body {
         background-color: white !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
-    }
-
-    /* 确保自定义技能页在打印时没有多余的边距 */
-    #custom-skills {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    
-    #custom-skills .sheet-section {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-    
-    .character-sheet.tab-content#custom-skills {
-        margin: 0 !important;
-        padding: 0 !important;
     }
 
     /* 确保在打印时所有输入框的占位符都不显示 */
@@ -2067,10 +2056,14 @@ input[type="number"] {
 
 /* 道具区域标题调整 */
 .items-section .section-title {
-    padding: 1px 4px !important;
+    padding: 1px 5px !important;
     margin: 0 !important;
     height: auto !important;
-    min-height: 16px !important;
+    min-height: 22px !important;
+    font-size: 11px !important;
+    line-height: 22px !important;
+    font-weight: bold !important;
+    background-color: var(--section-bg);
 }
 
 /* 优化单元格比例 - 名称列宽度增加，备注列宽度增加 */
@@ -2341,7 +2334,7 @@ input[type="number"] {
 #notes .sheet-section,
 #items .sheet-section {
     padding: 0;
-    margin-bottom: 5px;
+    margin-bottom: 1px;
 }
 
 /* 4. 统一section-title的边距样式 */
@@ -2439,4 +2432,118 @@ input[type="number"] {
         overflow: hidden !important;
         text-overflow: ellipsis !important;
     }
+}
+
+/* 恢复重要的通用打印样式 */
+    .character-sheet {
+        transform: none !important;
+        margin: 0 !important;
+        padding: 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* 确保所有页面在打印时都有统一内边距 */
+    .character-sheet.tab-content#custom-skills,
+    .character-sheet.tab-content#items,
+    .character-sheet.tab-content#notes {
+        padding: 10px !important;
+        margin: 0 !important;
+    }
+    
+    /* 确保内容容器也有适当的内边距 */
+    .custom-skills-container,
+    .items-container {
+        padding: 0 !important; /* 移除内边距，使表格与section等宽 */
+        box-sizing: border-box !important;
+        width: 100% !important;
+    }
+    
+    /* 优化items特定的character-sheet，但不覆盖内边距 */
+    .character-sheet.tab-content#items {
+        margin: 0 !important;
+    }
+    
+    /* 确保表格与容器等宽 */
+    .custom-skills-container table,
+    .items-table {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+    }
+
+
+/* 修复CSS语法错误 */
+.fix-css-error {
+    display: block;
+}
+
+/* 统一所有页面的栏目间间隙 */
+#custom-skills .sheet-section,
+#items .sheet-section,
+#notes .sheet-section {
+    padding: 0;
+    margin-bottom: 1px; /* 确保所有栏目间隙保持一致 */
+    border: 1px solid var(--border-color);
+}
+
+.dummy-selector {
+    /* 空样式，用于修复CSS语法错误 */
+    display: block;
+}
+
+/* 空样式修复器 */
+.css-fix {
+    display: block;
+}
+
+/* 统一所有页面的栏目间间隙 */
+#custom-skills .sheet-section,
+#items .sheet-section,
+#notes .sheet-section {
+    padding: 0;
+    margin-bottom: 1px; /* 确保所有栏目间隙保持一致 */
+    border: 1px solid var(--border-color);
+}
+
+/* 确保所有页面的section-title样式一致 */
+#custom-skills .section-title,
+#items .section-title,
+#notes .section-title {
+    padding: 4px 6px;
+    margin: 0;
+    border-bottom: 1px solid #000;
+    background-color: var(--section-bg);
+    font-weight: bold;
+    font-size: 11px;
+    height: 22px;
+    line-height: 22px;
+}
+
+/* 确保所有页面的内容容器样式一致 */
+#custom-skills .custom-skills-container,
+#items .items-container,
+#notes .items-container {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 统一表格样式 */
+#custom-skills table,
+#items .items-table,
+#notes .items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    border: 1px solid #ddd;
+}
+
+/* 统一所有页面的容器样式 */
+#custom-skills.active .custom-skills-container,
+#items.active .items-container,
+#notes.active .items-container {
+    margin-top: 0;
+    padding-top: 0;
 }

@@ -479,8 +479,8 @@ function updateDerivedStats() {
 // 更新总点数
 function updateTotalPoints() {
     try {
-        // 属性列表
-        const attributes = ['str', 'con', 'siz', 'dex', 'app', 'int', 'pow', 'edu', 'luc'];
+        // 属性列表 - 不包含幸运值
+        const attributes = ['str', 'con', 'siz', 'dex', 'app', 'int', 'pow', 'edu'];
         
         // 计算总点数
         let total = 0;
@@ -2047,6 +2047,7 @@ function loadCharacter(skipAlert = false) {
     setTimeout(() => {
         updatePointsRemaining();
         updateDerivedStats();
+        updateTotalPoints(); // 添加此行，确保总点数正确更新
     }, 100);
 }
 
@@ -2658,7 +2659,7 @@ function createCustomSkillItem() {
     nameTd.appendChild(nameInput);
     tds.push(nameTd);
     
-    // 基础值 - 固定为0且只读
+    // 基础值 - 改为用户可修改
     const baseTd = document.createElement('td');
     baseTd.style.width = '30px';
     baseTd.style.padding = '1px';
@@ -2667,7 +2668,7 @@ function createCustomSkillItem() {
     baseInput.type = 'text';
     baseInput.className = 'skill-base';
     baseInput.value = '0';
-    baseInput.readOnly = true;
+    // 移除readOnly属性，允许用户修改
     baseInput.style.width = '25px';
     baseInput.style.textAlign = 'center';
     baseInput.style.border = 'none';
@@ -2782,7 +2783,7 @@ function createCustomSkillItem() {
     tds.push(fifthTd);
     
     // 添加事件监听器
-    [occInput, intInput, growthInput].forEach(input => {
+    [baseInput, occInput, intInput, growthInput].forEach(input => {
         // 检查是否已经添加过事件，避免重复添加
         if (input.hasAttributedEvent) {
             return;
@@ -2790,7 +2791,7 @@ function createCustomSkillItem() {
         
         input.addEventListener('input', function() {
             // 重新计算总值和成功率
-            const base = 0; // 基础值固定为0
+            const base = parseInt(baseInput.value) || 0;
             const occ = parseInt(occInput.value) || 0;
             const int = parseInt(intInput.value) || 0;
             const growth = parseInt(growthInput.value) || 0;
@@ -2800,7 +2801,7 @@ function createCustomSkillItem() {
             halfInput.value = Math.floor(total / 2);
             fifthInput.value = Math.floor(total / 5);
             
-            console.log(`自定义技能值更新: 职业=${occ}, 兴趣=${int}, 成长=${growth}, 总值=${total}`);
+            console.log(`自定义技能值更新: 基础=${base}, 职业=${occ}, 兴趣=${int}, 成长=${growth}, 总值=${total}`);
         });
         
         // 标记已添加事件
