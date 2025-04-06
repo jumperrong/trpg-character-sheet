@@ -327,11 +327,6 @@ function updateDerivedStats() {
         const sanityStartElement = document.querySelector('.sanity-start');
         const sanityMaxElement = document.querySelector('.sanity-max');
         
-        // 设置最大理智值为99
-        if (sanityMaxElement) {
-            sanityMaxElement.value = '99';
-        }
-        
         // 获取克苏鲁神话技能的常规值
         let cthulhuMythosValue = 0;
         
@@ -388,15 +383,29 @@ function updateDerivedStats() {
         console.log(`最终使用的克苏鲁神话值: ${cthulhuMythosValue}`);
         console.log(`当前意志值: ${powValue}`);
         
-        // 更新起始理智值为意志值减去克苏鲁神话值
+        // 更新起始理智值为意志值
         if (sanityStartElement) {
             if (powValue === 0) {
                 sanityStartElement.value = ''; // 如果意志为0或未填，显示为空
             } else {
-                // 计算初始理智值：意志值减去克苏鲁神话值
-                const startingSanity = Math.max(0, powValue - cthulhuMythosValue);
-                console.log(`计算初始理智值: ${powValue} - ${cthulhuMythosValue} = ${startingSanity}`);
-                sanityStartElement.value = startingSanity;
+                // 设置起始理智值为意志值
+                sanityStartElement.value = powValue;
+            }
+        }
+        
+        // 设置最大理智值为99-克苏鲁神话值
+        if (sanityMaxElement) {
+            const maxSanity = Math.max(0, 99 - cthulhuMythosValue);
+            sanityMaxElement.value = maxSanity;
+        }
+        
+        // 如果理智起始值大于最大值，则将起始值设置为最大值
+        if (sanityStartElement && sanityMaxElement) {
+            const startVal = parseInt(sanityStartElement.value) || 0;
+            const maxVal = parseInt(sanityMaxElement.value) || 0;
+            
+            if (startVal > maxVal) {
+                sanityStartElement.value = maxVal;
             }
         }
         
@@ -1334,19 +1343,19 @@ function saveCharacter(showAlert = true) {
             avatar: document.getElementById('avatar-img').src,
             status: {
                 sanity: {
-                    current: document.getElementById('current-san') ? document.getElementById('current-san').value : '',
-                    start: document.getElementById('start-san') ? document.getElementById('start-san').value : '',
-                    max: document.getElementById('max-san') ? document.getElementById('max-san').value : ''
+                    current: document.querySelector('.sanity-current') ? document.querySelector('.sanity-current').value : '',
+                    start: document.querySelector('.sanity-start') ? document.querySelector('.sanity-start').value : '',
+                    max: document.querySelector('.sanity-max') ? document.querySelector('.sanity-max').value : ''
                 },
                 health: {
-                    current: document.getElementById('current-hp') ? document.getElementById('current-hp').value : '',
-                    max: document.getElementById('max-hp') ? document.getElementById('max-hp').value : '',
-                    temp: document.getElementById('temp-hp') ? document.getElementById('temp-hp').value : ''
+                    current: document.querySelector('.health-current') ? document.querySelector('.health-current').value : '',
+                    max: document.querySelector('.health-max') ? document.querySelector('.health-max').value : '',
+                    temp: document.querySelector('.health-temp') ? document.querySelector('.health-temp').value : ''
                 },
                 magic: {
-                    current: document.getElementById('current-mp') ? document.getElementById('current-mp').value : '',
-                    max: document.getElementById('max-mp') ? document.getElementById('max-mp').value : '',
-                    temp: document.getElementById('temp-mp') ? document.getElementById('temp-mp').value : ''
+                    current: document.querySelector('.magic-current') ? document.querySelector('.magic-current').value : '',
+                    max: document.querySelector('.magic-max') ? document.querySelector('.magic-max').value : '',
+                    temp: document.querySelector('.magic-temp') ? document.querySelector('.magic-temp').value : ''
                 }
             },
             skills: {
@@ -1612,37 +1621,37 @@ function loadCharacter(skipAlert = false) {
         if (characterData.status) {
             // 理智值
             if (characterData.status.sanity) {
-                const currentSan = document.getElementById('current-san');
+                const currentSan = document.querySelector('.sanity-current');
                 if (currentSan) currentSan.value = characterData.status.sanity.current || '';
                 
-                const startSan = document.getElementById('start-san');
+                const startSan = document.querySelector('.sanity-start');
                 if (startSan) startSan.value = characterData.status.sanity.start || '';
                 
-                const maxSan = document.getElementById('max-san');
+                const maxSan = document.querySelector('.sanity-max');
                 if (maxSan) maxSan.value = characterData.status.sanity.max || '99';
             }
             
             // 生命值
             if (characterData.status.health) {
-                const currentHp = document.getElementById('current-hp');
+                const currentHp = document.querySelector('.health-current');
                 if (currentHp) currentHp.value = characterData.status.health.current || '';
                 
-                const maxHp = document.getElementById('max-hp');
+                const maxHp = document.querySelector('.health-max');
                 if (maxHp) maxHp.value = characterData.status.health.max || '';
                 
-                const tempHp = document.getElementById('temp-hp');
+                const tempHp = document.querySelector('.health-temp');
                 if (tempHp) tempHp.value = characterData.status.health.temp || '';
             }
             
             // 魔法值
             if (characterData.status.magic) {
-                const currentMp = document.getElementById('current-mp');
+                const currentMp = document.querySelector('.magic-current');
                 if (currentMp) currentMp.value = characterData.status.magic.current || '';
                 
-                const maxMp = document.getElementById('max-mp');
+                const maxMp = document.querySelector('.magic-max');
                 if (maxMp) maxMp.value = characterData.status.magic.max || '';
                 
-                const tempMp = document.getElementById('temp-mp');
+                const tempMp = document.querySelector('.magic-temp');
                 if (tempMp) tempMp.value = characterData.status.magic.temp || '';
             }
         }
