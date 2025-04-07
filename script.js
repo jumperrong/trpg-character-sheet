@@ -595,6 +595,7 @@ function createSkillsHeader() {
 // 创建技能列表
 function createSkillsList() {
     try {
+        console.log('创建技能列表...');
         const skillsContainer = document.querySelector('.skills-container');
         
         // 创建表格容器
@@ -622,16 +623,19 @@ function createSkillsList() {
         skillsData.forEach(skill => {
             // 检查是否有rows属性
             if (skill.subtypes && skill.rows && skill.rows > 1) {
-                // 为第一行添加主技能
-                allSkills.push(skill);
+                // 为第一行添加主技能，标记为有子技能的父技能
+                const parentSkill = {...skill, isParentWithSubSkills: true};
+                allSkills.push(parentSkill);
                 
                 // 为剩余的行添加占位符技能
                 for (let i = 1; i < skill.rows; i++) {
                     allSkills.push({
-                        name: `${skill.name}子技能${i}`,
+                        name: `${skill.name}子技能${i}`, // 更清晰的命名
                         base: skill.base,
                         isSubSkillRow: true,
-                        parentSkill: skill.name
+                        parentSkill: skill.name,
+                        subSkillIndex: i, // 添加子技能索引，标识这是第几个子技能行
+                        subtypes: skill.subtypes // 继承父技能的子类型列表
                     });
                 }
             } else {
@@ -672,6 +676,21 @@ function createSingleSkill(container, skillData) {
         const skillRow = document.createElement('div');
         skillRow.className = 'skill-row';
         
+        // 检查是否是子技能行
+        if (skillData.isSubSkillRow) {
+            skillRow.classList.add('sub-skill-row');
+            
+            // 添加子技能索引属性，明确标识这是第几个子技能行
+            if (skillData.subSkillIndex) {
+                skillRow.dataset.subSkillIndex = skillData.subSkillIndex;
+            }
+            
+            // 添加父技能名称属性，便于保存和加载时明确关联
+            if (skillData.parentSkill) {
+                skillRow.dataset.parentSkill = skillData.parentSkill;
+            }
+        }
+        
         // 技能名称单元格
         const nameCell = document.createElement('div');
         nameCell.className = 'skill-cell skill-name';
@@ -691,7 +710,6 @@ function createSingleSkill(container, skillData) {
             const parentSkillName = skillData.parentSkill || "技能";
             nameSpan.textContent = parentSkillName;
             nameSpan.setAttribute('data-skill', parentSkillName);
-            skillRow.classList.add('sub-skill-row');
         } else {
             nameSpan.textContent = skillData.name;
             nameSpan.setAttribute('data-skill', skillData.name);
@@ -919,8 +937,16 @@ function createSubtypeModal(skillData, selectedSubtypeElement, skillRow) {
             const customName = prompt('请输入自定义子技能名称：');
             if (customName && customName.trim() !== '') {
                 selectedSubtypeElement.textContent = customName.trim();
-                // 不修改基础值，保持原来的值
+                
+                // 设置子技能行的数据属性，便于保存和加载
+                skillRow.dataset.selectedSubtype = customName.trim();
+                console.log(`设置自定义子技能: ${customName.trim()}`);
+                
+                // 关闭弹窗
                 modal.classList.remove('active');
+                
+                // 触发保存
+                saveCharacter(false);
             }
         });
         
@@ -949,6 +975,10 @@ function createSubtypeModal(skillData, selectedSubtypeElement, skillRow) {
                     }
                 }
                 
+                // 设置子技能行的数据属性，便于保存和加载
+                skillRow.dataset.selectedSubtype = subtypeName;
+                console.log(`选择了子技能: ${subtypeName}，基础值: ${subtypeBase}，设置到行的dataset.selectedSubtype`);
+                
                 // 重新计算成功率
                 calculateSkillSuccess(skillRow);
                 
@@ -973,7 +1003,7 @@ function createSubtypeModal(skillData, selectedSubtypeElement, skillRow) {
         cancelButton.className = 'subtype-modal-button';
         cancelButton.textContent = '取消';
         cancelButton.addEventListener('click', function() {
-            modal.classList.remove('active');
+            document.body.removeChild(modal);
         });
         
         modalFooter.appendChild(cancelButton);
@@ -984,22 +1014,11 @@ function createSubtypeModal(skillData, selectedSubtypeElement, skillRow) {
         modalContent.appendChild(modalFooter);
         modal.appendChild(modalContent);
         
-        // 添加到文档
+        // 添加到页面并显示
         document.body.appendChild(modal);
-        
-        // 显示弹窗
         setTimeout(() => {
             modal.classList.add('active');
         }, 10);
-        
-        // 点击弹窗外部关闭
-        modal.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                modal.classList.remove('active');
-            }
-        });
-        
-        console.log("弹窗创建完成");
     } catch (error) {
         console.error('Error creating subtype modal:', error);
     }
@@ -1316,72 +1335,52 @@ function importCharacter() {
 // 保存角色数据
 function saveCharacter(showAlert = true) {
     try {
-        // 创建角色数据对象
+        console.log('开始保存角色数据...');
+        // 创建保存对象
         const characterData = {
-            basic: {
-                isPartner: document.getElementById('is-partner').checked,
-                characterName: document.getElementById('character-name').value,
-                playerName: document.getElementById('player-name').value,
-                era: document.getElementById('era').value,
-                occupation: document.getElementById('occupation').value,
-                age: document.getElementById('age').value,
-                gender: document.getElementById('gender').value,
-                residence: document.getElementById('residence').value,
-                birthplace: document.getElementById('birthplace').value
-            },
-            attributes: {
-                str: document.getElementById('str').value,
-                con: document.getElementById('con').value,
-                siz: document.getElementById('siz').value,
-                dex: document.getElementById('dex').value,
-                app: document.getElementById('app').value,
-                int: document.getElementById('int').value,
-                pow: document.getElementById('pow').value,
-                edu: document.getElementById('edu').value,
-                luc: document.getElementById('luc').value
-            },
-            avatar: document.getElementById('avatar-img').src,
-            status: {
-                sanity: {
-                    current: document.querySelector('.sanity-current') ? document.querySelector('.sanity-current').value : '',
-                    start: document.querySelector('.sanity-start') ? document.querySelector('.sanity-start').value : '',
-                    max: document.querySelector('.sanity-max') ? document.querySelector('.sanity-max').value : ''
-                },
-                health: {
-                    current: document.querySelector('.health-current') ? document.querySelector('.health-current').value : '',
-                    max: document.querySelector('.health-max') ? document.querySelector('.health-max').value : '',
-                    temp: document.querySelector('.health-temp') ? document.querySelector('.health-temp').value : ''
-                },
-                magic: {
-                    current: document.querySelector('.magic-current') ? document.querySelector('.magic-current').value : '',
-                    max: document.querySelector('.magic-max') ? document.querySelector('.magic-max').value : '',
-                    temp: document.querySelector('.magic-temp') ? document.querySelector('.magic-temp').value : ''
-                }
-            },
+            basic: {},
+            attributes: {},
             skills: {
-                occupationPoints: document.getElementById('occupation-points').value,
-                interestPoints: document.getElementById('interest-points').value,
                 skillsList: []
             },
+            combat: {},
             weapons: [],
-            combat: {
-                damageBonus: document.getElementById('damage-bonus').value,
-                spiritBonus: document.getElementById('spirit-bonus').value,
-                build: document.getElementById('build').value,
-                armor: document.getElementById('armor').value
-            },
-            items: []
+            stats: {},
+            version: '1.1.0'
         };
         
+        // 收集基本信息
+        characterData.basic.characterName = document.getElementById('character-name').value;
+        characterData.basic.playerName = document.getElementById('player-name').value;
+        characterData.basic.era = document.getElementById('era').value;
+        characterData.basic.occupation = document.getElementById('occupation').value;
+        characterData.basic.age = document.getElementById('age').value;
+        characterData.basic.gender = document.getElementById('gender').value;
+        characterData.basic.residence = document.getElementById('residence').value;
+        characterData.basic.birthplace = document.getElementById('birthplace').value;
+        characterData.basic.isPartner = document.getElementById('is-partner').checked;
+        
+        // 收集角色属性
+        ['str', 'con', 'siz', 'dex', 'app', 'int', 'pow', 'edu', 'luc'].forEach(attrId => {
+            characterData.attributes[attrId] = document.getElementById(attrId).value;
+        });
+        
+        // 收集技能点数
+        characterData.skills.occupationPoints = document.getElementById('occupation-points').value;
+        characterData.skills.interestPoints = document.getElementById('interest-points').value;
+        
         // 收集技能数据
-        document.querySelectorAll('.skill-row').forEach(skillRow => {
+        console.log('收集技能数据，包括子技能...');
+        document.querySelectorAll('.skill-row').forEach((skillRow, index) => {
             const nameElement = skillRow.querySelector('.skill-name span');
             if (nameElement) {
                 const skillName = nameElement.textContent.trim();
+                console.log(`处理技能[${index}]: ${skillName}, 是否子技能行: ${skillRow.classList.contains('sub-skill-row')}`);
+                
                 const skillData = {
                     name: skillName,
-                    isSubSkill: skillRow.classList.contains('sub-skill-row'), // 新增标识
-                    parentSkill: skillRow.querySelector('.skill-name span').dataset.skill, // 获取父技能
+                    isSubSkill: skillRow.classList.contains('sub-skill-row'),
+                    parentSkill: nameElement.dataset.skill, // 获取父技能
                     checked: skillRow.querySelector('.skill-check').checked,
                     base: skillRow.querySelector('.base-value').value,
                     occupation: skillRow.querySelector('.occupation-points').value,
@@ -1389,90 +1388,73 @@ function saveCharacter(showAlert = true) {
                     growth: skillRow.querySelector('.growth-points').value
                 };
                 
-                // 获取实际选择的子类型（新增）
+                // 获取实际选择的子类型
                 const subtypeElement = skillRow.querySelector('.selected-subtype');
                 if (subtypeElement && subtypeElement.textContent.trim()) {
                     skillData.subtype = subtypeElement.textContent.trim();
                     skillData.actualBase = skillRow.querySelector('.base-value').value; // 保存实际基础值
+                    console.log(`  子技能类型: ${skillData.subtype}, 实际基础值: ${skillData.actualBase}`);
+                }
+                
+                // 对于子技能行，添加更多信息以确保唯一识别
+                if (skillRow.classList.contains('sub-skill-row')) {
+                    // 查找这是第几个子技能行
+                    if (skillRow.dataset.subSkillIndex) {
+                        skillData.subSkillIndex = skillRow.dataset.subSkillIndex;
+                    } else {
+                        // 计算在父技能下的索引
+                        const parent = nameElement.closest('.skills-column');
+                        if (parent) {
+                            const allSubSkillRows = Array.from(parent.querySelectorAll('.sub-skill-row'));
+                            const index = allSubSkillRows.indexOf(skillRow);
+                            if (index !== -1) {
+                                skillData.subSkillIndex = index + 1;
+                                console.log(`  计算子技能索引: ${skillData.subSkillIndex}`);
+                            }
+                        }
+                    }
                 }
                 
                 characterData.skills.skillsList.push(skillData);
             }
         });
         
+        // 收集战斗属性
+        characterData.combat.damageBonus = document.getElementById('damage-bonus').value;
+        characterData.combat.spiritBonus = document.getElementById('spirit-bonus').value;
+        characterData.combat.build = document.getElementById('build').value;
+        characterData.combat.armor = document.getElementById('armor').value;
+        
+        // 收集状态
+        characterData.stats.sanity = {
+            current: document.querySelector('.sanity-current').value,
+            start: document.querySelector('.sanity-start').value,
+            max: document.querySelector('.sanity-max').value
+        };
+        
+        characterData.stats.health = {
+            current: document.querySelector('.health-current').value,
+            max: document.querySelector('.health-max').value,
+            temp: document.querySelector('.health-temp').value
+        };
+        
+        characterData.stats.magic = {
+            current: document.querySelector('.magic-current').value,
+            max: document.querySelector('.magic-max').value,
+            temp: document.querySelector('.magic-temp').value
+        };
+        
         // 收集武器数据
-        document.querySelectorAll('.weapon-row').forEach(weaponRow => {
-            // 跳过表头
-            if (!weaponRow.classList.contains('weapon-header')) {
-                const weaponData = {
-                    name: weaponRow.querySelector('.weapon-name').value,
-                    damage: weaponRow.querySelector('.weapon-damage').value,
-                    features: weaponRow.querySelector('.weapon-feature').value
-                };
-                characterData.weapons.push(weaponData);
-            }
-        });
-        
-        // 收集道具数据
-        const itemRows = document.querySelectorAll('#items-body tr');
-        const itemsData = [];
-        
-        itemRows.forEach(row => {
-            const nameInputs = row.querySelectorAll('.item-name');
-            const typeInputs = row.querySelectorAll('.item-type input');
-            const noteInputs = row.querySelectorAll('.item-note');
-            
-            for (let i = 0; i < nameInputs.length; i++) {
-                if (nameInputs[i].value || typeInputs[i].value || noteInputs[i].value) {
-                    itemsData.push({
-                        name: nameInputs[i].value,
-                        type: typeInputs[i].value,
-                        note: noteInputs[i].value
-                    });
-                }
-            }
-        });
-        
-        // 将道具数据添加到保存对象中 - 添加此行
-        characterData.items = itemsData;
-        
-        // 保存笔记数据 - 按纵向顺序收集
-        const noteRows = document.querySelectorAll('#notes-body tr');
-        const notesData = [];
-        const totalRows = noteRows.length;
-
-        // 先收集左列数据
-        noteRows.forEach((row, rowIndex) => {
-            const leftNameInput = row.querySelector('td:nth-child(1) .item-name');
-            const leftTypeInput = row.querySelector('td:nth-child(2) .item-type-input'); // 修改选择器
-            const leftNoteInput = row.querySelector('td:nth-child(3) .item-note');
-
-            if (leftNameInput && (leftNameInput.value || leftTypeInput.value || leftNoteInput.value)) {
-                notesData.push({
-                    name: leftNameInput.value || '',
-                    type: leftTypeInput.value || '',
-                    note: leftNoteInput.value || ''
+        document.querySelectorAll('.weapon-row').forEach(row => {
+            const nameInput = row.querySelector('.weapon-name');
+            if (nameInput && nameInput.value) {
+                characterData.weapons.push({
+                    name: nameInput.value,
+                    damage: row.querySelector('.weapon-damage').value,
+                    feature: row.querySelector('.weapon-feature').value
                 });
             }
         });
-
-        // 再收集右列数据
-        noteRows.forEach((row, rowIndex) => {
-            const rightNameInput = row.querySelector('td:nth-child(4) .item-name');
-            const rightTypeInput = row.querySelector('td:nth-child(5) .item-type-input'); // 修改选择器
-            const rightNoteInput = row.querySelector('td:nth-child(6) .item-note');
-
-            if (rightNameInput && (rightNameInput.value || rightTypeInput.value || rightNoteInput.value)) {
-                notesData.push({
-                    name: rightNameInput.value || '',
-                    type: rightTypeInput.value || '',
-                    note: rightNoteInput.value || ''
-                });
-            }
-        });
-
-        // 将笔记数据添加到保存对象中
-        characterData.notes = notesData;
         
         // 收集自定义技能数据
         const customSkillsData = [];
@@ -1528,10 +1510,12 @@ function saveCharacter(showAlert = true) {
         if (showAlert) {
             alert('角色数据已保存到本地缓存');
         }
+        
+        console.log('角色数据保存完成');
     } catch (error) {
         console.error('Error saving character:', error);
         if (showAlert) {
-        alert('保存失败，请稍后再试。');
+            alert('保存失败，请稍后再试。');
         }
     }
 }
@@ -1539,12 +1523,14 @@ function saveCharacter(showAlert = true) {
 // 加载角色数据
 function loadCharacter(skipAlert = false) {
     try {
+        console.log('开始加载角色数据...');
         // 获取本地保存的数据
         const dataStr = localStorage.getItem('characterData');
         if (!dataStr) {
             // 没有保存的数据
             if (!skipAlert) {
-            alert('没有找到保存的角色数据');
+                console.log('没有找到保存的角色数据');
+                alert('没有找到保存的角色数据');
             }
             return;
         }
@@ -1554,6 +1540,7 @@ function loadCharacter(skipAlert = false) {
         
         // 检查数据是否为空或无效
         if (!characterData || !characterData.basic) {
+            console.error('保存的角色数据无效或为空');
             alert('保存的角色数据无效或为空');
             localStorage.removeItem('characterData');
             return;
@@ -1658,12 +1645,15 @@ function loadCharacter(skipAlert = false) {
         
         // 技能点数
         if (characterData.skills) {
+            console.log('加载技能点数...');
             document.getElementById('occupation-points').value = characterData.skills.occupationPoints || '0';
             document.getElementById('interest-points').value = characterData.skills.interestPoints || '0';
             updatePointsRemaining();
             
             // 创建技能列表并填充数据
             if (characterData.skills.skillsList && characterData.skills.skillsList.length > 0) {
+                console.log(`准备加载${characterData.skills.skillsList.length}个技能...`);
+                
                 const leftColumn = document.querySelector('.skills-column.left-column');
                 const rightColumn = document.querySelector('.skills-column.right-column');
                 
@@ -1674,128 +1664,182 @@ function loadCharacter(skipAlert = false) {
                 // 重新创建技能列表
                 createSkillsList();
                 
-                // 加载技能值
-                characterData.skills.skillsList.forEach(skillData => {
-                    // 处理子技能
-                    if (skillData.isSubSkill) {
-                        // 通过父技能和子类型查找对应的子技能行
-                        const parentSkills = document.querySelectorAll(`.skill-name span[data-skill="${skillData.parentSkill}"]`);
-                        parentSkills.forEach(parentSkill => {
-                            const parentRow = parentSkill.closest('.skill-row');
-                            const subRows = parentRow.parentElement.querySelectorAll('.sub-skill-row');
-                            
-                            subRows.forEach(subRow => {
+                // 先加载所有非子技能
+                console.log('首先加载常规技能...');
+                characterData.skills.skillsList.filter(skill => !skill.isSubSkill).forEach((skillData, index) => {
+                    console.log(`加载常规技能[${index}]: ${skillData.name}`);
+                    const skillElement = document.querySelector(`.skill-name span[data-skill="${skillData.name}"]`);
+                    
+                    if (skillElement) {
+                        const skillRow = skillElement.closest('.skill-row');
+                        
+                        // 设置勾选状态
+                        const checkbox = skillRow.querySelector('.skill-check');
+                        if (checkbox) checkbox.checked = skillData.checked || false;
+                        
+                        // 设置基础值
+                        const baseInput = skillRow.querySelector('.base-value');
+                        if (baseInput) baseInput.value = skillData.base || '0';
+                        
+                        // 设置职业点数
+                        const occupationInput = skillRow.querySelector('.occupation-points');
+                        if (occupationInput) {
+                            const occValue = skillData.occupation || '0';
+                            occupationInput.value = (occValue === '0') ? '' : occValue;
+                        }
+                        
+                        // 设置兴趣点数
+                        const interestInput = skillRow.querySelector('.interest-points');
+                        if (interestInput) {
+                            const intValue = skillData.interest || '0';
+                            interestInput.value = (intValue === '0') ? '' : intValue;
+                        }
+                        
+                        // 设置成长点数
+                        const growthInput = skillRow.querySelector('.growth-points');
+                        if (growthInput) {
+                            const growthValue = skillData.growth || '0';
+                            growthInput.value = (growthValue === '0') ? '' : growthValue;
+                        }
+                        
+                        // 恢复子类型技能名称
+                        if (skillData.subtype) {
+                            const subtypeElement = skillRow.querySelector('.selected-subtype');
+                            if (subtypeElement) {
+                                subtypeElement.textContent = skillData.subtype;
+                                console.log(`  设置技能 ${skillData.name} 的子类型: ${skillData.subtype}`);
+                            }
+                        }
+                        
+                        // 计算成功率
+                        calculateSkillSuccess(skillRow);
+                    } else {
+                        console.warn(`未找到技能: ${skillData.name}`);
+                    }
+                });
+                
+                // 然后加载所有子技能
+                console.log('加载子技能...');
+                const subSkills = characterData.skills.skillsList.filter(skill => skill.isSubSkill);
+                console.log(`共有${subSkills.length}个子技能需要加载`);
+                
+                subSkills.forEach((skillData, index) => {
+                    console.log(`加载子技能[${index}]: 父技能=${skillData.parentSkill}, 子类型=${skillData.subtype || '未设置'}, 索引=${skillData.subSkillIndex || '未知'}`);
+                    
+                    // 首先通过父技能名找到所有可能的父技能行
+                    const parentSkills = document.querySelectorAll(`.skill-name span[data-skill="${skillData.parentSkill}"]`);
+                    console.log(`  找到${parentSkills.length}个匹配的父技能行`);
+                    
+                    parentSkills.forEach((parentSkill, pIndex) => {
+                        const parentRow = parentSkill.closest('.skill-row');
+                        const parentColumn = parentRow.closest('.skills-column');
+                        
+                        if (!parentColumn) {
+                            console.warn(`  父技能[${pIndex}]没有找到所在列`);
+                            return;
+                        }
+                        
+                        // 找到所有子技能行
+                        const subRows = parentColumn.querySelectorAll('.sub-skill-row');
+                        console.log(`  父技能[${pIndex}]下有${subRows.length}个子技能行`);
+                        
+                        // 确定要加载到哪个子技能行
+                        let targetSubRow = null;
+                        
+                        // 首先，尝试通过已设置的子类型匹配
+                        if (skillData.subtype) {
+                            for (const subRow of subRows) {
                                 const subtypeSpan = subRow.querySelector('.selected-subtype');
                                 if (subtypeSpan && subtypeSpan.textContent === skillData.subtype) {
-                                    // 找到匹配的子技能行
-                                    const baseInput = subRow.querySelector('.base-value');
-                                    if (baseInput) baseInput.value = skillData.actualBase || '0';
-                                    
-                                    const occupationInput = subRow.querySelector('.occupation-points');
-                                    if (occupationInput) occupationInput.value = skillData.occupation || '';
-                                    
-                                    const interestInput = subRow.querySelector('.interest-points');
-                                    if (interestInput) interestInput.value = skillData.interest || '';
-                                    
-                                    const growthInput = subRow.querySelector('.growth-points');
-                                    if (growthInput) growthInput.value = skillData.growth || '';
-                                    
-                                    calculateSkillSuccess(subRow);
+                                    targetSubRow = subRow;
+                                    console.log(`  通过子类型匹配找到目标子技能行: ${skillData.subtype}`);
+                                    break;
                                 }
-                            });
-                        });
-                    } 
-                    else {
-                        // 原有常规技能加载逻辑
-                        const skillElement = document.querySelector(`.skill-name span[data-skill="${skillData.name}"]`);
+                            }
+                        }
                         
-                        if (skillElement) {
-                            const skillRow = skillElement.closest('.skill-row');
+                        // 如果没找到匹配的子类型，尝试通过索引匹配
+                        if (!targetSubRow && skillData.subSkillIndex) {
+                            // 找到对应索引的子技能行
+                            const indexedSubRows = Array.from(subRows).filter(row => {
+                                return row.dataset.parentSkill === skillData.parentSkill;
+                            });
                             
-                            // 设置勾选状态
-                            const checkbox = skillRow.querySelector('.skill-check');
-                            if (checkbox) checkbox.checked = skillData.checked || false;
+                            if (indexedSubRows.length >= skillData.subSkillIndex) {
+                                targetSubRow = indexedSubRows[skillData.subSkillIndex - 1];
+                                console.log(`  通过索引匹配找到目标子技能行: 索引=${skillData.subSkillIndex}`);
+                            }
+                        }
+                        
+                        // 如果还没找到，使用第一个可用的子技能行
+                        if (!targetSubRow && subRows.length > 0) {
+                            // 查找第一个没有设置子类型的行
+                            for (const subRow of subRows) {
+                                const subtypeSpan = subRow.querySelector('.selected-subtype');
+                                if (!subtypeSpan || !subtypeSpan.textContent.trim()) {
+                                    targetSubRow = subRow;
+                                    console.log(`  通过查找空子类型行找到目标子技能行`);
+                                    break;
+                                }
+                            }
+                            
+                            // 如果所有行都已设置子类型，使用第一个子技能行
+                            if (!targetSubRow) {
+                                targetSubRow = subRows[0];
+                                console.log(`  无法找到匹配行，使用第一个子技能行`);
+                            }
+                        }
+                        
+                        // 如果找到了目标子技能行，设置其值
+                        if (targetSubRow) {
+                            // 设置子类型
+                            const subtypeSpan = targetSubRow.querySelector('.selected-subtype');
+                            if (subtypeSpan && skillData.subtype) {
+                                subtypeSpan.textContent = skillData.subtype;
+                                console.log(`  设置子类型: ${skillData.subtype}`);
+                            }
                             
                             // 设置基础值
-                            const baseInput = skillRow.querySelector('.base-value');
-                            if (baseInput) baseInput.value = skillData.base || '0';
+                            const baseInput = targetSubRow.querySelector('.base-value');
+                            if (baseInput) {
+                                baseInput.value = skillData.actualBase || skillData.base || '0';
+                                console.log(`  设置基础值: ${baseInput.value}`);
+                            }
                             
                             // 设置职业点数
-                            const occupationInput = skillRow.querySelector('.occupation-points');
+                            const occupationInput = targetSubRow.querySelector('.occupation-points');
                             if (occupationInput) {
                                 const occValue = skillData.occupation || '0';
                                 occupationInput.value = (occValue === '0') ? '' : occValue;
                             }
                             
                             // 设置兴趣点数
-                            const interestInput = skillRow.querySelector('.interest-points');
+                            const interestInput = targetSubRow.querySelector('.interest-points');
                             if (interestInput) {
                                 const intValue = skillData.interest || '0';
                                 interestInput.value = (intValue === '0') ? '' : intValue;
                             }
                             
                             // 设置成长点数
-                            const growthInput = skillRow.querySelector('.growth-points');
+                            const growthInput = targetSubRow.querySelector('.growth-points');
                             if (growthInput) {
                                 const growthValue = skillData.growth || '0';
                                 growthInput.value = (growthValue === '0') ? '' : growthValue;
                             }
                             
-                            // 恢复子类型技能名称
-                            if (skillData.subtype) {
-                                const subtypeElement = skillRow.querySelector('.selected-subtype');
-                                if (subtypeElement) {
-                                    subtypeElement.textContent = skillData.subtype;
-                                }
+                            // 设置勾选状态
+                            const checkbox = targetSubRow.querySelector('.skill-check');
+                            if (checkbox) {
+                                checkbox.checked = skillData.checked || false;
                             }
                             
                             // 计算成功率
-                            calculateSkillSuccess(skillRow);
+                            calculateSkillSuccess(targetSubRow);
+                            console.log(`  子技能加载完成`);
                         } else {
-                            // 没有找到精确匹配的技能，可能是子类型技能
-                            // 查找所有技能行并检查是否有匹配的
-                            document.querySelectorAll('.skill-row').forEach(row => {
-                                const nameSpan = row.querySelector('.skill-name span');
-                                const subtypeSpan = row.querySelector('.selected-subtype');
-                                
-                                // 检查技能名和子类型是否匹配
-                                if (nameSpan && skillData.name.includes(nameSpan.textContent.trim())) {
-                                    // 如果有子类型且匹配
-                                    if (skillData.subtype && subtypeSpan) {
-                                        subtypeSpan.textContent = skillData.subtype;
-                                        
-                                        // 设置技能值
-                                        const baseInput = row.querySelector('.base-value');
-                                        if (baseInput) baseInput.value = skillData.base || '0';
-                                        
-                                        const occupationInput = row.querySelector('.occupation-points');
-                                        if (occupationInput) {
-                                            const occValue = skillData.occupation || '0';
-                                            occupationInput.value = (occValue === '0') ? '' : occValue;
-                                        }
-                                        
-                                        const interestInput = row.querySelector('.interest-points');
-                                        if (interestInput) {
-                                            const intValue = skillData.interest || '0';
-                                            interestInput.value = (intValue === '0') ? '' : intValue;
-                                        }
-                                        
-                                        const growthInput = row.querySelector('.growth-points');
-                                        if (growthInput) {
-                                            const growthValue = skillData.growth || '0';
-                                            growthInput.value = (growthValue === '0') ? '' : growthValue;
-                                        }
-                                        
-                                        const checkbox = row.querySelector('.skill-check');
-                                        if (checkbox) checkbox.checked = skillData.checked || false;
-                                        
-                                        // 计算成功率
-                                        calculateSkillSuccess(row);
-                                    }
-                                }
-                            });
+                            console.warn(`  未找到合适的子技能行进行加载`);
                         }
-                    }
+                    });
                 });
             }
         }
