@@ -1302,6 +1302,22 @@ function importCharacter() {
                     try {
                         const importedData = JSON.parse(e.target.result);
                         
+                        // 进行数据格式标准化处理
+                        // 1. 统一武器数据字段格式
+                        if (importedData.weapons && Array.isArray(importedData.weapons)) {
+                            importedData.weapons.forEach(weapon => {
+                                // 确保武器特性字段使用统一的命名
+                                if (weapon.features !== undefined && weapon.feature === undefined) {
+                                    weapon.feature = weapon.features;
+                                }
+                            });
+                        }
+                        
+                        // 2. 处理状态数据格式
+                        if (importedData.stats && !importedData.status) {
+                            importedData.status = importedData.stats;
+                        }
+                        
                         // 将导入的数据保存到localStorage
                         localStorage.setItem('characterData', JSON.stringify(importedData));
                         
@@ -1345,8 +1361,10 @@ function saveCharacter(showAlert = true) {
             },
             combat: {},
             weapons: [],
-            stats: {},
-            version: '1.1.0'
+            status: {},
+            items: [],
+            notes: [],
+            version: '1.2.0'
         };
         
         // 收集基本信息
@@ -1426,19 +1444,19 @@ function saveCharacter(showAlert = true) {
         characterData.combat.armor = document.getElementById('armor').value;
         
         // 收集状态
-        characterData.stats.sanity = {
+        characterData.status.sanity = {
             current: document.querySelector('.sanity-current').value,
             start: document.querySelector('.sanity-start').value,
             max: document.querySelector('.sanity-max').value
         };
         
-        characterData.stats.health = {
+        characterData.status.health = {
             current: document.querySelector('.health-current').value,
             max: document.querySelector('.health-max').value,
             temp: document.querySelector('.health-temp').value
         };
         
-        characterData.stats.magic = {
+        characterData.status.magic = {
             current: document.querySelector('.magic-current').value,
             max: document.querySelector('.magic-max').value,
             temp: document.querySelector('.magic-temp').value
@@ -1500,6 +1518,55 @@ function saveCharacter(showAlert = true) {
         
         // 将自定义技能数据添加到保存对象中
         characterData.customSkills = customSkillsData;
+        
+        // 收集道具数据
+        console.log('收集道具数据...');
+        const itemsInputs = document.querySelectorAll('#items-body input.item-name');
+        itemsInputs.forEach(nameInput => {
+            if (nameInput && nameInput.value.trim()) {
+                const itemIndex = nameInput.dataset.itemIndex;
+                const typeInput = document.querySelector(`#items-body input.item-type-input[data-item-index="${itemIndex}"]`);
+                const noteInput = document.querySelector(`#items-body textarea.item-note[data-item-index="${itemIndex}"]`);
+                
+                characterData.items.push({
+                    name: nameInput.value,
+                    type: typeInput ? typeInput.value : '',
+                    note: noteInput ? noteInput.value : '',
+                    itemIndex: parseInt(itemIndex) // 保存索引以便精确恢复位置
+                });
+            }
+        });
+        
+        // 收集笔记数据
+        console.log('收集笔记数据...');
+        const rows = document.querySelectorAll('#notes-body tr');
+        rows.forEach((row, rowIndex) => {
+            // 处理左侧笔记
+            const leftNameInput = row.querySelector('td:nth-child(1) .item-name');
+            if (leftNameInput && leftNameInput.value.trim()) {
+                const leftTypeInput = row.querySelector('td:nth-child(2) .item-type-input');
+                const leftNoteInput = row.querySelector('td:nth-child(3) .item-note');
+                
+                characterData.notes.push({
+                    name: leftNameInput.value,
+                    type: leftTypeInput ? leftTypeInput.value : '',
+                    note: leftNoteInput ? leftNoteInput.value : ''
+                });
+            }
+            
+            // 处理右侧笔记
+            const rightNameInput = row.querySelector('td:nth-child(4) .item-name');
+            if (rightNameInput && rightNameInput.value.trim()) {
+                const rightTypeInput = row.querySelector('td:nth-child(5) .item-type-input');
+                const rightNoteInput = row.querySelector('td:nth-child(6) .item-note');
+                
+                characterData.notes.push({
+                    name: rightNameInput.value,
+                    type: rightTypeInput ? rightTypeInput.value : '',
+                    note: rightNoteInput ? rightNoteInput.value : ''
+                });
+            }
+        });
         
         // 将数据保存到本地存储
         const characterName = characterData.basic.characterName || 'character';
@@ -1640,6 +1707,45 @@ function loadCharacter(skipAlert = false) {
                 
                 const tempMp = document.querySelector('.magic-temp');
                 if (tempMp) tempMp.value = characterData.status.magic.temp || '';
+            }
+        }
+        // 兼容旧版本数据，尝试从stats中读取
+        else if (characterData.stats) {
+            console.log('使用旧版格式(stats)加载状态数据');
+            // 理智值
+            if (characterData.stats.sanity) {
+                const currentSan = document.querySelector('.sanity-current');
+                if (currentSan) currentSan.value = characterData.stats.sanity.current || '';
+                
+                const startSan = document.querySelector('.sanity-start');
+                if (startSan) startSan.value = characterData.stats.sanity.start || '';
+                
+                const maxSan = document.querySelector('.sanity-max');
+                if (maxSan) maxSan.value = characterData.stats.sanity.max || '99';
+            }
+            
+            // 生命值
+            if (characterData.stats.health) {
+                const currentHp = document.querySelector('.health-current');
+                if (currentHp) currentHp.value = characterData.stats.health.current || '';
+                
+                const maxHp = document.querySelector('.health-max');
+                if (maxHp) maxHp.value = characterData.stats.health.max || '';
+                
+                const tempHp = document.querySelector('.health-temp');
+                if (tempHp) tempHp.value = characterData.stats.health.temp || '';
+            }
+            
+            // 魔法值
+            if (characterData.stats.magic) {
+                const currentMp = document.querySelector('.magic-current');
+                if (currentMp) currentMp.value = characterData.stats.magic.current || '';
+                
+                const maxMp = document.querySelector('.magic-max');
+                if (maxMp) maxMp.value = characterData.stats.magic.max || '';
+                
+                const tempMp = document.querySelector('.magic-temp');
+                if (tempMp) tempMp.value = characterData.stats.magic.temp || '';
             }
         }
         
@@ -1892,7 +1998,8 @@ function loadCharacter(skipAlert = false) {
                 const featureInput = document.createElement('input');
                 featureInput.type = 'text';
                 featureInput.className = 'weapon-feature';
-                featureInput.value = weaponData.features || '';
+                // 兼容性处理，同时检查 feature 和 features 两个字段
+                featureInput.value = weaponData.feature || weaponData.features || '';
                 featureCell.appendChild(featureInput);
                 
                 // 添加到行
@@ -1903,6 +2010,107 @@ function loadCharacter(skipAlert = false) {
                 // 添加到表格
                 weaponsTable.appendChild(weaponRow);
             });
+            
+            // 确保至少有四行武器输入区
+            const totalRows = weaponsTable.querySelectorAll('.weapon-row').length;
+            const rowsToAdd = Math.max(0, 4 - totalRows);
+            
+            // 添加额外的空白武器行
+            for (let i = 0; i < rowsToAdd; i++) {
+                const emptyRow = document.createElement('div');
+                emptyRow.className = 'weapon-row';
+                
+                // 武器名称
+                const nameCell = document.createElement('div');
+                nameCell.className = 'weapon-cell';
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'weapon-name';
+                nameInput.placeholder = '武器名称';
+                nameCell.appendChild(nameInput);
+                
+                // 伤害
+                const damageCell = document.createElement('div');
+                damageCell.className = 'weapon-cell';
+                const damageInput = document.createElement('input');
+                damageInput.type = 'text';
+                damageInput.className = 'weapon-damage';
+                damageInput.placeholder = '伤害';
+                damageCell.appendChild(damageInput);
+                
+                // 特性
+                const featureCell = document.createElement('div');
+                featureCell.className = 'weapon-cell';
+                const featureInput = document.createElement('input');
+                featureInput.type = 'text';
+                featureInput.className = 'weapon-feature';
+                featureInput.placeholder = '特性';
+                featureCell.appendChild(featureInput);
+                
+                // 添加到行
+                emptyRow.appendChild(nameCell);
+                emptyRow.appendChild(damageCell);
+                emptyRow.appendChild(featureCell);
+                
+                // 添加到表格
+                weaponsTable.appendChild(emptyRow);
+            }
+            
+            // 应用武器行背景色
+            applyWeaponRowColors();
+        }
+        else {
+            // 没有武器数据，确保默认的四行武器输入可用
+            // 清空当前武器表并重新创建四行输入
+            const weaponsTable = document.querySelector('.weapons-table');
+            
+            // 保留表头
+            const weaponHeader = weaponsTable.querySelector('.weapon-header');
+            const headerHTML = weaponHeader ? weaponHeader.outerHTML : '';
+            
+            // 清空表格并重新添加表头
+            weaponsTable.innerHTML = headerHTML;
+            
+            // 添加四行空白武器行
+            for (let i = 0; i < 4; i++) {
+                const emptyRow = document.createElement('div');
+                emptyRow.className = 'weapon-row';
+                
+                // 武器名称
+                const nameCell = document.createElement('div');
+                nameCell.className = 'weapon-cell';
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'weapon-name';
+                nameInput.placeholder = '武器名称';
+                nameCell.appendChild(nameInput);
+                
+                // 伤害
+                const damageCell = document.createElement('div');
+                damageCell.className = 'weapon-cell';
+                const damageInput = document.createElement('input');
+                damageInput.type = 'text';
+                damageInput.className = 'weapon-damage';
+                damageInput.placeholder = '伤害';
+                damageCell.appendChild(damageInput);
+                
+                // 特性
+                const featureCell = document.createElement('div');
+                featureCell.className = 'weapon-cell';
+                const featureInput = document.createElement('input');
+                featureInput.type = 'text';
+                featureInput.className = 'weapon-feature';
+                featureInput.placeholder = '特性';
+                featureCell.appendChild(featureInput);
+                
+                // 添加到行
+                emptyRow.appendChild(nameCell);
+                emptyRow.appendChild(damageCell);
+                emptyRow.appendChild(featureCell);
+                
+                // 添加到表格
+                weaponsTable.appendChild(emptyRow);
+            }
             
             // 应用武器行背景色
             applyWeaponRowColors();
@@ -2047,32 +2255,36 @@ function loadCharacter(skipAlert = false) {
             const rows = document.querySelectorAll('#notes-body tr');
             const totalRows = rows.length;
 
-            // 按纵向顺序填充数据
+            // 填充笔记数据
             characterData.notes.forEach((note, index) => {
-                // 计算正确的行和列位置
-                const column = Math.floor(index / totalRows); // 0为左列，1为右列
-                const row = index % totalRows;
-
-                if (row < totalRows) {
-                    const currentRow = rows[row];
-                    const startCell = column * 3; // 每组3个单元格（名称、类型、备注）
+                if (index < totalRows * 2) { // 确保索引在有效范围内
+                    // 计算行和列
+                    const rowIndex = index % totalRows;
+                    const isRight = Math.floor(index / totalRows) > 0;
                     
-                    // 获取当前位置的输入框，修正选择器
-                    const nameInput = currentRow.querySelector(`td:nth-child(${1 + startCell * 3}) .item-name`);
-                    const typeInput = currentRow.querySelector(`td:nth-child(${2 + startCell * 3}) .item-type-input`); // 修改选择器
-                    const noteInput = currentRow.querySelector(`td:nth-child(${3 + startCell * 3}) .item-note`);
-
-                    // 填充数据
-                    if (nameInput) {
-                        nameInput.value = note.name || '';
-                        nameInput.setAttribute('value', note.name || '');
-                    }
-                    if (typeInput) {
-                        typeInput.value = note.type || '';
-                        typeInput.setAttribute('value', note.type || '');
-                    }
-                    if (noteInput) {
-                        noteInput.value = note.note || '';
+                    if (rowIndex < rows.length) {
+                        const row = rows[rowIndex];
+                        
+                        // 确定单元格位置
+                        const startCell = isRight ? 4 : 1; // 右侧从第4列开始，左侧从第1列开始
+                        
+                        // 获取输入字段
+                        const nameInput = row.querySelector(`td:nth-child(${startCell}) .item-name`);
+                        const typeInput = row.querySelector(`td:nth-child(${startCell + 1}) .item-type-input`);
+                        const noteInput = row.querySelector(`td:nth-child(${startCell + 2}) .item-note`);
+                        
+                        // 填充数据
+                        if (nameInput) {
+                            nameInput.value = note.name || '';
+                            nameInput.setAttribute('value', note.name || '');
+                        }
+                        if (typeInput) {
+                            typeInput.value = note.type || '';
+                            typeInput.setAttribute('value', note.type || '');
+                        }
+                        if (noteInput) {
+                            noteInput.value = note.note || '';
+                        }
                     }
                 }
             });
