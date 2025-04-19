@@ -992,6 +992,21 @@ function createSubtypeModal(skillData, selectedSubtypeElement, skillRow) {
             subtypeList.appendChild(item);
         });
         
+        // 添加清除选项
+        const clearItem = document.createElement('li');
+        clearItem.className = 'subtype-item clear-option';
+        clearItem.innerHTML = '<i class="fas fa-eraser"></i> 清除选择';
+        clearItem.addEventListener('click', function() {
+            selectedSubtypeElement.textContent = '';
+            const baseInput = skillRow.querySelector('.base-value');
+            if (baseInput) baseInput.value = '';
+            skillRow.removeAttribute('data-selected-subtype');
+            calculateSkillSuccess(skillRow);
+            document.body.removeChild(modal);
+            saveCharacter(false);
+        });
+        subtypeList.appendChild(clearItem);
+        
         modalBody.appendChild(subtypeList);
         
         // 创建弹窗底部和按钮
