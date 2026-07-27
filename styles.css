@@ -1,4 +1,4 @@
-﻿/* 
+/* 
  * COC 7版角色卡样式表
  * 组织结构:
  * 1. 变量和基本样式
@@ -535,14 +535,14 @@ body {
     }
     
     .tab-content.print-visible {
-        display: block !important;
-        position: static !important; /* 修复定位问题 */
-        left: auto !important; /* 重置错误定位 */
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        right: auto !important;
         visibility: visible !important;
         opacity: 1 !important;
         height: auto !important;
         overflow: visible !important;
-        page-break-after: always;
     }
 
     /* 隐藏打印控制类 */

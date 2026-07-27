@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COC 7版人物卡 - 主页面</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- CSS 模块化文件（按依赖顺序加载） -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/print.css">
     <!-- 添加Font Awesome图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -74,32 +78,32 @@
                     <input type="text" id="str" class="char-value" maxlength="3">
                 </div>
                 <div class="characteristic-item">
-                    <span class="char-label">体质 CON</span>
-                    <input type="text" id="con" class="char-value" maxlength="3">
-                </div>
-                <div class="characteristic-item">
-                    <span class="char-label">体型 SIZ</span>
-                    <input type="text" id="siz" class="char-value" maxlength="3">
-                </div>
-                <div class="characteristic-item">
                     <span class="char-label">敏捷 DEX</span>
                     <input type="text" id="dex" class="char-value" maxlength="3">
-                </div>
-                <div class="characteristic-item">
-                    <span class="char-label">外貌 APP</span>
-                    <input type="text" id="app" class="char-value" maxlength="3">
-                </div>
-                <div class="characteristic-item">
-                    <span class="char-label">智力 INT</span>
-                    <input type="text" id="int" class="char-value" maxlength="3">
                 </div>
                 <div class="characteristic-item">
                     <span class="char-label">意志 POW</span>
                     <input type="text" id="pow" class="char-value" maxlength="3">
                 </div>
                 <div class="characteristic-item">
+                    <span class="char-label">体质 CON</span>
+                    <input type="text" id="con" class="char-value" maxlength="3">
+                </div>
+                <div class="characteristic-item">
+                    <span class="char-label">外貌 APP</span>
+                    <input type="text" id="app" class="char-value" maxlength="3">
+                </div>
+                <div class="characteristic-item">
                     <span class="char-label">教育 EDU</span>
                     <input type="text" id="edu" class="char-value" maxlength="3">
+                </div>
+                <div class="characteristic-item">
+                    <span class="char-label">体型 SIZ</span>
+                    <input type="text" id="siz" class="char-value" maxlength="3">
+                </div>
+                <div class="characteristic-item">
+                    <span class="char-label">智力 INT</span>
+                    <input type="text" id="int" class="char-value" maxlength="3">
                 </div>
                 <div class="characteristic-item">
                     <span class="char-label">幸运 LUC</span>
@@ -284,25 +288,43 @@
         <div class="sheet-section custom-skills-section section-border">
             <div class="section-title">自定义技能 Custom Skills</div>
             <div class="custom-skills-container">
-                <table>
+                <table class="data-table custom-skills-table">
+                    <colgroup>
+                        <col style="width: 20%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                        <col style="width: 20%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                        <col style="width: 6%">
+                    </colgroup>
                     <thead>
                         <tr>
-                            <th style="width: 95px; text-align: left;">技能名</th>
-                            <th style="width: 30px;">基础</th>
-                            <th style="width: 30px;">职业</th>
-                            <th style="width: 30px;">兴趣</th>
-                            <th style="width: 30px;">成长</th>
-                            <th style="width: 30px;">成功</th>
-                            <th style="width: 30px;">困难</th>
-                            <th style="width: 30px;">极难</th>
-                            <th style="width: 95px; text-align: left;">技能名</th>
-                            <th style="width: 30px;">基础</th>
-                            <th style="width: 30px;">职业</th>
-                            <th style="width: 30px;">兴趣</th>
-                            <th style="width: 30px;">成长</th>
-                            <th style="width: 30px;">成功</th>
-                            <th style="width: 30px;">困难</th>
-                            <th style="width: 30px;">极难</th>
+                            <th class="col-name">技能名</th>
+                            <th>基础</th>
+                            <th>职业</th>
+                            <th>兴趣</th>
+                            <th>成长</th>
+                            <th>成功</th>
+                            <th>困难</th>
+                            <th>极难</th>
+                            <th class="col-name">技能名</th>
+                            <th>基础</th>
+                            <th>职业</th>
+                            <th>兴趣</th>
+                            <th>成长</th>
+                            <th>成功</th>
+                            <th>困难</th>
+                            <th>极难</th>
                         </tr>
                     </thead>
                     <tbody id="custom-skills-body">
@@ -475,6 +497,28 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- 导入确认弹窗 -->
+    <div class="modal" id="import-confirm-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>确认导入角色数据</h2>
+            </div>
+            <div class="modal-body" id="import-confirm-body">
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-import" class="modal-button">取消</button>
+                <button id="confirm-import" class="modal-button">确认导入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模块化脚本（按依赖顺序加载） -->
+    <script src="js/core.js"></script>
+    <script src="js/calc.js"></script>
+    <script src="js/skills.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/print.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html> 

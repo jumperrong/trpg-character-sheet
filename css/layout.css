@@ -1,0 +1,228 @@
+/**
+ * 布局样式
+ * 主页面网格布局、角色卡容器样式
+ */
+
+/* ========== 角色卡容器 ========== */
+.character-sheet {
+    margin-top: 10px !important;
+    border: 1px solid var(--border-color);
+    padding: 2px;
+    background-color: white;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 2px auto 10px auto;
+}
+
+/* ========== 主页面网格布局 ========== */
+#main-sheet {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr 0.9fr;
+    grid-template-rows: auto auto auto auto;
+    grid-gap: 2px;
+}
+
+/* ========== 自定义技能页面布局 ========== */
+#custom-skills {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+#custom-skills .basic-info-section {
+    margin-bottom: 0;
+}
+
+/* ========== 道具页面布局 ========== */
+#items {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+#items .basic-info-section {
+    margin-bottom: 0;
+}
+
+#items.active {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* ========== 调查员、属性、头像区域布局 ========== */
+.basic-info-section,
+.characteristics-section,
+.avatar-section {
+    grid-row: 1;
+}
+
+.basic-info-section {
+    grid-column: 1;
+    text-align: center;
+    padding: 5px 0;
+}
+
+.characteristics-section {
+    grid-column: 2;
+}
+
+.avatar-section {
+    grid-column: 3;
+}
+
+/* ========== 武器和战斗区域布局 ========== */
+.weapons-section {
+    grid-column: 1 / 3;
+    grid-row: 4 / 5;
+    margin-bottom: 2px;
+    background-color: white;
+}
+
+.combat-section {
+    grid-column: 3;
+    grid-row: 4;
+}
+
+/* ========== 状态区域布局 ========== */
+.stats-section {
+    grid-column: 1 / 4;
+    grid-row: 2;
+}
+
+/* ========== 技能区域布局 ========== */
+.skills-section {
+    grid-column: 1 / 4;
+    grid-row: 3;
+}
+
+/* ========== 区域边框 ========== */
+.section-border {
+    border: 1px solid var(--border-color);
+}
+
+/* ========== 区域标题 ========== */
+.section-title {
+    background-color: var(--section-bg);
+    padding: 1px 5px;
+    font-weight: bold;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.section-title .checkbox-row {
+    display: flex;
+    align-items: center;
+    font-size: 10px;
+    padding: 0 3px;
+}
+
+.section-title .total-attr {
+    font-size: 11px;
+    margin: 0;
+    padding: 0 3px;
+}
+
+/* ========== Tab 内容样式 ========== */
+.tab-content {
+    display: none !important;
+    visibility: hidden;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    position: absolute;
+    left: -9999px;
+}
+
+.tab-content.active {
+    display: grid !important;
+    visibility: visible;
+    opacity: 1;
+    height: auto;
+    overflow: visible;
+    position: relative;
+    left: 0;
+}
+
+/* Tab 内容明确样式 */
+#main-sheet.active {
+    display: grid !important;
+    grid-template-columns: 1fr 1.1fr 0.9fr;
+    grid-template-rows: auto auto auto auto;
+    grid-gap: 2px;
+}
+
+#custom-skills.active {
+    display: flex !important;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* ========== 通用栏目样式 ========== */
+.sheet-section {
+    padding: 0;
+}
+
+.sheet-section.custom-skills-section {
+    padding: 0;
+    margin: 0;
+    border-top: 0;
+}
+
+.sheet-section.custom-skills-section .section-title {
+    margin-bottom: 0;
+}
+
+/* ========== 统一所有页面的栏目间间隙 ========== */
+#custom-skills .sheet-section,
+#items .sheet-section,
+#notes .sheet-section {
+    padding: 0;
+    margin-bottom: 1px;
+    border: 1px solid var(--border-color);
+}
+
+/* ========== 统一所有页面的section-title样式 ========== */
+#custom-skills .section-title,
+#items .section-title,
+#notes .section-title {
+    padding: 4px 6px;
+    margin: 0;
+    border-bottom: 1px solid #000;
+    background-color: var(--section-bg);
+    font-weight: bold;
+    font-size: 11px;
+    height: 22px;
+    line-height: 22px;
+}
+
+/* ========== 统一所有页面的内容容器样式 ========== */
+#custom-skills .custom-skills-container,
+#items .items-container,
+#notes .items-container {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* ========== 统一所有页面的容器样式 ========== */
+#custom-skills.active .custom-skills-container,
+#items.active .items-container,
+#notes.active .items-container {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+/* ========== 统一表格样式 ========== */
+#custom-skills table,
+#items .items-table,
+#notes .items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+    border: 1px solid #ddd;
+}

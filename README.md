@@ -24,6 +24,9 @@
 ### 数据管理
 - 本地缓存自动保存
 - JSON格式导入/导出（不含头像数据）
+- **导入前预览确认**：显示角色基本信息和数据概览，用户确认后才覆盖当前数据
+- **路径记忆**：导出后自动记住目录，下次导入/导出对话框自动定位到该目录
+- **File System Access API**：支持选择保存路径（Chrome/Edge 86+），不支持的浏览器降级为传统下载
 - 多页面数据同步
 - 一键数据重置
 - 伙伴模式支持（NPC角色卡）
@@ -67,8 +70,30 @@
    - 纸张尺寸：A4
    - 页边距：默认（建议≥0.5cm）
    - 缩放：100%
+4. **分页控制**：主页面、自定义技能页、道具页、笔记页各自独立分页，不会重叠
 
 ## 技术实现
+
+### 项目结构
+```
+trpg-character-sheet/
+├── index.html          # 主页面
+├── styles.css          # 废弃的旧样式（保留兼容）
+├── README.md           # 说明文档
+├── css/                # 样式模块
+│   ├── variables.css   # CSS变量定义
+│   ├── layout.css      # 屏幕布局样式
+│   ├── components.css  # 组件样式（表格、按钮等）
+│   └── print.css       # 打印样式
+└── js/                 # 脚本模块
+    ├── core.js         # 核心工具（DOM缓存、事件总线、角色存储）
+    ├── calc.js         # 计算模块（属性计算、技能点计算）
+    ├── skills.js       # 技能管理（子技能、技能行生成）
+    ├── ui.js           # UI交互（模态框、编辑器）
+    ├── data.js         # 数据管理（保存、加载、导入、导出）
+    ├── print.js        # 打印功能
+    └── main.js         # 入口初始化
+```
 
 ### 核心架构
 | 组件        | 技术方案                  |
@@ -76,6 +101,7 @@
 | 数据存储    | localStorage + JSON序列化 |
 | UI框架     | 纯CSS Grid/Flex布局       |
 | 打印系统    | CSS媒体查询 + DOM切换     |
+| 导入导出    | File System Access API + 降级方案 |
 
 ### 关键特性
 - **实时计算引擎**：
@@ -84,9 +110,9 @@
   - 职业/兴趣点数实时统计
 
 - **打印优化**：
-  - 隐藏交互元素
-  - 固定行高(22px)
-  - 智能省略长文本
+  - 与屏幕布局一致的 Grid 网格打印
+  - 每页独立分页，避免重叠
+  - 自定义技能页压缩行高以适配单页
   - 背景色保留（CSS打印媒体）
 
 - **错误处理**：
@@ -102,22 +128,50 @@
 ### 数据结构
 ```javascript
 {
-  "basic": { /* 基础信息 */ },
-  "attributes": { /* 角色属性 */ },
-  "skills": { /* 技能配置 */ },
-  "customSkills": [ /* 自定义技能 */ ],
-  "items": [ /* 道具列表 */ ],
-  "notes": [ /* 笔记条目 */ ],
+  "basic": {
+    "characterName": "角色姓名",
+    "playerName": "玩家名",
+    "era": "时代",
+    "occupation": "职业",
+    "age": "年龄",
+    "gender": "性别",
+    "residence": "住址",
+    "birthplace": "出生地",
+    "isPartner": false
+  },
+  "attributes": { "str": "65", "con": "99", ... },
+  "status": {
+    "sanity": { "current": "79", "start": "86", "max": "86" },
+    "health": { "current": "19", "max": "16", "temp": "" },
+    "magic": { "current": "18", "max": "17", "temp": "" }
+  },
+  "skills": {
+    "occupationPoints": "0",
+    "interestPoints": "0",
+    "skillsList": [/* 技能列表 */]
+  },
+  "combat": {
+    "damageBonus": "+1d4",
+    "spiritBonus": "0",
+    "build": "1",
+    "armor": "1"
+  },
+  "weapons": [/* 武器列表 */],
+  "customSkills": [/* 自定义技能 */],
+  "items": [/* 道具列表 */],
+  "notes": [/* 笔记条目 */],
   "version": "1.2.0"
 }
 ```
 
 ### 注意事项
-1. 打印样式通过`@media print`实现
-2. 头像使用Base64编码存储
+1. 打印样式通过`@media print`实现，使用与屏幕一致的 Grid 网格布局
+2. 头像不参与导入导出（隐私保护）
 3. 输入验证限制：
    - 数字字段仅接受0-999整数
    - 文本字段最大长度255字符
+4. File System Access API 仅在 Chrome/Edge 86+ 可用
+5. 导入时会覆盖当前所有数据，请确认后再操作
 
 ## 版权声明
 © 2024 大胡子跑团  

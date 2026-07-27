@@ -1,0 +1,327 @@
+/**
+ * 打印样式
+ * 保持与屏幕一致的视觉效果，填满A4单页
+ */
+
+@media print {
+    @page {
+        size: A4;
+        margin: 0.3cm;
+    }
+
+    /* ===== 基础重置 ===== */
+    html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* ===== 隐藏非打印元素 ===== */
+    .page-title,
+    .float-nav,
+    #print-modal,
+    .float-buttons,
+    #edit-modal,
+    .modal,
+    #edit-modal-content,
+    .modal-content,
+    .tooltip,
+    .subtype-select-button,
+    .print-hidden,
+    .item-type-button {
+        display: none !important;
+    }
+
+    /* ===== 打印显示控制 ===== */
+    .tab-content:not(.print-visible) {
+        display: none !important;
+    }
+
+    .tab-content.print-visible {
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        right: auto !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        height: auto !important;
+        overflow: visible !important;
+        float: none !important;
+        transform: none !important;
+        display: block !important;
+    }
+
+    /* ===== 角色卡容器 ===== */
+    .character-sheet {
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        background: transparent !important;
+        width: 100% !important;
+    }
+
+    /* ===== 主页面：grid布局，内容自然流动 ===== */
+    #main-sheet.print-visible {
+        display: grid !important;
+        grid-template-columns: 1fr 1.1fr 0.9fr !important;
+        grid-template-rows: auto auto auto auto !important;
+        grid-gap: 2px !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+        /* 主页面后强制分页 */
+        page-break-after: always !important;
+        break-after: page !important;
+        /* 适当调整字体大小 */
+        font-size: 11px;
+    }
+
+    /* ===== 主页面子区域定位 ===== */
+    #main-sheet .basic-info-section {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        margin: 0 !important;
+    }
+
+    #main-sheet .characteristics-section {
+        grid-column: 2 !important;
+        grid-row: 1 !important;
+        margin: 0 !important;
+    }
+
+    #main-sheet .avatar-section {
+        grid-column: 3 !important;
+        grid-row: 1 !important;
+        margin: 0 !important;
+    }
+
+    #main-sheet .stats-section {
+        grid-column: 1 / 4 !important;
+        grid-row: 2 !important;
+        margin: 0 !important;
+    }
+
+    #main-sheet .skills-section {
+        grid-column: 1 / 4 !important;
+        grid-row: 3 !important;
+        margin-bottom: 2px !important;
+    }
+
+    #main-sheet .weapons-section {
+        grid-column: 1 / 3 !important;
+        grid-row: 4 !important;
+        margin-bottom: 2px !important;
+    }
+
+    #main-sheet .combat-section {
+        grid-column: 3 !important;
+        grid-row: 4 !important;
+    }
+
+    /* ===== 技能行高 ===== */
+    #main-sheet .skill-row {
+        min-height: 22px !important;
+        height: 22px !important;
+    }
+
+    #main-sheet .skill-cell {
+        height: 22px !important;
+    }
+
+    #main-sheet .sub-skill-row {
+        min-height: 20px !important;
+        height: 20px !important;
+    }
+
+    #main-sheet .sub-skill-row .skill-cell {
+        height: 20px !important;
+    }
+
+    /* ===== 武器行高 ===== */
+    #main-sheet .weapon-row {
+        min-height: 24px !important;
+        height: 24px !important;
+    }
+
+    /* ===== 战斗区域 ===== */
+    #main-sheet .combat-row {
+        min-height: 20px !important;
+        height: 20px !important;
+        margin-bottom: 2px !important;
+    }
+
+    /* ===== 其他页面 ===== */
+
+    #custom-skills.print-visible {
+        display: block !important;
+        page-break-before: always !important;
+        page-break-after: auto !important;
+        width: 100% !important;
+        font-size: 10px;
+    }
+
+    /* 自定义技能表格：压缩行高以放进一页 */
+    #custom-skills .custom-skills-table {
+        font-size: 10px !important;
+        width: 100% !important;
+    }
+
+    #custom-skills .custom-skills-table th,
+    #custom-skills .custom-skills-table td {
+        padding: 0 3px !important;
+        height: 18px !important;
+        line-height: 18px !important;
+    }
+
+    #custom-skills .custom-skills-table input {
+        font-size: 10px !important;
+        height: 16px !important;
+        line-height: 16px !important;
+        padding: 0 2px !important;
+    }
+
+    #items.print-visible {
+        display: block !important;
+        page-break-before: always !important;
+        page-break-after: auto !important;
+        width: 100% !important;
+    }
+
+    #notes.print-visible {
+        display: block !important;
+        page-break-before: always !important;
+        page-break-after: auto !important;
+        width: 100% !important;
+    }
+
+    /* ===== 通用打印优化 ===== */
+
+    /* 注意：table 不要用 page-break-inside: avoid，否则大表格会被整个推到下一页 */
+    .character-sheet table {
+        border-collapse: collapse;
+        width: 100% !important;
+    }
+
+    .character-sheet * {
+        box-sizing: border-box !important;
+    }
+
+    /* 输入框颜色 */
+    input[type="text"],
+    textarea,
+    .items-table input,
+    .items-table textarea {
+        color: black !important;
+        opacity: 1 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        background: transparent !important;
+    }
+
+    /* 隐藏占位符 */
+    input::placeholder,
+    textarea::placeholder {
+        color: transparent !important;
+        opacity: 0 !important;
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* 表格交替行颜色 */
+    .weapon-row:nth-child(odd):not(.weapon-header) {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .weapon-row:nth-child(even):not(.weapon-header) {
+        background-color: var(--table-row-alt) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .skills-column .skill-row:nth-child(even) {
+        background-color: var(--table-row-alt) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .skills-column .skill-row:nth-child(odd) {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 道具表格颜色 */
+    .items-table tr.even-row {
+        background-color: #f2f2f2 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .items-table tr.odd-row {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 自定义技能表格颜色 */
+    .custom-skills-table tbody tr.even-row {
+        background-color: #f2f2f2 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    .custom-skills-table tbody tr.odd-row {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 隐藏武器表头 */
+    .weapons-table .weapon-header {
+        display: none !important;
+    }
+
+    /* 技能表0值隐藏 */
+    .occupation-points[value="0"],
+    .interest-points[value="0"],
+    .growth-points[value="0"],
+    .skill-occupation[value="0"],
+    .skill-interest[value="0"],
+    .skill-growth[value="0"] {
+        color: transparent !important;
+        opacity: 0 !important;
+    }
+
+    /* 区域背景色打印 */
+    .section-title,
+    .stat-title,
+    .custom-skills-table th,
+    .items-table th {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 边框 */
+    .section-border {
+        border: 1px solid var(--border-color) !important;
+    }
+}
+
+/* ========== 屏幕专用样式 ========== */
+@media screen {
+    .print-hidden {
+        display: none !important;
+    }
+
+    .print-empty-skill {
+        color: transparent !important;
+        border: none !important;
+        background: transparent !important;
+    }
+}

@@ -1,0 +1,1387 @@
+/**
+ * 组件样式
+ * 技能、武器、状态、道具、模态框等组件
+ */
+
+/* ========== 基本信息区域样式 ========== */
+.basic-info-section {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    padding: 5px;
+}
+
+.basic-info-section .section-title {
+    background-color: var(--section-bg);
+    color: #000;
+    padding: 4px 6px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #666;
+}
+
+.info-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+.info-table tr {
+    border-bottom: 1px solid #eee;
+    height: 22px;
+}
+
+.info-table tr:last-child {
+    border-bottom: none;
+}
+
+.info-table .field-label {
+    width: 36px;
+    text-align: right;
+    padding: 2px 5px 2px 6px;
+    font-weight: bold;
+    font-size: 11px;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.info-table .field-input {
+    width: 100%;
+    height: 18px;
+    border: none;
+    border-bottom: 1px dotted #ccc;
+    background-color: transparent;
+    font-size: 11px;
+    padding: 1px 2px;
+}
+
+/* ========== 属性区域样式 ========== */
+.characteristics-section {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    padding: 5px;
+}
+
+.characteristics-section .section-title {
+    background-color: var(--section-bg);
+    color: #000;
+    padding: 4px 6px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #666;
+}
+
+/* 属性网格样式 */
+.characteristics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 2px;
+    padding: 2px;
+}
+
+.characteristic-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--border-color);
+    padding: 4px 8px;
+    background-color: white;
+}
+
+.char-label {
+    font-weight: bold;
+    flex: 1;
+}
+
+.char-value {
+    width: 45px;
+    text-align: center;
+    border: 1px solid #ccc;
+    padding: 2px;
+    background-color: white;
+}
+
+/* ========== 头像区域样式 ========== */
+.avatar-section {
+    grid-column: 3 / 4;
+    grid-row: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    padding: 5px;
+}
+
+.avatar-section .section-title {
+    background-color: #e9e9e9;
+    color: #000;
+    padding: 4px 6px;
+    font-weight: bold;
+    border-bottom: 1px solid #666;
+}
+
+.avatar-container {
+    width: 120px;
+    height: 120px;
+    position: relative;
+    border: 1px solid var(--border-color);
+    margin: 5px auto;
+    background-color: white;
+    max-width: 130px;
+}
+
+.avatar-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.avatar-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.ai-draw-link {
+    font-size: 10px;
+    color: #3366cc;
+    margin-top: 8px;
+    text-decoration: none;
+    border-bottom: 1px dotted #3366cc;
+}
+
+.ai-draw-link:hover {
+    color: #1a4aa3;
+    border-bottom: 1px solid #1a4aa3;
+}
+
+/* ========== 状态区域样式 ========== */
+.stats-section {
+    grid-column: 1 / 4;
+    grid-row: 2 / 3;
+    background-color: white;
+    padding: 2px;
+}
+
+.stats-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 1px;
+    gap: 1px;
+}
+
+.stat-box {
+    flex: 1;
+    border: 1px solid var(--border-color);
+    margin: 0;
+    background-color: white;
+}
+
+.stat-title {
+    background-color: var(--section-bg);
+    padding: 1px;
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.stat-grid {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 1px;
+}
+
+.stat-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 33%;
+    border-right: 1px solid #eee;
+    padding: 0 1px;
+    margin: 1px 0;
+}
+
+.stat-label {
+    flex: 1;
+    padding: 1px 0;
+    text-align: center;
+    font-size: 9px;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.stat-value {
+    width: 100%;
+    border: none;
+    text-align: center;
+    padding: 1px 0;
+    margin-top: 0;
+    border-bottom: 1px dotted #ccc;
+    background-color: transparent;
+}
+
+/* ========== 技能区域样式 ========== */
+.skills-section {
+    grid-column: 1 / 4;
+    grid-row: 3 / 4;
+    margin-bottom: 2px;
+    background-color: white;
+}
+
+.skills-header {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    background-color: var(--table-header-bg);
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+    padding: 4px 0;
+}
+
+.skills-header-column {
+    display: flex;
+    width: 50%;
+}
+
+.skills-header-column:first-child {
+    border-right: 1px solid #ddd;
+}
+
+.skills-header-item {
+    text-align: center;
+    border-right: 1px solid #ddd;
+    font-size: 10px;
+    box-sizing: border-box;
+    padding: 0 2px;
+}
+
+.skills-header-item:first-child {
+    flex: 4;
+    text-align: left;
+    padding-left: 25px;
+}
+
+.skills-header-item:not(:first-child) {
+    flex: 0.6;
+    min-width: 30px;
+}
+
+.skills-header-column .skills-header-item:last-child {
+    border-right: none;
+}
+
+.skills-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border: 1px solid #ddd;
+    margin: 0;
+    background-color: white;
+    overflow: hidden;
+}
+
+.skills-table {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.skills-column {
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+}
+
+.skill-row {
+    display: flex;
+    min-height: 22px;
+    border-bottom: 1px solid #ddd;
+    background-color: white;
+}
+
+.skills-column .skill-row:nth-child(even) {
+    background-color: var(--table-row-alt);
+}
+
+.skills-column .skill-row:nth-child(odd) {
+    background-color: white;
+}
+
+.left-column .skill-row {
+    border-right: 1px solid #ddd;
+}
+
+.skill-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    border-right: 1px solid #ddd;
+    height: 100%;
+    min-width: 20px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.skill-cell:not(.skill-name) {
+    flex: 0.6;
+    min-width: 30px;
+    padding: 0 1px;
+}
+
+.skill-name {
+    flex: 4;
+    justify-content: flex-start;
+    padding-left: 0;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.skill-name span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.skill-check {
+    margin: 0 3px;
+    flex-shrink: 0;
+}
+
+.skill-input {
+    width: 100%;
+    max-width: 30px;
+    min-width: 28px;
+    text-align: center;
+    border: none;
+    background: transparent;
+    font-size: 10px;
+    padding: 0 2px;
+}
+
+.skill-success {
+    text-align: center;
+    width: 100%;
+    font-size: 10px;
+    padding: 0;
+}
+
+.skill-cell:last-child {
+    border-right: none;
+}
+
+/* 子技能行样式 */
+.sub-skill-row {
+    background-color: inherit;
+}
+
+.sub-skill-row .skill-name {
+    font-style: italic;
+}
+
+.sub-skill-row .subtype-select-button {
+    background-color: rgba(232, 240, 255, 0.5);
+}
+
+/* 子技能选择按钮样式 */
+.subtype-select-button {
+    font-size: 10px;
+    padding: 1px 3px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-left: 3px;
+    display: inline-block;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* 子技能名称显示区域 */
+.selected-subtype {
+    margin-left: 3px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+}
+
+/* 下拉菜单样式 */
+.subtype-select {
+    font-size: 10px;
+    max-width: 100px;
+    border: none;
+    background: transparent;
+    border-bottom: 1px dotted #ccc;
+    padding: 0;
+    margin-left: 2px;
+}
+
+/* ========== 武器区域样式 ========== */
+.weapons-table {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.weapon-row {
+    display: table-row;
+    border-bottom: 1px solid #ddd;
+    min-height: 22px;
+}
+
+.weapon-cell {
+    display: table-cell;
+    padding: 2px;
+    border-right: 1px solid #ddd;
+    vertical-align: middle;
+    height: 22px;
+}
+
+.weapon-cell:last-child {
+    border-right: none;
+}
+
+.weapon-cell input {
+    width: 100%;
+    padding: 1px 2px;
+    border: none;
+    background: transparent;
+    font-size: 11px;
+    height: 18px;
+}
+
+/* ========== 战斗区域样式 ========== */
+.combat-stats {
+    padding: 2px;
+}
+
+.combat-row {
+    display: flex;
+    margin-bottom: 2px;
+    align-items: center;
+    min-height: 22px;
+}
+
+.combat-label {
+    flex: 2;
+    font-weight: bold;
+    font-size: 11px;
+    padding: 1px 2px;
+}
+
+.combat-value {
+    flex: 1;
+}
+
+.combat-input {
+    width: 100%;
+    border: 1px solid #ccc;
+    padding: 1px 2px;
+    background-color: white;
+    height: 20px;
+    font-size: 11px;
+}
+
+/* ========== 模态窗口样式 ========== */
+.modal {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1002;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background-color: white;
+    width: 400px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    padding: 10px;
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.modal-body {
+    padding: 15px;
+}
+
+.print-option {
+    margin-bottom: 10px;
+}
+
+.modal-footer {
+    padding: 10px;
+    text-align: right;
+    border-top: 1px solid #ddd;
+}
+
+.modal-button {
+    padding: 5px 15px;
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* ========== 子技能弹出窗口样式 ========== */
+.subtype-modal {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1002;
+    justify-content: center;
+    align-items: center;
+}
+
+.subtype-modal.active {
+    display: flex;
+}
+
+.subtype-modal-content {
+    background-color: white;
+    width: 350px;
+    max-height: 80vh;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.subtype-modal-header {
+    padding: 10px;
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.subtype-modal-header h2 {
+    margin: 0;
+    font-size: 14px;
+}
+
+.subtype-modal-body {
+    padding: 10px;
+    overflow-y: auto;
+    max-height: 60vh;
+}
+
+.subtype-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.subtype-item {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.subtype-item:hover {
+    background-color: #f5f5f5;
+}
+
+.subtype-item:last-child {
+    border-bottom: none;
+}
+
+.subtype-modal-footer {
+    padding: 10px;
+    border-top: 1px solid #ddd;
+    text-align: right;
+}
+
+.subtype-modal-button {
+    padding: 5px 15px;
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+/* ========== 悬浮按钮组样式 ========== */
+.float-buttons {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.float-button {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: white;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #555;
+    font-size: 18px;
+    position: relative;
+}
+
+.float-button i {
+    font-size: 18px;
+}
+
+.button-tooltip {
+    position: absolute;
+    right: 50px;
+    background-color: rgba(70, 70, 70, 0.9);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 1001;
+}
+
+.button-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -6px;
+    transform: translateY(-50%);
+    border-width: 6px 0 6px 6px;
+    border-style: solid;
+    border-color: transparent transparent transparent rgba(70, 70, 70, 0.9);
+}
+
+.float-button:hover .button-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.float-button:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.float-button:active {
+    transform: scale(0.95);
+}
+
+.float-button-container {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    right: 0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.dropdown-menu button {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+.dropdown-menu button:hover {
+    background-color: #e9e9e9;
+}
+
+.dropdown-menu button i {
+    margin-right: 8px;
+    width: 16px;
+    text-align: center;
+}
+
+.float-button-container:hover .dropdown-menu {
+    display: block;
+}
+
+/* ========== 自定义技能区域样式 ========== */
+.custom-skills-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+}
+
+.custom-skills-table {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border-spacing: 0 !important;
+    border: 1px solid #ddd;
+}
+
+.custom-skills-table thead {
+    display: table-header-group;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.custom-skills-table tbody {
+    display: table-row-group;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.custom-skills-table tr {
+    border-bottom: 1px solid #ddd;
+}
+
+.custom-skills-table tr:last-child {
+    border-bottom: none;
+}
+
+.custom-skills-table th,
+.custom-skills-table td {
+    padding: 1px !important;
+    margin: 0 !important;
+    border-right: 1px solid #ddd;
+    box-sizing: border-box;
+}
+
+.custom-skills-table th:last-child,
+.custom-skills-table td:last-child {
+    border-right: none;
+}
+
+.custom-skills-table th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: 2px;
+    font-weight: normal;
+    font-size: 11px;
+    text-align: center;
+    height: 22px;
+    border-right: 1px solid #ddd;
+}
+
+.custom-skills-table th.col-name {
+    text-align: left;
+    padding-left: 5px;
+}
+
+.custom-skills-table tbody tr.even-row {
+    background-color: #f2f2f2;
+}
+
+.custom-skills-table tbody tr.odd-row {
+    background-color: white;
+}
+
+.custom-skills-table input {
+    box-sizing: border-box;
+    height: 18px;
+    padding: 1px 2px;
+    font-size: 11px;
+    width: 100%;
+}
+
+.custom-skills-table td {
+    padding: 1px;
+    vertical-align: middle;
+    height: 22px;
+    text-align: center;
+}
+
+.custom-skills-table td:first-child,
+.custom-skills-table td:nth-child(9) {
+    text-align: left;
+}
+
+.custom-skills-table td.col-name {
+    text-align: left;
+}
+
+.custom-skills-table .skill-name {
+    width: 100%;
+    text-align: left;
+    padding-left: 4px;
+}
+
+.custom-skills-section.section-border {
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+}
+
+.custom-skills-section .section-title {
+    margin: 0 !important;
+    box-sizing: border-box;
+}
+
+#custom-skills .sheet-section {
+    margin-bottom: 0 !important;
+}
+
+/* ========== 道具页面样式 ========== */
+.items-section, .custom-skills-section {
+    border: 1px solid var(--border-color);
+    margin-bottom: 2px;
+    background-color: white;
+}
+
+.items-section .section-title {
+    padding: 1px 5px !important;
+    margin: 0 !important;
+    height: auto !important;
+    min-height: 22px !important;
+    font-size: 11px !important;
+    line-height: 22px !important;
+    font-weight: bold !important;
+    background-color: var(--section-bg);
+}
+
+.items-container {
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: 1px solid #ddd;
+}
+
+.items-table th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: 2px;
+    font-weight: normal;
+    font-size: 11px;
+    text-align: center;
+    height: 22px;
+    border-right: 1px solid #ddd;
+}
+
+.items-table th:first-child {
+    text-align: left;
+    padding-left: 5px;
+}
+
+.items-table th:last-child {
+    border-right: none;
+}
+
+.items-table td {
+    padding: 1px;
+    vertical-align: middle;
+}
+
+.items-table input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    padding: 2px;
+    font-size: 11px;
+    box-sizing: border-box;
+}
+
+.items-table td:nth-child(3) {
+    border-right: 1px solid #ddd;
+}
+
+.items-table tr.even-row {
+    background-color: #f2f2f2;
+}
+
+.items-table tr.odd-row {
+    background-color: white;
+}
+
+.items-table .item-name,
+.items-table .item-type-input,
+.items-table .item-note {
+    height: 20px;
+    line-height: 20px;
+}
+
+.items-table .item-type {
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.items-table .item-type input {
+    text-align: center;
+    cursor: pointer;
+    background-color: #f9f9f9;
+    border-bottom: none;
+}
+
+/* 单元格比例 */
+.items-table th:nth-child(1), .items-table td:nth-child(1),
+.items-table th:nth-child(4), .items-table td:nth-child(4) {
+    width: 18%;
+}
+
+.items-table th:nth-child(2), .items-table td:nth-child(2),
+.items-table th:nth-child(5), .items-table td:nth-child(5) {
+    width: 9%;
+}
+
+.items-table th:nth-child(3), .items-table td:nth-child(3),
+.items-table th:nth-child(6), .items-table td:nth-child(6) {
+    width: 23%;
+}
+
+/* ========== 道具类型样式 ========== */
+.item-note {
+    display: block;
+    width: 100%;
+    height: 1.5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: all 0.3s;
+    resize: none;
+}
+
+.item-note:focus {
+    height: 5em;
+    white-space: normal;
+    overflow: auto;
+}
+
+/* ========== 数据表格通用样式 ========== */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin: 0;
+    border: 1px solid #ddd;
+}
+
+.data-table th {
+    background-color: #f2f2f2;
+    border-bottom: 1px solid #ddd;
+    padding: 2px;
+    font-weight: normal;
+    font-size: 11px;
+    text-align: center;
+    height: 22px;
+    border-right: 1px solid #ddd;
+}
+
+.data-table th:first-child {
+    text-align: left;
+    padding-left: 5px;
+}
+
+.data-table th:last-child {
+    border-right: none;
+}
+
+.data-table td {
+    padding: 1px;
+    vertical-align: middle;
+    height: 22px;
+    border-right: 1px solid #ddd;
+}
+
+.data-table input,
+.data-table textarea {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 11px;
+    height: 20px;
+    line-height: 20px;
+    padding: 2px;
+    -webkit-text-fill-color: black !important;
+}
+
+.data-table textarea {
+    resize: vertical;
+    min-height: 20px;
+    max-height: 100px;
+    white-space: pre-wrap;
+    overflow-y: auto;
+}
+
+.data-table td:nth-child(3) {
+    border-right: 1px solid #ddd;
+}
+
+/* ========== 笔记页面样式 ========== */
+#notes .items-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+#notes tr.even-row {
+    background-color: #f2f2f2;
+}
+
+#notes tr.odd-row {
+    background-color: white;
+}
+
+#notes td, #notes th {
+    border: 1px solid #ddd;
+    padding: 1px;
+    vertical-align: middle;
+}
+
+#notes .note-name,
+#notes .note-type-input,
+#notes .note-note {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 11px;
+    height: 18px;
+}
+
+/* ========== 笔记备注框样式 ========== */
+#notes .note-note {
+    height: 18px !important;
+    max-height: 18px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: none !important;
+    resize: none;
+}
+
+#notes .note-note:focus {
+    height: 18px !important;
+    max-height: 18px !important;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* ========== 帮助模态框样式 ========== */
+#help-modal-content {
+    max-width: 600px;
+    width: 90%;
+}
+
+#help-modal-body {
+    max-height: 70vh;
+    overflow-y: auto;
+    line-height: 1.5;
+}
+
+#help-modal-body p {
+    margin-bottom: 10px;
+}
+
+#help-modal-body h3 {
+    margin-top: 15px;
+    margin-bottom: 8px;
+    color: var(--header-bg);
+}
+
+#help-modal-body ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+#help-modal-body li {
+    margin-bottom: 5px;
+}
+
+#help-modal-body .credits {
+    margin-top: 20px;
+    font-style: italic;
+    color: #666;
+}
+
+/* ========== Tooltip 样式 ========== */
+.tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    z-index: 1001;
+    display: none;
+    min-width: 300px;
+    max-width: 800px;
+    word-wrap: break-word;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ========== 编辑模态框样式 ========== */
+#edit-modal {
+    display: none;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1002;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+
+#edit-modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+#edit-modal-content {
+    background-color: white;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    transition: transform 0.3s ease;
+    transform: translateY(-20px);
+    box-sizing: border-box;
+}
+
+#edit-modal.active #edit-modal-content {
+    transform: translateY(0);
+}
+
+#edit-modal textarea {
+    width: calc(100% - 20px);
+    height: auto;
+    min-height: 200px;
+    font-size: 14px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+
+#edit-modal .modal-footer {
+    text-align: right;
+    margin-top: 10px;
+}
+
+#edit-modal .modal-button {
+    padding: 5px 15px;
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+/* ========== 调查员名称样式 ========== */
+.investigator-name {
+    font-size: 1.1em;
+    margin-right: 20px;
+}
+
+/* ========== 自定义技能容器样式 ========== */
+.custom-skills-container {
+    padding: 15px;
+}
+
+/* ========== 道具与自定义技能区域通用样式 ========== */
+.items-grid, .custom-skills-grid {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.item-row, .custom-skill-row {
+    display: table-row;
+    border-bottom: 1px solid #ddd;
+    background-color: white;
+}
+
+.item-row:nth-child(even), .custom-skill-row:nth-child(even) {
+    background-color: var(--table-row-alt);
+}
+
+.item-header, .custom-skill-header {
+    background-color: var(--table-header-bg);
+    font-weight: bold;
+}
+
+.item-cell, .custom-skill-cell {
+    display: table-cell;
+    padding: 4px;
+    border-right: 1px solid #ddd;
+    vertical-align: middle;
+}
+
+.item-cell:last-child, .custom-skill-cell:last-child {
+    border-right: none;
+}
+
+.item-cell input, .custom-skill-cell input, .item-cell select {
+    width: 100%;
+    border: none;
+    background: transparent;
+}
+
+/* ========== 通用占位符样式 ========== */
+.items-table input::placeholder,
+#notes .items-table input::placeholder,
+.items-table textarea::placeholder {
+    color: #999 !important;
+    font-size: 11px !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    opacity: 0.75 !important;
+    padding-left: 1px !important;
+}
+
+/* ========== 统一所有输入框基础样式 ========== */
+.items-table input,
+#notes .items-table input,
+.items-table .item-name,
+.items-table .item-type input,
+.items-table .item-note {
+    font-size: 11px !important;
+    height: 18px !important;
+    line-height: 18px !important;
+    padding: 0 2px !important;
+    font-family: inherit !important;
+}
+
+/* 笔记页textarea样式 */
+#notes .items-table textarea.item-note {
+    width: 100%;
+    box-sizing: border-box;
+    height: 18px !important;
+    max-height: 18px !important;
+    min-height: 18px !important;
+    line-height: 18px !important;
+    border: none;
+    padding: 0 2px;
+    margin: 0;
+    background: transparent;
+    resize: none;
+    overflow: hidden;
+    white-space: nowrap;
+    font-family: inherit;
+    font-size: 11px;
+    vertical-align: middle;
+}
+
+#notes .items-table textarea.item-note:focus {
+    height: 18px !important;
+    max-height: 18px !important;
+    min-height: 18px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+}
+
+/* ========== 道具按钮样式 ========== */
+.add-button {
+    margin: 5px;
+    padding: 3px 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    cursor: pointer;
+}
+
+.item-type-button {
+    display: inline-block;
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 0 3px;
+    margin-left: 3px;
+    font-size: 9px;
+    cursor: pointer;
+}
+
+/* ========== 道具区域标题调整 ========== */
+#items .items-table th:nth-child(3),
+#items .items-table td:nth-child(3) {
+    width: 23%;
+}
+
+/* ========== 道具与笔记容器样式 ========== */
+#notes .items-container,
+#items .items-container {
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+    overflow-y: auto;
+    background-color: #fff;
+}
