@@ -22,6 +22,7 @@
             <div class="tab" data-tab="custom-skills">自定义技能</div>
             <div class="tab" data-tab="items">道具</div>
             <div class="tab" data-tab="notes">笔记</div>
+            <div class="tab" data-tab="growth">幕间成长</div>
         </div>
     </div>
 
@@ -401,6 +402,83 @@
         </div>
     </div>
 
+    <!-- 幕间成长页面 -->
+    <div class="character-sheet tab-content" id="growth">
+        <!-- 调查员信息 -->
+        <div class="sheet-section basic-info-section section-border">
+            <div class="section-title">
+                <span>调查员 Investigator</span>
+                <span class="investigator-name">姓名：<span id="growth-character-name"></span></span>
+            </div>
+        </div>
+
+        <!-- 成长点数区域 -->
+        <div class="sheet-section section-border growth-points-section">
+            <div class="section-title">
+                <span>幕间成长 Intermission Growth</span>
+            </div>
+            <div class="growth-info">
+                <div class="growth-points-display">
+                    <span>剩余成长点数：</span>
+                    <input type="number" id="growth-points-remaining" value="0" min="0" class="growth-points-input">
+                    <button id="confirm-growth-points" class="confirm-points-button">确认点数</button>
+                    <span id="growth-points-status" class="growth-points-status">未确认</span>
+                </div>
+                <div class="growth-rules">
+                    <span class="rule-title">成长规则：</span>
+                    <ul class="rule-list">
+                        <li>D100 掷骰结果需大于当前技能值</li>
+                        <li>成长值：1-29→1d10, 30-49→1d8, 50-69→1d6, 70-89→1d4, 90+→1d3</li>
+                        <li>投出100时获得双倍成长值</li>
+                        <li>技能值>95时，投出96-100总能成长</li>
+                        <li>每次成长消耗1点成长点数</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 技能选择和掷骰区域 -->
+        <div class="sheet-section section-border growth-main-section">
+            <div class="section-title">
+                <span>技能成长检定</span>
+                <div class="growth-filter">
+                    <label>
+                        <input type="checkbox" id="filter-default-skills" checked>
+                        显示默认技能
+                    </label>
+                    <label>
+                        <input type="checkbox" id="filter-custom-skills" checked>
+                        显示自定义技能
+                    </label>
+                </div>
+            </div>
+            <div class="growth-skill-list" id="growth-skill-list">
+                <!-- 技能列表将被动态生成 -->
+            </div>
+        </div>
+
+        <!-- 掷骰结果区域 -->
+        <div class="sheet-section section-border growth-result-section" id="growth-result-section" style="display:none;">
+            <div class="section-title">
+                <span>成长检定结果</span>
+            </div>
+            <div class="dice-result" id="dice-result">
+                <!-- 掷骰结果将被动态生成 -->
+            </div>
+        </div>
+
+        <!-- 历史记录区域 -->
+        <div class="sheet-section section-border growth-history-section">
+            <div class="section-title">
+                <span>成长历史记录</span>
+                <button id="clear-growth-history" class="mini-button">清空历史</button>
+            </div>
+            <div class="growth-history" id="growth-history">
+                <!-- 历史记录将被动态生成 -->
+            </div>
+        </div>
+    </div>
+
     <!-- 悬浮按钮组 -->
     <div class="float-buttons">
         <button class="float-button" id="print-button">
@@ -518,6 +596,7 @@
     <script src="js/skills.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/data.js"></script>
+    <script src="js/grow.js"></script>
     <script src="js/print.js"></script>
     <script src="js/main.js"></script>
 </body>

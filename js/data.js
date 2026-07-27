@@ -563,8 +563,8 @@ function collectItems() {
 }
 
 /**
- * 收集笔记数据（左右双栏）
- * 按顺序收集：先收集左列所有笔记，再收集右列
+ * 收集笔记数据（仅左列）
+ * 所有笔记均使用左列偶数位置：默认笔记在位置 0, 2, 4，自定义笔记从位置 6 开始
  */
 function collectNotes() {
     const body = DOMCache.get('notes-body');
@@ -572,28 +572,54 @@ function collectNotes() {
     
     const notes = [];
     const rows = body.querySelectorAll('tr');
+    const DEFAULT_NOTES = [
+        { name: '贡献', type: '其他' },  // 位置 0
+        { name: '幕间', type: '其他' },  // 位置 2
+        { name: '修炼', type: '其他' }   // 位置 4
+    ];
+    const DEFAULT_POSITIONS = [0, 2, 4];
     
-    rows.forEach(row => {
-        // 左栏
+    // 只收集左列偶数位置的笔记数据
+    const leftNotes = [];
+    rows.forEach((row, rowIndex) => {
+        const globalPos = rowIndex * 2; // 偶数位置（左列）
         const leftName = row.querySelector('td:nth-child(1) .item-name');
-        if (leftName && leftName.value.trim()) {
-            notes.push({
+        if (leftName) {
+            leftNotes.push({
+                globalPos: globalPos,
                 name: leftName.value,
                 type: row.querySelector('td:nth-child(2) .item-type-input')?.value || '',
                 note: row.querySelector('td:nth-child(3) .item-note')?.value || ''
             });
-        }
-        
-        // 右栏
-        const rightName = row.querySelector('td:nth-child(4) .item-name');
-        if (rightName && rightName.value.trim()) {
-            notes.push({
-                name: rightName.value,
-                type: row.querySelector('td:nth-child(5) .item-type-input')?.value || '',
-                note: row.querySelector('td:nth-child(6) .item-note')?.value || ''
-            });
+        } else {
+            leftNotes.push({ globalPos: globalPos, name: '', type: '', note: '' });
         }
     });
+    
+    // 收集默认笔记（位置 0, 2, 4）
+    for (let i = 0; i < DEFAULT_NOTES.length; i++) {
+        const position = DEFAULT_POSITIONS[i];
+        const note = leftNotes[position / 2] || {};
+        notes.push({
+            name: DEFAULT_NOTES[i].name,
+            type: DEFAULT_NOTES[i].type,
+            note: note.note || ''
+        });
+    }
+    
+    // 收集自定义笔记（跳过默认位置，只收集有名称的）
+    for (let i = 0; i < leftNotes.length; i++) {
+        const globalPos = leftNotes[i].globalPos;
+        if (DEFAULT_POSITIONS.includes(globalPos)) continue;
+        const note = leftNotes[i];
+        if (note.name && note.name.trim()) {
+            notes.push({
+                name: note.name,
+                type: note.type || '',
+                note: note.note || ''
+            });
+        }
+    }
     
     return notes;
 }
@@ -846,7 +872,10 @@ function setSkillRowData(row, data, isSub = false) {
     
     if (data.subtype) {
         const subtypeElement = row.querySelector('.selected-subtype');
-        if (subtypeElement) subtypeElement.textContent = data.subtype;
+        if (subtypeElement) {
+            subtypeElement.textContent = data.subtype;
+            row.dataset.selectedSubtype = data.subtype;
+        }
     }
     
     calculateSkillSuccess(row);
@@ -1010,16 +1039,54 @@ function loadNotes(data) {
     
     const rows = document.querySelectorAll('#notes-body tr');
     const totalRows = rows.length;
+    const DEFAULT_NOTES_COUNT = 3;
+    const DEFAULT_NOTE_NAMES = ['贡献', '幕间', '修炼'];
+    const DEFAULT_POSITIONS = [0, 2, 4];
     
-    data.notes.forEach((note, index) => {
-        if (index >= totalRows * 2) return;
+    // 分离默认笔记和自定义笔记
+    let defaultNotes = [null, null, null];
+    let customNotes = [];
+    
+    data.notes.forEach(note => {
+        const defaultIndex = DEFAULT_NOTE_NAMES.indexOf(note.name);
+        if (defaultIndex !== -1 && note.type === '其他') {
+            defaultNotes[defaultIndex] = note;
+        } else {
+            customNotes.push(note);
+        }
+    });
+    
+    // 填充前三项默认笔记（只恢复备注），映射到全局位置 0, 2, 4（均为左列）
+    for (let i = 0; i < DEFAULT_NOTES_COUNT; i++) {
+        const globalPosition = DEFAULT_POSITIONS[i];
+        const rowIndex = Math.floor(globalPosition / 2);
         
-        const rowIndex = index % totalRows;
-        const isRight = Math.floor(index / totalRows) > 0;
+        if (rowIndex >= totalRows) break;
         
-        if (rowIndex >= rows.length) return;
+        const startCell = 1; // 左列
+        const row = rows[rowIndex];
         
-        const startCell = isRight ? 4 : 1;
+        if (!row) continue;
+        
+        const noteInput = row.querySelector(`td:nth-child(${startCell + 2}) .item-note`);
+        if (noteInput && defaultNotes[i]) {
+            noteInput.value = defaultNotes[i].note || '';
+        }
+    }
+    
+    // 填充自定义笔记（只使用左列偶数位置，跳过默认位置 0, 2, 4，从位置 6 开始）
+    const SKIP_POSITIONS = [0, 2, 4];
+    let customIdx = 0;
+    for (let globalPos = 0; customIdx < customNotes.length; globalPos += 2) {
+        if (SKIP_POSITIONS.includes(globalPos)) continue;
+        if (globalPos >= totalRows * 2) break;
+        
+        const note = customNotes[customIdx];
+        const rowIndex = Math.floor(globalPos / 2);
+        
+        if (rowIndex >= rows.length) break;
+        
+        const startCell = 1; // 左列
         const row = rows[rowIndex];
         
         const nameInput = row.querySelector(`td:nth-child(${startCell}) .item-name`);
@@ -1029,15 +1096,20 @@ function loadNotes(data) {
         if (nameInput) {
             nameInput.value = note.name || '';
             nameInput.setAttribute('value', note.name || '');
+            nameInput.readOnly = false;
+            nameInput.classList.remove('default-note');
         }
         if (typeInput) {
             typeInput.value = note.type || '';
             typeInput.setAttribute('value', note.type || '');
+            typeInput.classList.remove('default-note');
         }
         if (noteInput) {
             noteInput.value = note.note || '';
         }
-    });
+        
+        customIdx++;
+    }
 }
 
 /**

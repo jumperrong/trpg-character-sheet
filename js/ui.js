@@ -145,32 +145,53 @@ function initResetAndHelp() {
         helpModalBody.innerHTML = `
             <h3>【基本操作】</h3>
             <ul>
-                <li>填写角色基本信息（姓名、职业等）</li>
-                <li>输入角色各项属性值（力量、体质等）</li>
+                <li>填写角色基本信息（姓名、职业、年代等）</li>
+                <li>输入角色各项属性值（力量、体质、体型、敏捷等）</li>
                 <li>分配职业点数和兴趣点数到相应技能</li>
-                <li>记录角色的武器和道具</li>
+                <li>输入成长点数用于已成长的技能</li>
+            </ul>
+            
+            <h3>【多页面说明】</h3>
+            <ul>
+                <li><b>主页面</b>：角色基本信息、属性、技能、战斗属性、状态值、武器</li>
+                <li><b>自定义技能</b>：添加6个自定义技能（左列3个+右列3个）</li>
+                <li><b>道具</b>：记录角色携带的20种道具</li>
+                <li><b>笔记</b>：固定前三项为贡献、幕间、修炼，其余为自定义笔记</li>
+                <li><b>幕间成长</b>：消耗成长点数进行技能成长检定</li>
             </ul>
             
             <h3>【数据管理】</h3>
             <ul>
-                <li>保存按钮：将角色数据保存到本地缓存</li>
-                <li>导入/导出：可将角色数据导出为JSON文件或从JSON文件导入</li>
-                <li>重置按钮：清空所有数据并重新开始</li>
+                <li><b>保存</b>：将角色数据保存到本地浏览器缓存</li>
+                <li><b>导出</b>：将角色数据导出为JSON文件（选择保存路径）</li>
+                <li><b>导入</b>：从JSON文件加载角色数据（导入前会显示确认提示）</li>
+                <li><b>重置</b>：清空所有数据并重新开始</li>
             </ul>
             
-            <h3>【多页面管理】</h3>
+            <h3>【幕间成长规则】</h3>
             <ul>
-                <li>主页面：角色基本信息、属性和技能</li>
-                <li>自定义技能：可添加自定义技能</li>
-                <li>道具页：记录角色携带的80种道具</li>
+                <li>投入成长点数后，选择技能进行D100检定</li>
+                <li>检定规则：投出值 > 当前技能值 即为成功</li>
+                <li>成长值根据当前技能值决定：1-29→1d10，30-49→1d8，50-69→1d6，70-89→1d4，90+→1d3</li>
+                <li>投出100时获得双倍成长值</li>
+                <li>技能值>95时，投出96-100总能成长</li>
+                <li>每次检定消耗1点成长点数，一次性完成所有点数的掷骰结算</li>
+                <li>信用评级和克苏鲁神话不参与成长</li>
             </ul>
             
             <h3>【打印功能】</h3>
             <ul>
-                <li>点击打印按钮可选择打印主页面、自定义技能页或道具页</li>
-                <li>打印时会自动优化格式，隐藏不必要的元素</li>
-                <li>道具页打印经过特别优化，可在一页纸上完整显示所有80个道具项目</li>
-                <li>打印前请确保已保存角色数据，以免丢失</li>
+                <li>点击"打印角色卡"按钮可打开打印对话框</li>
+                <li>支持打印主页面和自定义技能页</li>
+                <li>打印时会自动优化格式以适应A4纸张</li>
+                <li>建议使用Chrome/Edge浏览器获得最佳打印效果</li>
+            </ul>
+            
+            <h3>【注意事项】</h3>
+            <ul>
+                <li>笔记前三项（贡献、幕间、修炼）名称和类型固定，仅可编辑备注</li>
+                <li>自定义技能的子技能类型可在技能页选择</li>
+                <li>导入数据会覆盖当前所有内容，请谨慎操作</li>
             </ul>
             
             <p class="credits">Design by 龙王 jumper.rong@outlook.com<br>大胡子跑团版权所有</p>
@@ -681,13 +702,23 @@ function openItemTypeModal(typeInput) {
 }
 
 // 统一创建单元格函数
-function createNoteCells(row, noteIndex) {
+function createNoteCells(row, noteIndex, defaults = {}) {
+    const isDefault = defaults.isDefault === true;
+    
     // 第一列：笔记名称
     const nameCell = document.createElement('td');
     const nameInput = document.createElement('input');
     nameInput.type = 'text';
     nameInput.className = 'item-name';
     nameInput.placeholder = '未命名';
+    if (defaults.name) {
+        nameInput.value = defaults.name;
+        nameInput.setAttribute('value', defaults.name);
+    }
+    if (isDefault) {
+        nameInput.readOnly = true;
+        nameInput.classList.add('default-note');
+    }
     nameCell.appendChild(nameInput);
     row.appendChild(nameCell);
 
@@ -696,15 +727,24 @@ function createNoteCells(row, noteIndex) {
     typeCell.className = 'item-type';
     const typeInput = document.createElement('input');
     typeInput.type = 'text';
-    typeInput.className = 'item-type-input'; // 添加类名
+    typeInput.className = 'item-type-input';
     typeInput.placeholder = '点击选择';
     typeInput.readOnly = true;
+    if (defaults.type) {
+        typeInput.value = defaults.type;
+        typeInput.setAttribute('value', defaults.type);
+    }
+    if (isDefault) {
+        typeInput.classList.add('default-note');
+    }
     typeCell.appendChild(typeInput);
     
-    // 添加点击事件
-    typeCell.addEventListener('click', function() {
-        openNoteTypeModal(typeInput);
-    });
+    if (!isDefault) {
+        // 只有非默认笔记才可点击修改类型
+        typeCell.addEventListener('click', function() {
+            openNoteTypeModal(typeInput);
+        });
+    }
     row.appendChild(typeCell);
 
     // 第三列：备注
@@ -730,11 +770,32 @@ function initNotesTable() {
     itemsBody.innerHTML = '';
     
     const totalRows = 40;
+    
+    // 前三项默认配置（均在左列）
+    const defaultNotes = [
+        { name: '贡献', type: '其他', isDefault: true },  // 位置 0 (Row 0, Left)
+        { name: '幕间', type: '其他', isDefault: true },  // 位置 2 (Row 1, Left)
+        { name: '修炼', type: '其他', isDefault: true }   // 位置 4 (Row 2, Left)
+    ];
+    
+    // 默认笔记位置映射：全局位置 -> 默认笔记索引
+    const defaultPositionMap = { 0: 0, 2: 1, 4: 2 };
+    
     for (let i = 0; i < totalRows; i++) {
         const row = document.createElement('tr');
         row.className = i % 2 === 0 ? 'even-row' : 'odd-row';
-        createNoteCells(row, i * 2);
-        createNoteCells(row, i * 2 + 1); 
+        
+        // 左栏 - 全局位置 i * 2
+        const leftGlobalIndex = i * 2;
+        const leftDefaults = defaultPositionMap[leftGlobalIndex] !== undefined 
+            ? defaultNotes[defaultPositionMap[leftGlobalIndex]] 
+            : {};
+        createNoteCells(row, leftGlobalIndex, leftDefaults);
+        
+        // 右栏 - 全局位置 i * 2 + 1
+        const rightGlobalIndex = i * 2 + 1;
+        createNoteCells(row, rightGlobalIndex, {});
+        
         itemsBody.appendChild(row);
     }
 
@@ -839,5 +900,10 @@ function switchTab(tabId) {
             console.log('切换到笔记页，强制初始化笔记表');
             initNotesTable();
         }
+    }
+    
+    // 检查是否切换到成长页
+    if (tabId === 'growth' && typeof Growth !== 'undefined') {
+        Growth.onTabActivate();
     }
 }

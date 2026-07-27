@@ -1013,6 +1013,19 @@
     resize: none;
 }
 
+/* ========== 默认笔记样式（贡献/幕间/修炼） ========== */
+.items-table .item-name.default-note,
+.items-table .item-type-input.default-note {
+    background-color: #e8e8e8;
+    color: #555;
+    font-weight: bold;
+    cursor: not-allowed;
+}
+
+.items-table .item-type.default-note {
+    cursor: not-allowed;
+}
+
 .item-note:focus {
     height: 5em;
     white-space: normal;
@@ -1384,4 +1397,501 @@
     box-sizing: border-box;
     overflow-y: auto;
     background-color: #fff;
+}
+
+/* ========== 幕间成长样式 ========== */
+#growth {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#growth .sheet-section {
+    background-color: white;
+    border: 1px solid var(--border-color);
+}
+
+/* 成长点数区域 */
+.growth-points-section .growth-info {
+    padding: 10px;
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.growth-points-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.growth-points-input {
+    width: 60px;
+    height: 28px;
+    font-size: 16px;
+    text-align: center;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-weight: bold;
+    color: var(--header-bg);
+}
+
+.growth-points-input:focus {
+    outline: none;
+    border-color: var(--header-bg);
+}
+
+.confirm-points-button {
+    padding: 5px 12px;
+    background-color: #555;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: normal;
+    transition: background-color 0.2s;
+}
+
+.confirm-points-button:hover {
+    background-color: #333;
+}
+
+.growth-points-status {
+    font-size: 12px;
+    color: #999;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background-color: #f5f5f5;
+}
+
+.growth-points-status.confirmed {
+    color: #333;
+    background-color: #e0e0e0;
+    font-weight: bold;
+}
+
+.growth-rules {
+    flex: 1;
+    min-width: 300px;
+}
+
+.rule-title {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.rule-list {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #555;
+}
+
+/* 技能列表区域 */
+.growth-main-section .section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.growth-filter {
+    display: flex;
+    gap: 15px;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.growth-filter label {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.growth-skill-list {
+    padding: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.growth-skill-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+}
+
+.growth-skill-row:hover {
+    background-color: #f8f8f8;
+}
+
+.growth-skill-row:last-child {
+    border-bottom: none;
+}
+
+.skill-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.skill-name {
+    font-weight: bold;
+    min-width: 100px;
+}
+
+.skill-value {
+    color: #666;
+    font-size: 12px;
+}
+
+.growth-die {
+    background-color: #e0e0e0;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: #555;
+}
+
+.skill-tag {
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 2px;
+    color: white;
+}
+
+.skill-tag.custom {
+    background-color: #888;
+}
+
+.skill-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.roll-button {
+    padding: 5px 12px;
+    background-color: var(--header-bg);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+}
+
+.roll-button:hover:not(:disabled) {
+    background-color: #555;
+}
+
+.roll-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.no-skills {
+    text-align: center;
+    color: #999;
+    padding: 30px;
+}
+
+/* 掷骰结果区域 */
+.growth-result-section {
+    padding: 15px;
+}
+
+.dice-result {
+    margin-bottom: 15px;
+}
+
+.roll-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.skill-being-rolled {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.current-value {
+    color: #666;
+    font-size: 13px;
+}
+
+.dice-animation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.dice {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    border-radius: 8px;
+    color: white;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.dice.success {
+    background-color: #444;
+}
+
+.dice.failure {
+    background-color: #999;
+}
+
+.dice-label {
+    font-size: 12px;
+    color: #666;
+}
+
+.roll-result {
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.roll-result.success {
+    background-color: #f0f0f0;
+    border: 1px solid #333;
+}
+
+.roll-result.failure {
+    background-color: #f8f8f8;
+    border: 1px solid #999;
+}
+
+.success-msg, .failure-msg {
+    margin: 0 0 8px 0;
+    font-size: 15px;
+}
+
+.success-msg {
+    color: #333;
+}
+
+.failure-msg {
+    color: #666;
+}
+
+.double-bonus {
+    color: #000;
+    font-weight: bold;
+}
+
+.growth-calc, .failure-reason {
+    margin: 5px 0;
+    color: #555;
+    font-size: 13px;
+}
+
+.new-total {
+    margin: 8px 0 0;
+    font-size: 14px;
+}
+
+.highlight {
+    color: #000;
+    font-size: 18px;
+    padding: 2px 6px;
+    background-color: #e8e8e8;
+    border-radius: 3px;
+}
+
+.result-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.result-actions .modal-button {
+    padding: 6px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#confirm-growth {
+    background-color: var(--header-bg);
+    color: white;
+    border: none;
+}
+
+#cancel-growth {
+    background-color: #e0e0e0;
+    color: #333;
+    border: none;
+}
+
+/* 历史记录区域 */
+.growth-history-section .section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mini-button {
+    padding: 3px 10px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.mini-button:hover {
+    background-color: #e0e0e0;
+}
+
+.growth-history {
+    padding: 5px 10px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 12px;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-item.success {
+    background-color: #f5f5f5;
+}
+
+.history-item.failure {
+    background-color: #fafafa;
+}
+
+.history-time {
+    color: #999;
+    min-width: 90px;
+}
+
+.history-skill {
+    font-weight: bold;
+    min-width: 100px;
+}
+
+.history-roll {
+    color: #666;
+    min-width: 60px;
+}
+
+.history-growth {
+    color: #333;
+    font-weight: bold;
+    min-width: 50px;
+}
+
+.history-fail {
+    color: #888;
+    font-weight: bold;
+}
+
+.history-total {
+    color: #555;
+}
+
+.history-success-count {
+    font-size: 11px;
+    color: #666;
+    min-width: 80px;
+}
+
+.no-history {
+    text-align: center;
+    color: #999;
+    padding: 20px;
+}
+
+/* 多次掷骰结果样式 */
+.roll-stats {
+    display: flex;
+    gap: 10px;
+    font-size: 12px;
+    color: #666;
+}
+
+.roll-item {
+    padding: 6px 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 12px;
+}
+
+.roll-item:last-of-type {
+    border-bottom: none;
+}
+
+.roll-item-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3px;
+    color: #555;
+}
+
+.dice-result-value {
+    font-weight: bold;
+}
+
+.roll-item-success {
+    color: #333;
+}
+
+.roll-item-failure {
+    color: #888;
+    font-style: italic;
+}
+
+.roll-final {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #ddd;
+}
+
+/* 成长页面响应式 */
+@media (max-width: 768px) {
+    .growth-info {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .skill-info {
+        flex-wrap: wrap;
+    }
+
+    .roll-summary {
+        flex-direction: column;
+        gap: 10px;
+    }
 }

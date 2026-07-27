@@ -1,6 +1,6 @@
 /**
  * 主入口模块 - 初始化和页面加载
- * 依赖：core.js, calc.js, skills.js, ui.js, data.js, print.js
+ * 依赖：core.js, calc.js, skills.js, ui.js, data.js, grow.js, print.js
  */
 
 // 初始化角色卡
@@ -37,6 +37,11 @@ function initCharacterSheet() {
     
     // 初始化重置和帮助按钮
     initResetAndHelp();
+    
+    // 初始化幕间成长功能
+    if (typeof Growth !== 'undefined') {
+        Growth.init();
+    }
     
     console.log("角色卡组件初始化完成");
 }
