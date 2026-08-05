@@ -125,6 +125,21 @@ function initAvatarUpload() {
     }
 }
 
+// 初始化编辑模态框（一次性绑定，避免在每次点击备注时重复绑定）
+let editModalInitialized = false;
+function initEditModalOnce() {
+    if (editModalInitialized) return;
+    const editModal = document.getElementById('edit-modal');
+    if (!editModal) return;
+    // 点击模态框外部关闭（只绑定一次）
+    editModal.addEventListener('click', function(event) {
+        if (event.target === editModal) {
+            editModal.classList.remove('active');
+        }
+    });
+    editModalInitialized = true;
+}
+
 // 初始化重置和帮助按钮
 function initResetAndHelp() {
     // 重置按钮点击事件
@@ -134,83 +149,84 @@ function initResetAndHelp() {
             window.location.reload();
         }
     });
-    
-    // 帮助按钮点击事件
-    document.getElementById('help-button').addEventListener('click', function() {
-        // 获取帮助模态框元素
-        const helpModal = document.getElementById('help-modal');
-        const helpModalBody = document.getElementById('help-modal-body');
-        
-        // 格式化帮助内容为HTML
-        helpModalBody.innerHTML = `
-            <h3>【基本操作】</h3>
-            <ul>
-                <li>填写角色基本信息（姓名、职业、年代等）</li>
-                <li>输入角色各项属性值（力量、体质、体型、敏捷等）</li>
-                <li>分配职业点数和兴趣点数到相应技能</li>
-                <li>输入成长点数用于已成长的技能</li>
-            </ul>
-            
-            <h3>【多页面说明】</h3>
-            <ul>
-                <li><b>主页面</b>：角色基本信息、属性、技能、战斗属性、状态值、武器</li>
-                <li><b>自定义技能</b>：添加6个自定义技能（左列3个+右列3个）</li>
-                <li><b>道具</b>：记录角色携带的20种道具</li>
-                <li><b>笔记</b>：固定前三项为贡献、幕间、修炼，其余为自定义笔记</li>
-                <li><b>幕间成长</b>：消耗成长点数进行技能成长检定</li>
-            </ul>
-            
-            <h3>【数据管理】</h3>
-            <ul>
-                <li><b>保存</b>：将角色数据保存到本地浏览器缓存</li>
-                <li><b>导出</b>：将角色数据导出为JSON文件（选择保存路径）</li>
-                <li><b>导入</b>：从JSON文件加载角色数据（导入前会显示确认提示）</li>
-                <li><b>重置</b>：清空所有数据并重新开始</li>
-            </ul>
-            
-            <h3>【幕间成长规则】</h3>
-            <ul>
-                <li>投入成长点数后，选择技能进行D100检定</li>
-                <li>检定规则：投出值 > 当前技能值 即为成功</li>
-                <li>成长值根据当前技能值决定：1-29→1d10，30-49→1d8，50-69→1d6，70-89→1d4，90+→1d3</li>
-                <li>投出100时获得双倍成长值</li>
-                <li>技能值>95时，投出96-100总能成长</li>
-                <li>每次检定消耗1点成长点数，一次性完成所有点数的掷骰结算</li>
-                <li>信用评级和克苏鲁神话不参与成长</li>
-            </ul>
-            
-            <h3>【打印功能】</h3>
-            <ul>
-                <li>点击"打印角色卡"按钮可打开打印对话框</li>
-                <li>支持打印主页面和自定义技能页</li>
-                <li>打印时会自动优化格式以适应A4纸张</li>
-                <li>建议使用Chrome/Edge浏览器获得最佳打印效果</li>
-            </ul>
-            
-            <h3>【注意事项】</h3>
-            <ul>
-                <li>笔记前三项（贡献、幕间、修炼）名称和类型固定，仅可编辑备注</li>
-                <li>自定义技能的子技能类型可在技能页选择</li>
-                <li>导入数据会覆盖当前所有内容，请谨慎操作</li>
-            </ul>
-            
-            <p class="credits">Design by 龙王 jumper.rong@outlook.com<br>大胡子跑团版权所有</p>
-        `;
-        
-        // 显示帮助模态框
-        helpModal.style.display = 'flex';
-        
-        // 关闭帮助按钮点击事件
-        document.getElementById('close-help').addEventListener('click', function() {
+
+    // 帮助内容（静态文本，无用户数据，可安全使用 innerHTML）
+    const HELP_HTML = `
+        <h3>【基本操作】</h3>
+        <ul>
+            <li>填写角色基本信息（姓名、职业、年代等）</li>
+            <li>输入角色各项属性值（力量、体质、体型、敏捷等）</li>
+            <li>分配职业点数和兴趣点数到相应技能</li>
+            <li>输入成长点数用于已成长的技能</li>
+        </ul>
+
+        <h3>【多页面说明】</h3>
+        <ul>
+            <li><b>主页面</b>：角色基本信息、属性、技能、战斗属性、状态值、武器</li>
+            <li><b>自定义技能</b>：添加6个自定义技能（左列3个+右列3个）</li>
+            <li><b>道具</b>：记录角色携带的20种道具</li>
+            <li><b>笔记</b>：固定前三项为贡献、幕间、修炼，其余为自定义笔记</li>
+            <li><b>幕间成长</b>：消耗成长点数进行技能成长检定</li>
+        </ul>
+
+        <h3>【数据管理】</h3>
+        <ul>
+            <li><b>保存</b>：将角色数据保存到本地浏览器缓存</li>
+            <li><b>导出</b>：将角色数据导出为JSON文件（选择保存路径）</li>
+            <li><b>导入</b>：从JSON文件加载角色数据（导入前会显示确认提示）</li>
+            <li><b>重置</b>：清空所有数据并重新开始</li>
+        </ul>
+
+        <h3>【幕间成长规则】</h3>
+        <ul>
+            <li>投入成长点数后，选择技能进行D100检定</li>
+            <li>检定规则：投出值 > 当前技能值 即为成功</li>
+            <li>成长值根据当前技能值决定：1-29→1d10，30-49→1d8，50-69→1d6，70-89→1d4，90+→1d3</li>
+            <li>投出100时获得双倍成长值</li>
+            <li>技能值>95时，投出96-100总能成长</li>
+            <li>每次检定消耗1点成长点数，一次性完成所有点数的掷骰结算</li>
+            <li>信用评级和克苏鲁神话不参与成长</li>
+        </ul>
+
+        <h3>【打印功能】</h3>
+        <ul>
+            <li>点击"打印角色卡"按钮可打开打印对话框</li>
+            <li>支持打印主页面和自定义技能页</li>
+            <li>打印时会自动优化格式以适应A4纸张</li>
+            <li>建议使用Chrome/Edge浏览器获得最佳打印效果</li>
+        </ul>
+
+        <h3>【注意事项】</h3>
+        <ul>
+            <li>笔记前三项（贡献、幕间、修炼）名称和类型固定，仅可编辑备注</li>
+            <li>自定义技能的子技能类型可在技能页选择</li>
+            <li>导入数据会覆盖当前所有内容，请谨慎操作</li>
+        </ul>
+
+        <p class="credits">Design by 龙王 jumper.rong@outlook.com<br>大胡子跑团版权所有</p>
+    `;
+
+    // 帮助模态框关闭逻辑（一次性绑定，避免在 help-button 点击时重复绑定）
+    const helpModal = document.getElementById('help-modal');
+    const closeHelpBtn = document.getElementById('close-help');
+    if (closeHelpBtn) {
+        closeHelpBtn.addEventListener('click', function() {
             helpModal.style.display = 'none';
         });
-        
-        // 点击模态框外部关闭
+    }
+    if (helpModal) {
         helpModal.addEventListener('click', function(event) {
             if (event.target === helpModal) {
                 helpModal.style.display = 'none';
             }
         });
+    }
+
+    // 帮助按钮点击事件（只负责填充内容和显示）
+    document.getElementById('help-button').addEventListener('click', function() {
+        const helpModalBody = document.getElementById('help-modal-body');
+        helpModalBody.innerHTML = HELP_HTML;
+        helpModal.style.display = 'flex';
     });
 }
 
@@ -575,41 +591,32 @@ function addNoteEvents(noteInput) {
     noteInput.addEventListener('click', function() {
         // 确保先隐藏tooltip，防止打印时出现黑色块
         tooltip.style.display = 'none';
-        
+
         const editModal = document.getElementById('edit-modal');
         const editTextarea = document.getElementById('edit-textarea');
         const saveButton = document.getElementById('save-edit');
         const cancelButton = document.getElementById('cancel-edit');
-        
+
+        // 一次性绑定点击外部关闭事件（避免重复绑定）
+        initEditModalOnce();
+
         // 设置当前备注内容到编辑框
         editTextarea.value = noteInput.value;
-        
+
         // 显示编辑模态框
         editModal.classList.add('active');
-        
-        // 保存按钮事件
+
+        // 保存按钮事件（用 onclick 覆盖式赋值，绑定最新的目标备注框）
         saveButton.onclick = function() {
-            // 更新输入框的值
             noteInput.value = editTextarea.value;
-            
-            // 关闭编辑模态框
             editModal.classList.remove('active');
-            
-            // 保存到本地缓存，不显示提示
             saveCharacter(false);
         };
-        
+
         // 取消按钮事件
         cancelButton.onclick = function() {
             editModal.classList.remove('active');
         };
-        
-        // 点击模态框外部关闭
-        editModal.addEventListener('click', function(event) {
-            if (event.target === editModal) {
-                editModal.classList.remove('active');
-            }
-        });
     });
     
     // 标记已添加事件监听器

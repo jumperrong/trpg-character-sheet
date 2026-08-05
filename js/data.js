@@ -225,10 +225,10 @@ let pendingImportData = null;
 
 function showImportConfirm(data, fileName) {
     pendingImportData = data;
-    
+
     const modal = document.getElementById('import-confirm-modal');
     const body = document.getElementById('import-confirm-body');
-    
+
     const basic = data.basic || {};
     const attrCount = data.attributes ? Object.keys(data.attributes).length : 0;
     const skillCount = data.skills?.skillsList?.length || 0;
@@ -236,27 +236,40 @@ function showImportConfirm(data, fileName) {
     const customSkillCount = data.customSkills?.length || 0;
     const itemCount = data.items?.length || 0;
     const noteCount = data.notes?.length || 0;
-    
+
+    // 对所有用户可控字符串进行 HTML 转义，防止 XSS
+    const esc = escapeHtml;
+    const safeFileName = esc(fileName || '未知');
+    const safeVersion = esc(String(data.version || '未知'));
+    const safeName = esc(basic.characterName || '（空）');
+    const safePlayer = esc(basic.playerName || '（空）');
+    const safeOccupation = esc(basic.occupation || '（空）');
+    const safeEra = esc(basic.era || '（空）');
+    const safeAge = esc(basic.age || '（空）');
+    const safeGender = esc(basic.gender || '（空）');
+    const safeResidence = esc(basic.residence || '（空）');
+    const safeBirthplace = esc(basic.birthplace || '（空）');
+
     body.innerHTML = `
         <div style="margin-bottom: 16px; color: #d32f2f; font-weight: bold;">
             ⚠ 导入将覆盖当前所有角色数据，此操作不可撤销
         </div>
         <div style="background: #f5f5f5; padding: 12px; border-radius: 4px; margin-bottom: 12px;">
             <div style="font-weight: bold; margin-bottom: 8px;">文件信息</div>
-            <div style="font-size: 13px; color: #666;">文件名：${fileName || '未知'}</div>
-            <div style="font-size: 13px; color: #666;">数据版本：${data.version || '未知'}</div>
+            <div style="font-size: 13px; color: #666;">文件名：${safeFileName}</div>
+            <div style="font-size: 13px; color: #666;">数据版本：${safeVersion}</div>
         </div>
         <div style="background: #f5f5f5; padding: 12px; border-radius: 4px; margin-bottom: 12px;">
             <div style="font-weight: bold; margin-bottom: 8px;">角色基本信息</div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 13px;">
-                <div>姓名：<strong>${basic.characterName || '（空）'}</strong></div>
-                <div>玩家：${basic.playerName || '（空）'}</div>
-                <div>职业：${basic.occupation || '（空）'}</div>
-                <div>时代：${basic.era || '（空）'}</div>
-                <div>年龄：${basic.age || '（空）'}</div>
-                <div>性别：${basic.gender || '（空）'}</div>
-                <div>住址：${basic.residence || '（空）'}</div>
-                <div>出生地：${basic.birthplace || '（空）'}</div>
+                <div>姓名：<strong>${safeName}</strong></div>
+                <div>玩家：${safePlayer}</div>
+                <div>职业：${safeOccupation}</div>
+                <div>时代：${safeEra}</div>
+                <div>年龄：${safeAge}</div>
+                <div>性别：${safeGender}</div>
+                <div>住址：${safeResidence}</div>
+                <div>出生地：${safeBirthplace}</div>
             </div>
         </div>
         <div style="background: #f5f5f5; padding: 12px; border-radius: 4px;">
@@ -271,8 +284,21 @@ function showImportConfirm(data, fileName) {
             </div>
         </div>
     `;
-    
+
     modal.style.display = 'flex';
+}
+
+/**
+ * HTML 转义，防止 XSS
+ */
+function escapeHtml(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 /**
@@ -763,18 +789,11 @@ function loadSkills(data) {
     updatePointsRemaining();
     
     if (!data.skills.skillsList?.length) return;
-    
-    // 重建技能列表
-    const leftColumn = document.querySelector('.skills-column.left-column');
-    const rightColumn = document.querySelector('.skills-column.right-column');
-    leftColumn.innerHTML = '';
-    rightColumn.innerHTML = '';
-    createSkillsList();
-    
-    // 加载常规技能和子技能
+
+    // rebuildSkillsContainer() 已重建技能列表，这里只需加载数据
     const normalSkills = data.skills.skillsList.filter(s => !s.isSubSkill);
     const subSkills = data.skills.skillsList.filter(s => s.isSubSkill);
-    
+
     normalSkills.forEach(loadSingleSkill);
     subSkills.forEach(loadSubSkill);
 }

@@ -105,7 +105,6 @@
 ```
 trpg-character-sheet/
 ├── index.html          # 主页面
-├── styles.css          # 废弃的旧样式（保留兼容）
 ├── README.md           # 说明文档
 ├── css/                # 样式模块
 │   ├── variables.css   # CSS变量定义
@@ -201,7 +200,7 @@ trpg-character-sheet/
 ```
 
 ### 注意事项
-1. 打印样式通过`@media print`实现，使用与屏幕一致的 Grid 网格布局
+1. 打印样式通过`@media print`实现，使用与屏幕一致的 Grid 网格布局（位于`css/print.css`）
 2. 头像不参与导入导出（隐私保护）
 3. 输入验证限制：
    - 数字字段仅接受0-999整数
