@@ -8,7 +8,7 @@
  */
 
 // ============ 常量配置 ============
-const SAVE_VERSION = '1.2.0';
+const SAVE_VERSION = '1.3.0';
 const ATTR_IDS = ['str', 'con', 'siz', 'dex', 'app', 'int', 'pow', 'edu', 'luc'];
 const LAST_EXPORT_KEY = 'lastExportFileHandle';
 
