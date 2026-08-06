@@ -5,13 +5,12 @@
 
 /* ========== 角色卡容器 ========== */
 .character-sheet {
-    margin-top: 10px !important;
     border: 1px solid var(--border-color);
     padding: 2px;
     background-color: white;
     width: 100%;
     box-sizing: border-box;
-    margin: 2px auto 10px auto;
+    margin: 10px auto;
 }
 
 /* ========== 主页面网格布局 ========== */
@@ -45,7 +44,7 @@
 }
 
 #items.active {
-    display: flex !important;
+    display: flex;
     flex-direction: column;
     gap: 0;
 }
@@ -128,7 +127,7 @@
 
 /* ========== Tab 内容样式 ========== */
 .tab-content {
-    display: none !important;
+    display: none;
     visibility: hidden;
     opacity: 0;
     height: 0;
@@ -138,7 +137,7 @@
 }
 
 .tab-content.active {
-    display: grid !important;
+    display: grid;
     visibility: visible;
     opacity: 1;
     height: auto;
@@ -149,14 +148,14 @@
 
 /* Tab 内容明确样式 */
 #main-sheet.active {
-    display: grid !important;
+    display: grid;
     grid-template-columns: 1fr 1.1fr 0.9fr;
     grid-template-rows: auto auto auto auto;
     grid-gap: 2px;
 }
 
 #custom-skills.active {
-    display: flex !important;
+    display: flex;
     flex-direction: column;
     gap: 0;
 }

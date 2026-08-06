@@ -10,7 +10,6 @@ let printInitialized = false;
 function initPrint() {
     // 如果已经初始化过打印功能，则直接返回
     if (printInitialized) {
-        console.log('打印功能已经初始化过，跳过重复初始化');
         return;
     }
     
@@ -21,13 +20,10 @@ function initPrint() {
     const printCharacterCheckbox = document.getElementById('print-character');
     const printCustomSkillsCheckbox = document.getElementById('print-custom-skills');
     const printItemsCheckbox = document.getElementById('print-items');
-    
-    console.log('初始化打印功能...');
 
     // 打印按钮点击事件
     if (printButton) {
     printButton.addEventListener('click', function() {
-            console.log('打印按钮被点击');
         printModal.style.display = 'flex';
     });
     } else {

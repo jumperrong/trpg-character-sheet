@@ -39,7 +39,6 @@ function initSkills() {
 // 创建技能表头
 function createSkillsHeader() {
     try {
-        console.log("创建技能表头...");
         const skillsContainer = document.querySelector('.skills-container');
         
         // 创建表头容器
@@ -93,7 +92,6 @@ function createSkillsHeader() {
 // 创建技能列表
 function createSkillsList() {
     try {
-        console.log('创建技能列表...');
         const skillsContainer = document.querySelector('.skills-container');
         
         // 创建表格容器
@@ -193,7 +191,6 @@ function createSkillsList() {
 // 创建单个技能
 function createSingleSkill(container, skillData) {
     try {
-        console.log(`创建技能: ${skillData.name}`);
         // 创建技能行
         const skillRow = document.createElement('div');
         skillRow.className = 'skill-row';
@@ -378,8 +375,7 @@ function createSingleSkill(container, skillData) {
 // 创建子技能选择弹出窗口
 function createSubtypeModal(skillData, selectedSubtypeElement, skillRow) {
     try {
-        console.log("创建子技能弹窗：", skillData.name);
-        
+
         // 移除可能存在的旧弹窗
         const oldModal = document.getElementById('subtype-modal');
         if (oldModal) {
@@ -435,20 +431,9 @@ function createSubtypeModal(skillData, selectedSubtypeElement, skillRow) {
         
         // 自定义选项点击事件
         customItem.addEventListener('click', function() {
-            const customName = prompt('请输入自定义子技能名称：');
-            if (customName && customName.trim() !== '') {
-                selectedSubtypeElement.textContent = customName.trim();
-                
-                // 设置子技能行的数据属性，便于保存和加载
-                skillRow.dataset.selectedSubtype = customName.trim();
-                console.log(`设置自定义子技能: ${customName.trim()}`);
-                
-                // 关闭弹窗
-                modal.classList.remove('active');
-                
-                // 触发保存
-                saveCharacter(false);
-            }
+            // 关闭子技能选择弹窗，打开自定义名称输入弹窗
+            document.body.removeChild(modal);
+            showCustomSubtypeInputModal(skillData, selectedSubtypeElement, skillRow);
         });
         
         // 添加子技能选项
@@ -478,8 +463,7 @@ function createSubtypeModal(skillData, selectedSubtypeElement, skillRow) {
                 
                 // 设置子技能行的数据属性，便于保存和加载
                 skillRow.dataset.selectedSubtype = subtypeName;
-                console.log(`选择了子技能: ${subtypeName}，基础值: ${subtypeBase}，设置到行的dataset.selectedSubtype`);
-                
+
                 // 重新计算成功率
                 calculateSkillSuccess(skillRow);
                 
@@ -538,4 +522,90 @@ function createSubtypeModal(skillData, selectedSubtypeElement, skillRow) {
     } catch (error) {
         console.error('Error creating subtype modal:', error);
     }
+}
+
+// 自定义子技能名称输入弹窗（替代原生 prompt）
+function showCustomSubtypeInputModal(skillData, selectedSubtypeElement, skillRow) {
+    // 移除可能存在的旧弹窗
+    const oldInputModal = document.getElementById('subtype-input-modal');
+    if (oldInputModal) {
+        document.body.removeChild(oldInputModal);
+    }
+
+    const inputModal = document.createElement('div');
+    inputModal.id = 'subtype-input-modal';
+    inputModal.className = 'subtype-input-modal';
+
+    const content = document.createElement('div');
+    content.className = 'subtype-input-modal-content';
+
+    // 头部
+    const header = document.createElement('div');
+    header.className = 'subtype-modal-header';
+    const title = document.createElement('h2');
+    title.textContent = `自定义 ${skillData.name} 子技能`;
+    header.appendChild(title);
+
+    // 主体（输入框）
+    const body = document.createElement('div');
+    body.className = 'subtype-input-modal-body';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = '请输入自定义子技能名称';
+    input.maxLength = 30;
+    body.appendChild(input);
+
+    // 底部按钮
+    const footer = document.createElement('div');
+    footer.className = 'subtype-modal-footer';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.className = 'subtype-modal-button';
+    cancelButton.textContent = '取消';
+
+    const confirmButton = document.createElement('button');
+    confirmButton.type = 'button';
+    confirmButton.className = 'subtype-modal-button';
+    confirmButton.textContent = '确定';
+
+    footer.appendChild(cancelButton);
+    footer.appendChild(confirmButton);
+
+    content.appendChild(header);
+    content.appendChild(body);
+    content.appendChild(footer);
+    inputModal.appendChild(content);
+    document.body.appendChild(inputModal);
+
+    // 自动聚焦
+    setTimeout(() => input.focus(), 10);
+
+    // 确认处理
+    const confirm = () => {
+        const customName = input.value.trim();
+        if (customName === '') return;
+        selectedSubtypeElement.textContent = customName;
+        skillRow.dataset.selectedSubtype = customName;
+        document.body.removeChild(inputModal);
+        saveCharacter(false);
+    };
+
+    confirmButton.addEventListener('click', confirm);
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            confirm();
+        } else if (e.key === 'Escape') {
+            document.body.removeChild(inputModal);
+        }
+    });
+    cancelButton.addEventListener('click', function() {
+        document.body.removeChild(inputModal);
+    });
+    inputModal.addEventListener('click', function(event) {
+        if (event.target === inputModal) {
+            document.body.removeChild(inputModal);
+        }
+    });
 }

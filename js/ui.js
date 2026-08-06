@@ -97,8 +97,6 @@ function initAvatarUpload() {
                         avatarImg.src = resizedImageData;
                         avatarImg.style.display = 'block';
                         document.querySelector('.avatar-placeholder').style.display = 'none';
-                        
-                        console.log('头像已调整为容器尺寸：' + containerWidth + 'x' + containerHeight);
                     };
                     
                     // 加载原始图像
@@ -471,8 +469,6 @@ function initItemsTable() {
     
     // 使道具表缓存失效
     DOMCache.invalidateByPrefix('qa:.item');
-    
-    console.log('道具表初始化完成，共创建' + totalRows + '行，' + (totalRows * 2) + '个道具位置');
 }
 
 // 创建单个道具项的单元格（名称、类型、备注）
@@ -882,7 +878,6 @@ function switchTab(tabId) {
     if (tabId === 'notes') {
         const notesBody = document.getElementById('notes-body');
         if (notesBody && notesBody.children.length < 2) {
-            console.log('切换到笔记页，强制初始化笔记表');
             initNotesTable();
         }
     }

@@ -132,19 +132,6 @@ const $ = {
     get notesCharacterName() { return DOMCache.get('notes-character-name'); }
 };
 
-// 常用查询的缓存键前缀（用于 invalidateByPrefix 缓存失效）
-// 注意：这不是 CSS 选择器，是 DOMCache 内部使用的缓存键格式
-const CACHE_KEYS = {
-    SKILL_ROWS: 'qa:.skill-row',
-    BASE_INPUTS: 'qa:.base-value',
-    OCC_INPUTS: 'qa:.occupation-points',
-    INT_INPUTS: 'qa:.interest-points',
-    GROWTH_INPUTS: 'qa:.growth-points',
-    ATTR_INPUTS: 'qa:.char-value',
-    WEAPON_ROWS: 'qa:.weapon-row',
-    ITEM_INPUTS: 'qa:.item-name'
-};
-
 // 技能数据
 const skillsData = [
     { name: "信用评级", base: 0 },
@@ -262,16 +249,6 @@ const skillsData = [
     }
 ];
 
-// 道具类别数据
-const itemCategories = [
-    "武器", "防具", "魔法物品", "书籍", "药品", "工具", "日常用品", "珍稀物品", "其他"
-];
-
-// 笔记类别数据
-const noteCategories = [
-    '冒险', '人物', '功法', '强化', '待办', '其他'
-];
-
 // 默认笔记配置（名称固定，仅可编辑备注）
 // globalPos 为左列偶数位置，collectNotes / loadNotes / initNotesTable 共用此定义
 const DEFAULT_NOTES = [
@@ -280,9 +257,6 @@ const DEFAULT_NOTES = [
     { name: '修炼', type: '其他', globalPos: 4 }
 ];
 const DEFAULT_NOTE_POSITIONS = DEFAULT_NOTES.map(n => n.globalPos);
-
-// 初始化完成标志
-let initializationComplete = false;
 
 // ============ 发布-订阅系统（EventBus） ============
 const EventBus = {

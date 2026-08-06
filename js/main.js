@@ -42,8 +42,6 @@ function initCharacterSheet() {
     if (typeof Growth !== 'undefined') {
         Growth.init();
     }
-    
-    console.log("角色卡组件初始化完成");
 }
 
 // 初始化所有（Tab切换等全局功能）
@@ -58,13 +56,10 @@ function initAll() {
             switchTab(tabId);
         });
     });
-    
-    console.log("全局功能初始化完成");
 }
 
 // DOM加载完成后执行
 document.addEventListener("DOMContentLoaded", function() {
-    console.log("DOM加载完成，初始化角色卡...");
     try {
         // 注册 EventBus 订阅者
         setupEventBusSubscribers();
@@ -91,7 +86,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     // 数据有效，自动加载（不再每次弹窗询问，skipAlert=true 静默加载）
                     loadCharacter(true);
                 } else {
-                    console.log("发现无效或空的角色数据，不提示加载");
                     // 数据无效或为空，清除localStorage
                     localStorage.removeItem("characterData");
                 }
@@ -101,11 +95,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 localStorage.removeItem("characterData");
             }
         }
-        
-        // 设置初始化标志
-        initializationComplete = true;
-        
-        console.log("角色卡初始化完成！");
     } catch (error) {
         console.error("初始化出错：", error);
     }
