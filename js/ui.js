@@ -71,9 +71,9 @@ function initAvatarUpload() {
                     const img = new Image();
                     img.onload = function() {
                         // 保存尺寸（与显示尺寸解耦，保留打印清晰度）
-                        // 512×512 JPEG 0.9 约 40-80KB，远低于 200KB 上限
-                        const saveWidth = 512;
-                        const saveHeight = 512;
+                        // 1024×1024 JPEG 0.92 实测 80-655KB，低于 1MB 上限
+                        const saveWidth = 1024;
+                        const saveHeight = 1024;
 
                         // 创建Canvas进行尺寸调整
                         const canvas = document.createElement('canvas');
@@ -92,7 +92,7 @@ function initAvatarUpload() {
                         ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
 
                         // 转换为图像数据
-                        const resizedImageData = canvas.toDataURL('image/jpeg', 0.9);
+                        const resizedImageData = canvas.toDataURL('image/jpeg', 0.92);
 
                         // 设置头像
                         avatarImg.src = resizedImageData;
