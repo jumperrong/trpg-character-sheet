@@ -62,47 +62,48 @@ function initAvatarUpload() {
         
         avatarUpload.addEventListener('change', function(event) {
             const file = event.target.files[0];
-            
+
             if (file) {
                 const reader = new FileReader();
-                
+
                 reader.onload = function(e) {
                     // 创建临时图像对象
                     const img = new Image();
                     img.onload = function() {
-                        // 获取头像容器尺寸
-                        const containerWidth = avatarContainer.clientWidth;
-                        const containerHeight = avatarContainer.clientHeight;
-                        
+                        // 保存尺寸（与显示尺寸解耦，保留打印清晰度）
+                        // 512×512 JPEG 0.9 约 40-80KB，远低于 200KB 上限
+                        const saveWidth = 512;
+                        const saveHeight = 512;
+
                         // 创建Canvas进行尺寸调整
                         const canvas = document.createElement('canvas');
-                        canvas.width = containerWidth;
-                        canvas.height = containerHeight;
+                        canvas.width = saveWidth;
+                        canvas.height = saveHeight;
                         const ctx = canvas.getContext('2d');
-                        
-                        // 计算缩放和居中
-                        let scale = Math.min(containerWidth / img.width, containerHeight / img.height);
-                        let x = (containerWidth - img.width * scale) / 2;
-                        let y = (containerHeight - img.height * scale) / 2;
-                        
+
+                        // 计算缩放和居中（contain 模式，白底填充）
+                        let scale = Math.min(saveWidth / img.width, saveHeight / img.height);
+                        let x = (saveWidth - img.width * scale) / 2;
+                        let y = (saveHeight - img.height * scale) / 2;
+
                         // 绘制图像
                         ctx.fillStyle = 'white';
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                         ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-                        
+
                         // 转换为图像数据
-                        const resizedImageData = canvas.toDataURL('image/jpeg', 0.85);
-                        
+                        const resizedImageData = canvas.toDataURL('image/jpeg', 0.9);
+
                         // 设置头像
                         avatarImg.src = resizedImageData;
                         avatarImg.classList.add('is-visible');
                         document.querySelector('.avatar-placeholder').classList.add('is-hidden');
                     };
-                    
+
                     // 加载原始图像
                     img.src = e.target.result;
                 };
-                
+
                 reader.readAsDataURL(file);
             }
         });
