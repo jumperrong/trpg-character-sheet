@@ -70,13 +70,12 @@ async function exportCharacter() {
         saveCharacter(false);
         const dataStr = localStorage.getItem('characterData');
         if (!dataStr) {
-            alert('没有可导出的角色数据');
+            await showMessage('没有可导出的角色数据');
             return;
         }
-        
+
         const characterData = JSON.parse(dataStr);
-        delete characterData.avatar;
-        
+
         const characterName = characterData.basic?.characterName || 'character';
         const fileName = `${characterName}_${new Date().toISOString().split('T')[0]}.json`;
         const jsonContent = JSON.stringify(characterData, null, 2);
@@ -105,7 +104,7 @@ async function exportCharacter() {
                 const writable = await handle.createWritable();
                 await writable.write(jsonContent);
                 await writable.close();
-                alert('角色数据已导出');
+                await showMessage('角色数据已导出');
                 return;
             } catch (pickerError) {
                 // 用户取消 → 直接终止，不降级
@@ -115,26 +114,26 @@ async function exportCharacter() {
                 console.warn('showSaveFilePicker 失败，降级到传统下载:', pickerError);
             }
         }
-        
+
         // 传统方式降级（仅在不支持 File System Access API 时使用）
         const blob = new Blob([jsonContent], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        
+
         const a = document.createElement('a');
         a.href = url;
         a.download = fileName;
         document.body.appendChild(a);
         a.click();
-        
+
         setTimeout(() => {
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }, 100);
-        
-        alert('角色数据已导出');
+
+        await showMessage('角色数据已导出');
     } catch (error) {
         console.error('导出角色数据错误:', error);
-        alert('导出失败，请稍后再试');
+        await showMessage('导出失败，请稍后再试');
     }
 }
 
@@ -166,7 +165,7 @@ async function importCharacter() {
                 showImportConfirm(importedData, file.name);
             } catch (parseError) {
                 console.error('Error parsing JSON:', parseError);
-                alert('导入的文件不是有效的角色数据文件');
+                await showMessage('导入的文件不是有效的角色数据文件');
             }
         } catch (pickerError) {
             // 用户取消，不提示
@@ -188,33 +187,33 @@ function fallbackImport() {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = '.json';
-        fileInput.style.display = 'none';
+        fileInput.className = 'hidden-file-input';
         
         fileInput.addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
+
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 try {
                     const importedData = JSON.parse(e.target.result);
                     normalizeImportedData(importedData);
                     showImportConfirm(importedData, file.name);
                 } catch (parseError) {
                     console.error('Error parsing JSON:', parseError);
-                    alert('导入的文件不是有效的角色数据文件');
+                    await showMessage('导入的文件不是有效的角色数据文件');
                 }
             };
             reader.readAsText(file);
         });
-        
+
         document.body.appendChild(fileInput);
         fileInput.click();
-        
+
         setTimeout(() => document.body.removeChild(fileInput), 100);
     } catch (error) {
         console.error('Error importing character:', error);
-        alert('导入失败，请稍后再试。');
+        showMessage('导入失败，请稍后再试。');
     }
 }
 
@@ -251,17 +250,17 @@ function showImportConfirm(data, fileName) {
     const safeBirthplace = esc(basic.birthplace || '（空）');
 
     body.innerHTML = `
-        <div style="margin-bottom: 16px; color: #d32f2f; font-weight: bold;">
+        <div class="import-confirm-warning">
             ⚠ 导入将覆盖当前所有角色数据，此操作不可撤销
         </div>
-        <div style="background: #f5f5f5; padding: 12px; border-radius: 4px; margin-bottom: 12px;">
-            <div style="font-weight: bold; margin-bottom: 8px;">文件信息</div>
-            <div style="font-size: 13px; color: #666;">文件名：${safeFileName}</div>
-            <div style="font-size: 13px; color: #666;">数据版本：${safeVersion}</div>
+        <div class="import-confirm-section">
+            <div class="import-confirm-section-title">文件信息</div>
+            <div class="import-confirm-meta">文件名：${safeFileName}</div>
+            <div class="import-confirm-meta">数据版本：${safeVersion}</div>
         </div>
-        <div style="background: #f5f5f5; padding: 12px; border-radius: 4px; margin-bottom: 12px;">
-            <div style="font-weight: bold; margin-bottom: 8px;">角色基本信息</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 13px;">
+        <div class="import-confirm-section">
+            <div class="import-confirm-section-title">角色基本信息</div>
+            <div class="import-confirm-grid-2">
                 <div>姓名：<strong>${safeName}</strong></div>
                 <div>玩家：${safePlayer}</div>
                 <div>职业：${safeOccupation}</div>
@@ -272,9 +271,9 @@ function showImportConfirm(data, fileName) {
                 <div>出生地：${safeBirthplace}</div>
             </div>
         </div>
-        <div style="background: #f5f5f5; padding: 12px; border-radius: 4px;">
-            <div style="font-weight: bold; margin-bottom: 8px;">数据概览</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; font-size: 13px;">
+        <div class="import-confirm-section">
+            <div class="import-confirm-section-title">数据概览</div>
+            <div class="import-confirm-grid-3">
                 <div>属性：${attrCount} 项</div>
                 <div>技能：${skillCount} 项</div>
                 <div>武器：${weaponCount} 项</div>
@@ -285,7 +284,7 @@ function showImportConfirm(data, fileName) {
         </div>
     `;
 
-    modal.style.display = 'flex';
+    modal.classList.add('active');
 }
 
 /**
@@ -304,16 +303,16 @@ function escapeHtml(str) {
 /**
  * 执行导入（确认后调用）
  */
-function confirmImport() {
+async function confirmImport() {
     if (!pendingImportData) return;
-    
+
     try {
         localStorage.setItem('characterData', JSON.stringify(pendingImportData));
         loadCharacter(true);
-        alert('角色数据已成功导入');
+        await showMessage('角色数据已成功导入');
     } catch (error) {
         console.error('Error confirming import:', error);
-        alert('导入失败，请稍后再试。');
+        await showMessage('导入失败，请稍后再试。');
     } finally {
         pendingImportData = null;
         closeImportConfirm();
@@ -326,7 +325,7 @@ function confirmImport() {
 function closeImportConfirm() {
     const modal = document.getElementById('import-confirm-modal');
     if (modal) {
-        modal.style.display = 'none';
+        modal.classList.remove('active');
     }
     pendingImportData = null;
 }
@@ -350,7 +349,7 @@ function normalizeImportedData(data) {
 }
 
 // ============ 保存 ============
-function saveCharacter(showAlert = true) {
+async function saveCharacter(showAlert = true) {
     try {
         const characterData = {
             basic: collectBasicInfo(),
@@ -362,18 +361,19 @@ function saveCharacter(showAlert = true) {
             customSkills: collectCustomSkills(),
             items: collectItems(),
             notes: collectNotes(),
+            growth: collectGrowth(),
             version: SAVE_VERSION
         };
-        
+
         localStorage.setItem('characterData', JSON.stringify(characterData));
-        
+
         if (showAlert) {
-            alert('角色数据已保存到本地缓存');
+            await showMessage('角色数据已保存到本地缓存');
         }
     } catch (error) {
         console.error('Error saving character:', error);
         if (showAlert) {
-            alert('保存失败，请稍后再试。');
+            await showMessage('保存失败，请稍后再试。');
         }
     }
 }
@@ -382,8 +382,10 @@ function saveCharacter(showAlert = true) {
 
 /**
  * 收集基础信息（姓名、玩家、时代等）
+ * 头像以 dataURL 形式保存在 basic.avatar 中
  */
 function collectBasicInfo() {
+    const avatarImg = document.getElementById('avatar-img');
     return {
         characterName: DOMCache.get('character-name')?.value || '',
         playerName: DOMCache.get('player-name')?.value || '',
@@ -393,7 +395,8 @@ function collectBasicInfo() {
         gender: DOMCache.get('gender')?.value || '',
         residence: DOMCache.get('residence')?.value || '',
         birthplace: DOMCache.get('birthplace')?.value || '',
-        isPartner: DOMCache.get('is-partner')?.checked || false
+        isPartner: DOMCache.get('is-partner')?.checked || false,
+        avatar: (avatarImg && avatarImg.classList.contains('is-visible')) ? (avatarImg.src || '') : ''
     };
 }
 
@@ -644,26 +647,67 @@ function collectNotes() {
     return notes;
 }
 
+/**
+ * 收集成长模块状态（与 characterData 一同保存/导出/导入）
+ */
+function collectGrowth() {
+    if (typeof Growth === 'undefined') return null;
+    return {
+        growthPoints: Growth.state.growthPoints,
+        pointsConfirmed: Growth.state.pointsConfirmed,
+        history: Growth.state.history
+    };
+}
+
+/**
+ * 从 characterData 加载成长模块状态
+ * 兼容：旧版独立 localStorage key（growthPointsRemaining / growthHistory）迁移后清除
+ */
+function loadGrowth(data) {
+    if (typeof Growth === 'undefined') return;
+
+    // 旧版兼容：独立 key 存在则迁移
+    const legacyPoints = localStorage.getItem('growthPointsRemaining');
+    const legacyHistory = localStorage.getItem('growthHistory');
+    if (legacyPoints !== null || legacyHistory !== null) {
+        Growth.state.growthPoints = legacyPoints ? parseInt(legacyPoints) : 0;
+        Growth.state.history = legacyHistory ? JSON.parse(legacyHistory) : [];
+        localStorage.removeItem('growthPointsRemaining');
+        localStorage.removeItem('growthHistory');
+    } else if (data && data.growth) {
+        Growth.state.growthPoints = data.growth.growthPoints || 0;
+        Growth.state.pointsConfirmed = !!data.growth.pointsConfirmed;
+        Growth.state.history = Array.isArray(data.growth.history) ? data.growth.history : [];
+    }
+
+    Growth.saveState = function() {
+        // 重写：保存到 characterData 而非独立 key
+        if (typeof saveCharacter === 'function') {
+            saveCharacter(false);
+        }
+    };
+}
+
 // ============ 加载 ============
-function loadCharacter(skipAlert = false) {
+async function loadCharacter(skipAlert = false) {
     try {
         const dataStr = localStorage.getItem('characterData');
         if (!dataStr) {
-            if (!skipAlert) alert('没有找到保存的角色数据');
+            if (!skipAlert) await showMessage('没有找到保存的角色数据');
             return;
         }
-        
+
         const characterData = JSON.parse(dataStr);
         if (!characterData || !characterData.basic) {
-            alert('保存的角色数据无效或为空');
+            await showMessage('保存的角色数据无效或为空');
             localStorage.removeItem('characterData');
             return;
         }
-        
+
         // 重建技能表
         DOMCache.clear();
         rebuildSkillsContainer();
-        
+
         // 加载各部分数据
         loadBasicInfo(characterData);
         loadAttributes(characterData);
@@ -674,13 +718,22 @@ function loadCharacter(skipAlert = false) {
         loadItems(characterData);
         loadCustomSkills(characterData);
         loadNotes(characterData);
-        
+        loadGrowth(characterData);
+
+        // 加载后刷新成长模块的显示（历史、点数输入框等）
+        if (typeof Growth !== 'undefined') {
+            Growth.loadState(); // 失效技能列表签名，确保重建
+            Growth.initGrowthPointsInput();
+            Growth.renderSkillList();
+            Growth.renderHistory();
+        }
+
         if (!skipAlert) {
-            alert('角色数据已从本地缓存加载');
+            await showMessage('角色数据已从本地缓存加载');
         }
     } catch (error) {
         console.error('解析保存的数据时出错:', error);
-        alert('加载失败，请稍后再试。');
+        await showMessage('加载失败，请稍后再试。');
     }
 
     // 各 load 函数均为同步 DOM 操作，此处可直接同步重算，无需 setTimeout
@@ -729,9 +782,20 @@ function loadBasicInfo(data) {
     setValue('birthplace', data.basic.birthplace);
     
     CharacterStore.setCharacterName(data.basic.characterName || '');
-    
+
     const partner = DOMCache.get('is-partner');
     if (partner) partner.checked = data.basic.isPartner || false;
+
+    // 恢复头像
+    if (data.basic.avatar) {
+        const avatarImg = document.getElementById('avatar-img');
+        const avatarPlaceholder = document.querySelector('.avatar-placeholder');
+        if (avatarImg) {
+            avatarImg.src = data.basic.avatar;
+            avatarImg.classList.add('is-visible');
+        }
+        if (avatarPlaceholder) avatarPlaceholder.classList.add('is-hidden');
+    }
 }
 
 /**

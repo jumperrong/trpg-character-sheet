@@ -272,7 +272,7 @@ function calculateSkillSuccess(skillRow) {
 
 // 更新闪避技能基础值
 function updateDodgeBaseValue() {
-    const dexValue = parseInt(document.getElementById('dex').value) || 0;
+    const dexValue = parseInt(DOMCache.get('dex')?.value) || 0;
     const halfDex = Math.floor(dexValue / 2);
 
     // 通过 data-skill 属性直接定位闪避技能行
@@ -289,7 +289,7 @@ function updateDodgeBaseValue() {
 
 // 更新母语技能基础值
 function updateMotherTongueBaseValue() {
-    const eduValue = parseInt(document.getElementById('edu').value) || 0;
+    const eduValue = parseInt(DOMCache.get('edu')?.value) || 0;
 
     // 通过 data-skill 属性直接定位母语技能行
     const motherTongueSpan = document.querySelector('.skill-row .skill-name span[data-skill="母语"]');

@@ -24,7 +24,7 @@ function initPrint() {
     // 打印按钮点击事件
     if (printButton) {
     printButton.addEventListener('click', function() {
-        printModal.style.display = 'flex';
+        printModal.classList.add('active');
     });
     } else {
         console.error('找不到打印按钮');
@@ -33,7 +33,7 @@ function initPrint() {
     // 取消按钮点击事件
     if (cancelPrintButton) {
     cancelPrintButton.addEventListener('click', function() {
-        printModal.style.display = 'none';
+        printModal.classList.remove('active');
     });
     }
 
@@ -41,7 +41,7 @@ function initPrint() {
     if (printModal) {
     printModal.addEventListener('click', function(event) {
         if (event.target === printModal) {
-            printModal.style.display = 'none';
+            printModal.classList.remove('active');
         }
     });
     } else {

@@ -47,15 +47,11 @@ function createSkillsHeader() {
         
         // 创建左列表头
         const leftHeader = document.createElement('div');
-        leftHeader.className = 'skills-header-column';
-        leftHeader.style.width = '50%';
-        leftHeader.style.display = 'flex';
-        
+        leftHeader.className = 'skills-header-column half';
+
         // 创建右列表头
         const rightHeader = document.createElement('div');
-        rightHeader.className = 'skills-header-column';
-        rightHeader.style.width = '50%';
-        rightHeader.style.display = 'flex';
+        rightHeader.className = 'skills-header-column half';
         
         // 创建表头项
         const headerItems = [
@@ -259,15 +255,15 @@ function createSingleSkill(container, skillData) {
             // 添加按钮点击事件
             selectButton.addEventListener('click', function() {
                 // 确定要使用的技能数据
-                const modalSkillData = skillData.isSubSkillRow 
-                    ? skillsData.find(s => s.name === skillData.parentSkill) 
+                const modalSkillData = skillData.isSubSkillRow
+                    ? skillsData.find(s => s.name === skillData.parentSkill)
                     : skillData;
-                    
+
                 if (modalSkillData && modalSkillData.subtypes) {
                     // 创建弹出窗口
                     createSubtypeModal(modalSkillData, selectedSubtype, skillRow);
                 } else {
-                    alert("此技能没有可选的子类型");
+                    showMessage('此技能没有可选的子类型', '提示');
                 }
             });
         }
@@ -275,10 +271,10 @@ function createSingleSkill(container, skillData) {
         // 确定初始基础值
         let baseValue = skillData.base;
         if (baseValue === "halfDex") {
-            const dexValue = parseInt(document.getElementById('dex').value) || 0;
+            const dexValue = parseInt(DOMCache.get('dex')?.value) || 0;
             baseValue = Math.floor(dexValue / 2);
         } else if (baseValue === "edu") {
-            const eduValue = parseInt(document.getElementById('edu').value) || 0;
+            const eduValue = parseInt(DOMCache.get('edu')?.value) || 0;
             baseValue = eduValue;
         } else if (baseValue < 0) {
             // 如果是负值（表示需要选择子技能），默认设为0
@@ -415,7 +411,7 @@ function createSubtypeModal(skillData, selectedSubtypeElement, skillRow) {
             // 子技能是字符串数组（如母语、外语等）
             let baseValue = skillData.base;
             if (skillData.name === "母语") {
-                const eduValue = parseInt(document.getElementById('edu').value) || 0;
+                const eduValue = parseInt(DOMCache.get('edu')?.value) || 0;
                 baseValue = eduValue;
             } else if (skillData.name === "外语") {
                 baseValue = 1;

@@ -329,10 +329,12 @@ function setupEventBusSubscribers() {
         const customName = document.getElementById('custom-character-name');
         const itemsName = document.getElementById('items-character-name');
         const notesName = document.getElementById('notes-character-name');
-        
+        const growthName = document.getElementById('growth-character-name');
+
         if (customName) customName.textContent = name;
         if (itemsName) itemsName.textContent = name;
         if (notesName) notesName.textContent = name;
+        if (growthName) growthName.textContent = name || '未命名';
     });
 
     // 订阅属性变更 - 触发衍生计算
@@ -365,5 +367,87 @@ function setupEventBusSubscribers() {
         if (skillData?.name?.includes('克苏鲁神话') && typeof updateDerivedStats === 'function') {
             updateDerivedStats();
         }
+    });
+}
+
+// ============ 通用消息/确认模态框（替代原生 alert/confirm） ============
+// 简易 HTML 转义，避免消息文本注入
+function _escapeMessageText(str) {
+    if (str == null) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+// 显示提示消息（替代 alert），支持可选标题
+function showMessage(message, title = '提示') {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('message-modal');
+        const titleEl = document.getElementById('message-modal-title');
+        const body = document.getElementById('message-modal-body');
+        const okBtn = document.getElementById('message-modal-ok');
+        const cancelBtn = document.getElementById('message-modal-cancel');
+
+        if (!modal || !okBtn) {
+            // 兜底：若 DOM 尚未就绪，退回 alert
+            alert(message);
+            resolve(false);
+            return;
+        }
+
+        titleEl.textContent = title;
+        body.innerHTML = _escapeMessageText(message).replace(/\n/g, '<br>');
+
+        // alert 模式：隐藏取消按钮
+        cancelBtn.classList.add('is-hidden');
+
+        const close = (result) => {
+            modal.classList.remove('active');
+            okBtn.onclick = null;
+            cancelBtn.onclick = null;
+            modal.onclick = null;
+            resolve(result);
+        };
+
+        okBtn.onclick = () => close(true);
+        modal.onclick = (e) => { if (e.target === modal) close(false); };
+        modal.classList.add('active');
+    });
+}
+
+// 显示确认对话框（替代 confirm），返回 Promise<boolean>
+function showConfirm(message, title = '确认') {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('message-modal');
+        const titleEl = document.getElementById('message-modal-title');
+        const body = document.getElementById('message-modal-body');
+        const okBtn = document.getElementById('message-modal-ok');
+        const cancelBtn = document.getElementById('message-modal-cancel');
+
+        if (!modal || !okBtn || !cancelBtn) {
+            // 兜底
+            resolve(confirm(message));
+            return;
+        }
+
+        titleEl.textContent = title;
+        body.innerHTML = _escapeMessageText(message).replace(/\n/g, '<br>');
+
+        // confirm 模式：显示取消按钮
+        cancelBtn.classList.remove('is-hidden');
+
+        const close = (result) => {
+            modal.classList.remove('active');
+            okBtn.onclick = null;
+            cancelBtn.onclick = null;
+            modal.onclick = null;
+            resolve(result);
+        };
+
+        okBtn.onclick = () => close(true);
+        cancelBtn.onclick = () => close(false);
+        modal.onclick = (e) => { if (e.target === modal) close(false); };
+        modal.classList.add('active');
     });
 }

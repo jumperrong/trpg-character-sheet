@@ -33,27 +33,55 @@ const Growth = {
         this.renderSkillList();
         this.renderHistory();
         this.bindEvents();
+        this.bindDelegatedRollHandler();
+    },
+
+    /**
+     * 事件委托：在 #growth-skill-list 上一次性绑定掷骰处理器，
+     * 避免每次 renderSkillList 重建按钮时累积 listener。
+     */
+    bindDelegatedRollHandler() {
+        const container = document.getElementById('growth-skill-list');
+        if (!container || container.dataset.rollDelegated) return;
+        container.addEventListener('click', (e) => {
+            const btn = e.target.closest('.roll-button');
+            if (!btn) return;
+            const skillId = btn.dataset.skillId;
+            if (skillId) this.performGrowthRoll(skillId);
+        });
+        container.dataset.rollDelegated = '1';
     },
 
     /**
      * 加载状态
+     * 注意：成长数据已并入 characterData（由 data.js 的 loadGrowth 负责填充 Growth.state）。
+     * 此处仅做旧版 key 一次性迁移，迁移后清除。
      */
     loadState() {
-        // 加载成长点数
-        const savedPoints = localStorage.getItem(this.config.growthPointsKey);
-        this.state.growthPoints = savedPoints ? parseInt(savedPoints) : 0;
+        // 旧版独立 key 迁移（若存在）
+        const legacyPoints = localStorage.getItem(this.config.growthPointsKey);
+        const legacyHistory = localStorage.getItem(this.config.storageKey);
+        if (legacyPoints !== null || legacyHistory !== null) {
+            this.state.growthPoints = legacyPoints ? parseInt(legacyPoints) : 0;
+            this.state.history = legacyHistory ? JSON.parse(legacyHistory) : [];
+            localStorage.removeItem(this.config.growthPointsKey);
+            localStorage.removeItem(this.config.storageKey);
+        }
+        // 否则 state 已由 data.js 的 loadGrowth() 填充
 
-        // 加载历史记录
-        const savedHistory = localStorage.getItem(this.config.storageKey);
-        this.state.history = savedHistory ? JSON.parse(savedHistory) : [];
+        // 失效技能列表签名，确保下次 renderSkillList 重建 DOM
+        this._lastSkillSignature = null;
     },
 
     /**
      * 保存状态
+     * 注意：data.js 的 loadGrowth 会用「保存到 characterData」的实现覆盖本方法。
+     * 此处保留默认实现，仅用于 loadGrowth 未被调用时的兜底（直接写 characterData）。
      */
     saveState() {
-        localStorage.setItem(this.config.growthPointsKey, this.state.growthPoints.toString());
-        localStorage.setItem(this.config.storageKey, JSON.stringify(this.state.history));
+        if (typeof saveCharacter === 'function') {
+            saveCharacter(false);
+        }
     },
 
     /**
@@ -133,9 +161,10 @@ const Growth = {
      * 绑定事件
      */
     bindEvents() {
-        // 清空历史
-        document.getElementById('clear-growth-history')?.addEventListener('click', () => {
-            if (confirm('确定要清空所有成长历史吗？')) {
+        // 清空历史（使用自定义确认弹窗）
+        document.getElementById('clear-growth-history')?.addEventListener('click', async () => {
+            const confirmed = await showConfirm('确定要清空所有成长历史吗？', '清空确认');
+            if (confirmed) {
                 this.state.history = [];
                 this.saveState();
                 this.renderHistory();
@@ -153,6 +182,7 @@ const Growth = {
 
     /**
      * 渲染技能列表
+     * 通过签名比对避免技能数据未变化时的重复 DOM 重建
      */
     renderSkillList() {
         const container = document.getElementById('growth-skill-list');
@@ -167,6 +197,15 @@ const Growth = {
             if (s.type === 'custom' && !showCustom) return false;
             return true;
         });
+
+        // 计算签名：技能名+总值+筛选状态，未变化则跳过 DOM 重建
+        const signature = filtered.map(s => `${s.name}:${s.total}`).join('|') + `#${showDefault},${showCustom}`;
+        if (this._lastSkillSignature === signature) {
+            // 数据未变，仅刷新按钮状态（成长点数可能已变）
+            this.updateButtonStates();
+            return;
+        }
+        this._lastSkillSignature = signature;
 
         container.innerHTML = '';
 
@@ -309,10 +348,7 @@ const Growth = {
             </div>
         `;
 
-        // 绑定掷骰事件
-        row.querySelector('.roll-button')?.addEventListener('click', () => {
-            this.performGrowthRoll(skill.id);
-        });
+        // 掷骰事件由 bindDelegatedRollHandler 在容器上统一委托处理
 
         return row;
     },
@@ -331,13 +367,13 @@ const Growth = {
     /**
      * 执行成长检定（一次性完成所有确认点数的掷骰和结算）
      */
-    performGrowthRoll(skillId) {
+    async performGrowthRoll(skillId) {
         const skills = this.collectAllSkills();
         const skill = skills.find(s => s.id === skillId);
         if (!skill) return;
 
         if (!this.state.pointsConfirmed || this.state.growthPoints <= 0) {
-            alert('请先确认成长点数！');
+            await showMessage('请先确认成长点数！', '提示');
             return;
         }
 
@@ -549,7 +585,8 @@ const Growth = {
             </div>
         `;
 
-        resultSection.style.display = 'block';
+        resultSection.classList.remove('is-hidden');
+        resultSection.classList.add('is-visible');
     },
 
     /**

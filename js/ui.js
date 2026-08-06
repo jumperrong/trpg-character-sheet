@@ -95,8 +95,8 @@ function initAvatarUpload() {
                         
                         // 设置头像
                         avatarImg.src = resizedImageData;
-                        avatarImg.style.display = 'block';
-                        document.querySelector('.avatar-placeholder').style.display = 'none';
+                        avatarImg.classList.add('is-visible');
+                        document.querySelector('.avatar-placeholder').classList.add('is-hidden');
                     };
                     
                     // 加载原始图像
@@ -128,9 +128,10 @@ function initEditModalOnce() {
 
 // 初始化重置和帮助按钮
 function initResetAndHelp() {
-    // 重置按钮点击事件
-    document.getElementById('reset-button').addEventListener('click', function() {
-        if (confirm('确定要重置所有数据吗？此操作不可撤销。')) {
+    // 重置按钮点击事件（使用自定义确认弹窗）
+    document.getElementById('reset-button').addEventListener('click', async function() {
+        const confirmed = await showConfirm('确定要重置所有数据吗？此操作不可撤销。', '重置确认');
+        if (confirmed) {
             localStorage.removeItem('characterData');
             window.location.reload();
         }
@@ -197,13 +198,13 @@ function initResetAndHelp() {
     const closeHelpBtn = document.getElementById('close-help');
     if (closeHelpBtn) {
         closeHelpBtn.addEventListener('click', function() {
-            helpModal.style.display = 'none';
+            helpModal.classList.remove('active');
         });
     }
     if (helpModal) {
         helpModal.addEventListener('click', function(event) {
             if (event.target === helpModal) {
-                helpModal.style.display = 'none';
+                helpModal.classList.remove('active');
             }
         });
     }
@@ -212,7 +213,7 @@ function initResetAndHelp() {
     document.getElementById('help-button').addEventListener('click', function() {
         const helpModalBody = document.getElementById('help-modal-body');
         helpModalBody.innerHTML = HELP_HTML;
-        helpModal.style.display = 'flex';
+        helpModal.classList.add('active');
     });
 }
 
@@ -643,9 +644,6 @@ function openItemTypeModal(typeInput) {
         const categoryHeader = document.createElement('li');
         categoryHeader.className = 'subtype-category';
         categoryHeader.textContent = category.category;
-        categoryHeader.style.fontWeight = 'bold';
-        categoryHeader.style.backgroundColor = '#eee';
-        categoryHeader.style.padding = '5px 10px';
         typeList.appendChild(categoryHeader);
         
         category.subtypes.forEach(subtype => {

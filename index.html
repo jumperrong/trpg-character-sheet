@@ -9,8 +9,10 @@
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/print.css">
-    <!-- 添加Font Awesome图标库 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 添加Font Awesome图标库（主 CDN 失败时自动回退到备用 CDN） -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css'">
 </head>
 <body>
     <!-- 页面标题 -->
@@ -32,12 +34,12 @@
         <div class="sheet-section basic-info-section section-border">
             <div class="section-title">
                 <span>调查员 Investigator</span>
-                <div class="checkbox-row" style="margin: 0; padding: 0;">
+                <div class="checkbox-row no-spacing">
                     <input type="checkbox" id="is-partner">
                     <label for="is-partner">伙伴</label>
                 </div>
             </div>
-            <table class="info-table" style="width:100%; border-collapse:collapse;">
+            <table class="info-table full">
                 <tr class="field-row">
                     <td class="field-label">姓名</td>
                     <td colspan="3"><input type="text" id="character-name" class="field-input" placeholder=""></td>
@@ -71,7 +73,7 @@
         <div class="sheet-section characteristics-section section-border">
             <div class="section-title">
                 <span>属性 Characteristics</span>
-                <div class="total-attr" style="margin: 0;">总点数：0</div>
+                <div class="total-attr compact">总点数：0</div>
             </div>
             <div class="characteristics-grid">
                 <div class="characteristic-item">
@@ -117,7 +119,7 @@
         <div class="sheet-section avatar-section section-border">
             <div class="section-title">头像 Portrait</div>
             <div class="avatar-container" id="avatar-container">
-                <img id="avatar-img" class="avatar-img" src="" alt="" style="display: none;">
+                <img id="avatar-img" class="avatar-img" src="" alt="角色头像">
                 <div class="avatar-placeholder">
                     <div class="avatar-placeholder-text">点击上传头像</div>
                     <a href="https://www.doubao.com/chat/create-image" target="_blank" class="ai-draw-link">使用AI绘制头像</a>
@@ -291,22 +293,22 @@
             <div class="custom-skills-container">
                 <table class="data-table custom-skills-table">
                     <colgroup>
-                        <col style="width: 20%">
-                        <col style="width: 6%">
-                        <col style="width: 6%">
-                        <col style="width: 6%">
-                        <col style="width: 6%">
-                        <col style="width: 6%">
-                        <col style="width: 6%">
-                        <col style="width: 6%">
-                        <col style="width: 20%">
-                        <col style="width: 6%">
-                        <col style="width: 6%">
-                        <col style="width: 6%">
-                        <col style="width: 6%">
-                        <col style="width: 6%">
-                        <col style="width: 6%">
-                        <col style="width: 6%">
+                        <col class="col-w-20">
+                        <col class="col-w-6">
+                        <col class="col-w-6">
+                        <col class="col-w-6">
+                        <col class="col-w-6">
+                        <col class="col-w-6">
+                        <col class="col-w-6">
+                        <col class="col-w-6">
+                        <col class="col-w-20">
+                        <col class="col-w-6">
+                        <col class="col-w-6">
+                        <col class="col-w-6">
+                        <col class="col-w-6">
+                        <col class="col-w-6">
+                        <col class="col-w-6">
+                        <col class="col-w-6">
                     </colgroup>
                     <thead>
                         <tr>
@@ -353,12 +355,12 @@
                 <table class="data-table items-table">
                     <thead>
                         <tr>
-                            <th style="width: 15%;">名称</th>
-                            <th style="width: 10%;">类型</th>
-                            <th style="width: 25%;">备注</th>
-                            <th style="width: 15%;">名称</th>
-                            <th style="width: 10%;">类型</th>
-                            <th style="width: 25%;">备注</th>
+                            <th class="col-w-15">名称</th>
+                            <th class="col-w-10">类型</th>
+                            <th class="col-w-25">备注</th>
+                            <th class="col-w-15">名称</th>
+                            <th class="col-w-10">类型</th>
+                            <th class="col-w-25">备注</th>
                         </tr>
                     </thead>
                     <tbody id="items-body">
@@ -386,12 +388,12 @@
                 <table class="data-table items-table">
                     <thead>
                         <tr>
-                            <th style="width: 15%;">笔记名称</th>
-                            <th style="width: 10%;">笔记类别</th>
-                            <th style="width: 25%;">备注</th>
-                            <th style="width: 15%;">笔记名称</th>
-                            <th style="width: 10%;">笔记类别</th>
-                            <th style="width: 25%;">备注</th>
+                            <th class="col-w-15">笔记名称</th>
+                            <th class="col-w-10">笔记类别</th>
+                            <th class="col-w-25">备注</th>
+                            <th class="col-w-15">笔记名称</th>
+                            <th class="col-w-10">笔记类别</th>
+                            <th class="col-w-25">备注</th>
                         </tr>
                     </thead>
                     <tbody id="notes-body">
@@ -458,7 +460,7 @@
         </div>
 
         <!-- 掷骰结果区域 -->
-        <div class="sheet-section section-border growth-result-section" id="growth-result-section" style="display:none;">
+        <div class="sheet-section section-border growth-result-section is-hidden" id="growth-result-section">
             <div class="section-title">
                 <span>成长检定结果</span>
             </div>
@@ -590,14 +592,28 @@
         </div>
     </div>
 
-    <!-- 模块化脚本（按依赖顺序加载） -->
-    <script src="js/core.js"></script>
-    <script src="js/calc.js"></script>
-    <script src="js/skills.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/data.js"></script>
-    <script src="js/grow.js"></script>
-    <script src="js/print.js"></script>
-    <script src="js/main.js"></script>
+    <!-- 通用消息/确认弹窗 -->
+    <div class="modal" id="message-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="message-modal-title">提示</h2>
+            </div>
+            <div class="modal-body" id="message-modal-body"></div>
+            <div class="modal-footer">
+                <button id="message-modal-cancel" class="modal-button is-hidden">取消</button>
+                <button id="message-modal-ok" class="modal-button">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模块化脚本（defer 保证按顺序执行且不阻塞渲染） -->
+    <script src="js/core.js" defer></script>
+    <script src="js/calc.js" defer></script>
+    <script src="js/skills.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/data.js" defer></script>
+    <script src="js/grow.js" defer></script>
+    <script src="js/print.js" defer></script>
+    <script src="js/main.js" defer></script>
 </body>
 </html> 
