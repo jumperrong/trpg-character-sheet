@@ -914,25 +914,39 @@ function loadCombat(data) {
 
 /**
  * 加载武器数据
+ * 策略：复用 HTML 中已有的静态武器行，按顺序填充；不足时再追加新行。
+ * 不再使用 innerHTML 清空重建，避免破坏静态 DOM 结构。
  */
 function loadWeapons(data) {
     const weaponsTable = document.querySelector('.weapons-table');
-    const weaponHeader = weaponsTable?.querySelector('.weapon-header');
-    const headerHTML = weaponHeader ? weaponHeader.outerHTML : '';
-    
-    weaponsTable.innerHTML = headerHTML;
-    
+    if (!weaponsTable) return;
+
     const weapons = data.weapons || [];
-    weapons.forEach(weaponData => {
-        weaponsTable.appendChild(createWeaponRow(weaponData));
+    const existingRows = weaponsTable.querySelectorAll('.weapon-row');
+
+    // 填充已有行
+    weapons.forEach((weaponData, index) => {
+        const row = existingRows[index] || weaponsTable.appendChild(createWeaponRow());
+        WEAPON_CELL_CONFIG.forEach(config => {
+            const input = row.querySelector(`.${config.cls}`);
+            if (input) input.value = weaponData[config.dataKey] || '';
+        });
     });
-    
-    // 确保至少4行
-    const existingRows = weaponsTable.querySelectorAll('.weapon-row').length;
-    for (let i = existingRows; i < 4; i++) {
+
+    // 清空多余的静态行（保存数据少于现有行数时）
+    for (let i = weapons.length; i < existingRows.length; i++) {
+        WEAPON_CELL_CONFIG.forEach(config => {
+            const input = existingRows[i].querySelector(`.${config.cls}`);
+            if (input) input.value = '';
+        });
+    }
+
+    // 确保至少 4 行
+    const currentCount = weaponsTable.querySelectorAll('.weapon-row').length;
+    for (let i = currentCount; i < 4; i++) {
         weaponsTable.appendChild(createWeaponRow());
     }
-    
+
     applyWeaponRowColors();
 }
 
@@ -942,21 +956,21 @@ function loadWeapons(data) {
 function createWeaponRow(data = {}) {
     const row = document.createElement('div');
     row.className = 'weapon-row';
-    
+
     WEAPON_CELL_CONFIG.forEach(config => {
         const cellDiv = document.createElement('div');
         cellDiv.className = 'weapon-cell';
-        
+
         const input = document.createElement('input');
         input.type = 'text';
         input.className = config.cls;
-        input.value = data[config.dataKey] || data.features || '';
+        input.value = data[config.dataKey] || '';
         input.placeholder = config.placeholder;
-        
+
         cellDiv.appendChild(input);
         row.appendChild(cellDiv);
     });
-    
+
     return row;
 }
 

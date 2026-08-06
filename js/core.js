@@ -311,22 +311,12 @@ const EventBus = {
 };
 
 // ============ 角色数据 Store（状态管理） ============
+// 说明：当前 Store 仅承担"属性/角色名变更 → 事件分发"的职责，
+// HP/MP/Sanity 等状态值仍由各模块直接读写 DOM，未纳入 Store。
 const CharacterStore = {
     _state: {
         characterName: '',
-        attributes: {},
-        skills: [],
-        status: { hpMax: 0, hpCurrent: 0, mpMax: 0, mpCurrent: 0, sanityMax: 0, sanityCurrent: 0 }
-    },
-
-    // 获取状态
-    getState() {
-        return this._state;
-    },
-
-    // 获取单个值
-    get(key) {
-        return this._state[key];
+        attributes: {}
     },
 
     // 更新角色名（自动同步到所有Tab）
@@ -346,37 +336,6 @@ const CharacterStore = {
     setAttributes(attrs) {
         Object.assign(this._state.attributes, attrs);
         EventBus.emit('attributes', attrs);
-    },
-
-    // 更新状态值
-    setStatus(key, value) {
-        this._state.status[key] = value;
-        EventBus.emit('status', { key, value });
-    },
-
-    // 从角色卡数据加载
-    loadFromData(data) {
-        // 更新角色名
-        if (data.basic?.characterName) {
-            this.setCharacterName(data.basic.characterName);
-        }
-        // 更新属性
-        if (data.attributes) {
-            this.setAttributes(data.attributes);
-        }
-        // 发布加载完成事件
-        EventBus.emit('loaded', data);
-    },
-
-    // 重置
-    reset() {
-        this._state = {
-            characterName: '',
-            attributes: {},
-            skills: [],
-            status: { hpMax: 0, hpCurrent: 0, mpMax: 0, mpCurrent: 0, sanityMax: 0, sanityCurrent: 0 }
-        };
-        EventBus.emit('reset');
     }
 };
 

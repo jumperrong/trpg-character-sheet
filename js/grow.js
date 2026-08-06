@@ -21,7 +21,6 @@ const Growth = {
     state: {
         growthPoints: 0,
         pointsConfirmed: false,
-        currentRoll: null,
         history: []
     },
 
@@ -59,41 +58,47 @@ const Growth = {
 
     /**
      * 初始化成长点数输入
+     * 注意：本方法会在每次切到成长页时调用，事件绑定需做去重，
+     * 否则 input/confirm 会累积多个相同 listener。
      */
     initGrowthPointsInput() {
         const input = document.getElementById('growth-points-remaining');
         const confirmBtn = document.getElementById('confirm-growth-points');
         const statusEl = document.getElementById('growth-points-status');
-        
+
         if (input) {
             input.value = this.state.growthPoints;
-            
-            // 输入变化时重置确认状态
-            input.addEventListener('input', () => {
-                this.state.pointsConfirmed = false;
-                if (statusEl) {
-                    statusEl.textContent = '未确认';
-                    statusEl.className = 'growth-points-status';
-                }
-                this.updateButtonStates();
-            });
+
+            // 仅在首次绑定时挂载 input 监听
+            if (!input.dataset.growthBound) {
+                input.addEventListener('input', () => {
+                    this.state.pointsConfirmed = false;
+                    if (statusEl) {
+                        statusEl.textContent = '未确认';
+                        statusEl.className = 'growth-points-status';
+                    }
+                    this.updateButtonStates();
+                });
+                input.dataset.growthBound = '1';
+            }
         }
-        
+
         // 确认按钮
-        if (confirmBtn) {
+        if (confirmBtn && !confirmBtn.dataset.growthBound) {
             confirmBtn.addEventListener('click', () => {
                 const val = parseInt(input?.value) || 0;
                 this.state.growthPoints = Math.max(0, val);
                 this.state.pointsConfirmed = true;
                 this.saveState();
-                
+
                 if (statusEl) {
                     statusEl.textContent = `已确认：${this.state.growthPoints} 点`;
                     statusEl.className = 'growth-points-status confirmed';
                 }
-                
+
                 this.updateButtonStates();
             });
+            confirmBtn.dataset.growthBound = '1';
         }
 
         // 同步角色名
@@ -102,7 +107,7 @@ const Growth = {
         if (nameInput && growthName) {
             growthName.textContent = nameInput.value || '未命名';
         }
-        
+
         // 初始化状态显示
         if (statusEl) {
             statusEl.textContent = this.state.pointsConfirmed ? `已确认：${this.state.growthPoints} 点` : '未确认';
@@ -548,68 +553,6 @@ const Growth = {
     },
 
     /**
-     * 确认应用成长
-     */
-    confirmGrowth() {
-        if (!this.state.currentRoll) return;
-
-        const roll = this.state.currentRoll;
-
-        // 消耗成长点数
-        this.state.growthPoints = Math.max(0, this.state.growthPoints - 1);
-        const input = document.getElementById('growth-points-remaining');
-        const statusEl = document.getElementById('growth-points-status');
-        if (input) {
-            input.value = this.state.growthPoints;
-        }
-        
-        // 消耗后重置确认状态
-        this.state.pointsConfirmed = false;
-        if (statusEl) {
-            statusEl.textContent = '未确认';
-            statusEl.className = 'growth-points-status';
-        }
-
-        // 如果成功，更新技能值
-        if (roll.isSuccess) {
-            const skills = this.collectAllSkills();
-            const skill = skills.find(s => s.id === roll.skillId);
-
-            if (skill) {
-                if (skill.type === 'default') {
-                    this.updateDefaultSkillGrowth(skill, roll.growthAmount);
-                } else {
-                    this.updateCustomSkillGrowth(skill, roll.growthAmount);
-                }
-            }
-        }
-
-        // 添加到历史
-        this.addToHistory(roll);
-
-        // 保存状态
-        this.saveState();
-
-        // 重置当前掷骰
-        this.state.currentRoll = null;
-
-        // 隐藏结果区域
-        const resultSection = document.getElementById('growth-result-section');
-        if (resultSection) {
-            resultSection.style.display = 'none';
-        }
-
-        // 刷新显示
-        this.renderSkillList();
-        this.renderHistory();
-
-        // 保存角色数据
-        if (typeof saveCharacter === 'function') {
-            saveCharacter(false);
-        }
-    },
-
-    /**
      * 更新默认技能的成长值
      */
     updateDefaultSkillGrowth(skill, growthAmount) {
@@ -651,17 +594,6 @@ const Growth = {
                 
                 totalInput.value = base + occ + int + growth;
             }
-        }
-    },
-
-    /**
-     * 取消成长
-     */
-    cancelGrowth() {
-        this.state.currentRoll = null;
-        const resultSection = document.getElementById('growth-result-section');
-        if (resultSection) {
-            resultSection.style.display = 'none';
         }
     },
 

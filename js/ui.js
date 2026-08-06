@@ -550,43 +550,54 @@ function createItemCells(row, itemIndex) {
 }
 
 // 为备注框添加事件
+// 所有备注框共享同一个全局 tooltip 元素，避免 DOM 膨胀（原本 160+ 个 tooltip 节点）。
+let _sharedNoteTooltip = null;
+function getSharedNoteTooltip() {
+    if (!_sharedNoteTooltip) {
+        _sharedNoteTooltip = document.createElement('div');
+        _sharedNoteTooltip.className = 'tooltip';
+        _sharedNoteTooltip.style.display = 'none';
+        document.body.appendChild(_sharedNoteTooltip);
+    }
+    return _sharedNoteTooltip;
+}
+
 function addNoteEvents(noteInput) {
     // 如果已经添加过事件，就不再添加
     if (noteInput.hasEventListener) {
         return;
     }
-    
-    // 创建tooltip元素
-    const tooltip = document.createElement('div');
-    tooltip.className = 'tooltip';
-    document.body.appendChild(tooltip);
-    
+
+    const tooltip = getSharedNoteTooltip();
+
     // 悬停时显示tooltip
     noteInput.addEventListener('mouseenter', function(e) {
         tooltip.textContent = this.value;
         const rect = this.getBoundingClientRect();
-        
+
         // 检查是否为右侧备注框
         const isRightColumn = this.closest('td').cellIndex > 3;
-        
+
         // 调整tooltip位置
         if (isRightColumn) {
-            // 右侧备注框的tooltip显示在左侧
-            tooltip.style.left = `${Math.max(10, rect.left + window.scrollX - 820)}px`;
+            // 右侧备注框的tooltip显示在左侧，按 tooltip 实际宽度定位
+            tooltip.style.display = 'block';
+            const tipWidth = tooltip.offsetWidth;
+            tooltip.style.left = `${Math.max(10, rect.left + window.scrollX - tipWidth - 10)}px`;
         } else {
             // 左侧备注框的tooltip显示在右侧
             tooltip.style.left = `${rect.right + window.scrollX + 10}px`;
         }
-        
+
         tooltip.style.top = `${rect.top + window.scrollY}px`;
         tooltip.style.display = 'block';
     });
-    
+
     // 移出时隐藏tooltip
     noteInput.addEventListener('mouseleave', function() {
         tooltip.style.display = 'none';
     });
-    
+
     // 点击时弹出编辑窗口
     noteInput.addEventListener('click', function() {
         // 确保先隐藏tooltip，防止打印时出现黑色块
@@ -618,7 +629,7 @@ function addNoteEvents(noteInput) {
             editModal.classList.remove('active');
         };
     });
-    
+
     // 标记已添加事件监听器
     noteInput.hasEventListener = true;
 }

@@ -30,18 +30,7 @@ function initSkills() {
         // 初始更新点数剩余
         updatePointsRemaining();
 
-        // 使用缓存获取技能行并更新驾驶子技能（传递正确的CSS选择器）
-        const skillRows = DOMCache.queryAll('.skill-row') || [];
-        skillRows.forEach(row => {
-            const nameSpan = row.querySelector('.skill-name span');
-            if (nameSpan && nameSpan.textContent.trim() === '飞行器') {
-                const baseInput = row.querySelector('.base-value');
-                if (baseInput && baseInput.value === '25') {
-                    baseInput.value = '1';
-                    calculateSkillSuccess(row);
-                }
-            }
-        });
+        // 飞行器基础值已由 skillsData 中 base:1 提供，无需运行时补丁
     } catch (error) {
         console.error('Error initializing skills:', error);
     }
