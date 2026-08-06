@@ -32,24 +32,12 @@ function initWeapons() {
     applyWeaponRowColors();
 }
 
-// 应用武器行背景色
+// 清除武器行可能残留的内联背景色，交替色由 CSS :nth-child 提供
 function applyWeaponRowColors() {
     const weaponsTable = document.querySelector('.weapons-table');
-    const weaponRows = weaponsTable.querySelectorAll('.weapon-row');
-    
-    weaponRows.forEach((row, index) => {
-        // 清除可能存在的内联样式
+    weaponsTable?.querySelectorAll('.weapon-row').forEach(row => {
         row.style.backgroundColor = '';
-        
-        // 手动应用交替背景色
-        if (index % 2 === 0) {
-            row.style.backgroundColor = 'white';
-        } else {
-            row.style.backgroundColor = 'var(--table-row-alt)';
-        }
     });
-    
-    console.log('已应用武器行背景色，共 ' + weaponRows.length + ' 行');
 }
 
 // 初始化头像上传
@@ -230,7 +218,7 @@ function initResetAndHelp() {
     });
 }
 
-// 计算单个技能行的总值和成功率
+// 计算单个技能行的总值和成功率（自定义技能，与默认技能共用 computeSkillTotals）
 function calculateSkillRow(row) {
     const inputs = {
         base: row.querySelector('.skill-base'),
@@ -241,24 +229,19 @@ function calculateSkillRow(row) {
         half: row.querySelector('.skill-half'),
         fifth: row.querySelector('.skill-fifth')
     };
-    
+
     if (!inputs.base || !inputs.total) return;
-    
+
     const base = parseInt(inputs.base.value) || 0;
     const occupation = parseInt(inputs.occupation?.value) || 0;
     const interest = parseInt(inputs.interest?.value) || 0;
     const growth = parseInt(inputs.growth?.value) || 0;
-    
-    // 设置职业、兴趣和成长点数为0时显示为空
-    if (occupation === 0 && inputs.occupation) inputs.occupation.value = '';
-    if (interest === 0 && inputs.interest) inputs.interest.value = '';
-    if (growth === 0 && inputs.growth) inputs.growth.value = '';
-    
-    const total = base + occupation + interest + growth;
+
+    const { total, half, fifth } = computeSkillTotals(base, occupation, interest, growth);
     inputs.total.value = total;
-    
-    if (inputs.half) inputs.half.value = Math.floor(total / 2);
-    if (inputs.fifth) inputs.fifth.value = Math.floor(total / 5);
+
+    if (inputs.half) inputs.half.value = half;
+    if (inputs.fifth) inputs.fifth.value = fifth;
 }
 
 // 设置自定义技能功能
@@ -518,23 +501,12 @@ function createItemCells(row, itemIndex) {
     typeCell.appendChild(typeInput);
     row.appendChild(typeCell);
     
-    // 备注/说明
+    // 备注/说明（样式由 .item-note 提供）
     const noteCell = document.createElement('td');
     const noteInput = document.createElement('textarea');
     noteInput.className = 'item-note';
     noteInput.placeholder = '备注/说明';
     noteInput.dataset.itemIndex = itemIndex; // 添加索引属性
-    noteInput.style.width = '100%';
-    noteInput.style.height = '18px'; // 保持初始高度固定
-    noteInput.style.maxHeight = '18px'; // 限制最大高度
-    noteInput.style.border = 'none';
-    noteInput.style.resize = 'none';
-    noteInput.style.background = 'transparent';
-    noteInput.style.fontFamily = "'Microsoft YaHei', Arial, sans-serif";
-    noteInput.style.fontSize = '11px';
-    noteInput.style.overflow = 'hidden'; // 溢出内容隐藏
-    noteInput.style.textOverflow = 'ellipsis'; // 溢出使用省略号
-    noteInput.style.whiteSpace = 'nowrap'; // 不换行显示
     noteCell.appendChild(noteInput);
     row.appendChild(noteCell);
     
@@ -789,15 +761,10 @@ function initNotesTable() {
     
     const totalRows = 40;
     
-    // 前三项默认配置（均在左列）
-    const defaultNotes = [
-        { name: '贡献', type: '其他', isDefault: true },  // 位置 0 (Row 0, Left)
-        { name: '幕间', type: '其他', isDefault: true },  // 位置 2 (Row 1, Left)
-        { name: '修炼', type: '其他', isDefault: true }   // 位置 4 (Row 2, Left)
-    ];
-    
+    // 默认笔记配置使用全局常量 DEFAULT_NOTES / DEFAULT_NOTE_POSITIONS
     // 默认笔记位置映射：全局位置 -> 默认笔记索引
-    const defaultPositionMap = { 0: 0, 2: 1, 4: 2 };
+    const defaultPositionMap = {};
+    DEFAULT_NOTES.forEach((n, i) => { defaultPositionMap[n.globalPos] = i; });
     
     for (let i = 0; i < totalRows; i++) {
         const row = document.createElement('tr');
@@ -805,8 +772,8 @@ function initNotesTable() {
         
         // 左栏 - 全局位置 i * 2
         const leftGlobalIndex = i * 2;
-        const leftDefaults = defaultPositionMap[leftGlobalIndex] !== undefined 
-            ? defaultNotes[defaultPositionMap[leftGlobalIndex]] 
+        const leftDefaults = defaultPositionMap[leftGlobalIndex] !== undefined
+            ? { ...DEFAULT_NOTES[defaultPositionMap[leftGlobalIndex]], isDefault: true }
             : {};
         createNoteCells(row, leftGlobalIndex, leftDefaults);
         

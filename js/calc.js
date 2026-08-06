@@ -6,23 +6,23 @@
 // 验证非负整数输入
 function validateNonNegativeInt(inputElement) {
     let value = inputElement.value.trim();
-    
+
     // 如果为空，保持为空
     if (value === '') {
         return;
     }
-    
+
     // 移除非数字字符
     value = value.replace(/[^0-9]/g, '');
-    
+
     // 确保是非负整数
     value = Math.max(0, parseInt(value) || 0);
-    
+
     // 设置最大值为999
     value = Math.min(999, value);
-    
-    // 如果结果为0，显示为空字符串
-    inputElement.value = value === 0 ? '' : value;
+
+    // 0 是合法值，正常显示（不再清空为空字符串）
+    inputElement.value = value;
 }
 
 // 更新派生属性（性能优化版：使用DOM缓存）
@@ -56,18 +56,14 @@ function updateDerivedStats() {
         
         // 更新理智值
         let cthulhuMythosValue = 0;
-        
-        // 使用缓存查找克苏鲁神话技能
-        const skillRows = DOMCache.queryAll('.skill-row') || [];
-        
-        for (const row of skillRows) {
-            const nameSpan = row.querySelector('.skill-name span');
-            if (nameSpan && nameSpan.textContent.trim().includes('克苏鲁神话')) {
-                const regularSuccess = row.querySelector('.regular-success');
-                if (regularSuccess) {
-                    cthulhuMythosValue = parseInt(regularSuccess.textContent) || 0;
-                }
-                break;
+
+        // 通过 data-skill 属性直接定位克苏鲁神话技能行，避免遍历全部技能行
+        const cthulhuNameSpan = document.querySelector('.skill-row .skill-name span[data-skill="克苏鲁神话"]');
+        if (cthulhuNameSpan) {
+            const cthulhuRow = cthulhuNameSpan.closest('.skill-row');
+            const regularSuccess = cthulhuRow?.querySelector('.regular-success');
+            if (regularSuccess) {
+                cthulhuMythosValue = parseInt(regularSuccess.textContent) || 0;
             }
         }
         
@@ -218,6 +214,24 @@ function updatePointsRemaining() {
     }
 }
 
+/**
+ * 统一计算技能总值与成功率
+ * 默认技能与自定义技能共用此逻辑，避免两套算法不同步。
+ * @param {number} base 基础值
+ * @param {number} occupation 职业点数
+ * @param {number} interest 兴趣点数
+ * @param {number} growth 成长点数
+ * @returns {{total:number, half:number, fifth:number}}
+ */
+function computeSkillTotals(base, occupation, interest, growth) {
+    const total = base + occupation + interest + growth;
+    return {
+        total,
+        half: Math.floor(total / 2),
+        fifth: Math.floor(total / 5)
+    };
+}
+
 // 计算技能成功率（性能优化版：减少重复查询）
 function calculateSkillSuccess(skillRow) {
     try {
@@ -230,29 +244,24 @@ function calculateSkillSuccess(skillRow) {
         const hardSuccess = skillRow.querySelector('.hard-success');
         const extremeSuccess = skillRow.querySelector('.extreme-success');
         const nameSpan = skillRow.querySelector('.skill-name span');
-        
+
         // 获取各个值
         const baseValue = parseInt(baseInput?.value) || 0;
         const occupationPoints = parseInt(occupationInput?.value) || 0;
         const interestPoints = parseInt(interestInput?.value) || 0;
         const growthPoints = parseInt(growthInput?.value) || 0;
-        
-        // 设置职业、兴趣和成长点数为0时显示为空
-        if (occupationInput && occupationPoints === 0) occupationInput.value = '';
-        if (interestInput && interestPoints === 0) interestInput.value = '';
-        if (growthInput && growthPoints === 0) growthInput.value = '';
-        
-        // 计算总值
-        const total = baseValue + occupationPoints + interestPoints + growthPoints;
-        
+
+        // 统一计算总值与成功率（与自定义技能共用）
+        const { total, half, fifth } = computeSkillTotals(baseValue, occupationPoints, interestPoints, growthPoints);
+
         // 更新成功率
         if (regularSuccess) regularSuccess.textContent = total.toString();
-        if (hardSuccess) hardSuccess.textContent = Math.floor(total / 2).toString();
-        if (extremeSuccess) extremeSuccess.textContent = Math.floor(total / 5).toString();
-        
+        if (hardSuccess) hardSuccess.textContent = half.toString();
+        if (extremeSuccess) extremeSuccess.textContent = fifth.toString();
+
         // 设置打印数据
         skillRow.dataset.total = total;
-        
+
         // 发布技能变更事件（订阅者会处理克苏鲁神话等特殊逻辑）
         const skillName = nameSpan?.textContent.trim() || '';
         EventBus.emit('skill', { name: skillName, total });
@@ -265,33 +274,33 @@ function calculateSkillSuccess(skillRow) {
 function updateDodgeBaseValue() {
     const dexValue = parseInt(document.getElementById('dex').value) || 0;
     const halfDex = Math.floor(dexValue / 2);
-    
-    // 查找闪避技能行
-    document.querySelectorAll('.skill-row').forEach(skillRow => {
-        const skillName = skillRow.querySelector('.skill-name span');
-        if (skillName && skillName.textContent === '闪避') {
-            const baseInput = skillRow.querySelector('.base-value');
+
+    // 通过 data-skill 属性直接定位闪避技能行
+    const dodgeNameSpan = document.querySelector('.skill-row .skill-name span[data-skill="闪避"]');
+    if (dodgeNameSpan) {
+        const skillRow = dodgeNameSpan.closest('.skill-row');
+        const baseInput = skillRow?.querySelector('.base-value');
+        if (baseInput) {
             baseInput.value = halfDex;
             calculateSkillSuccess(skillRow);
         }
-    });
+    }
 }
 
 // 更新母语技能基础值
 function updateMotherTongueBaseValue() {
     const eduValue = parseInt(document.getElementById('edu').value) || 0;
-    
-    // 查找母语技能行
-    document.querySelectorAll('.skill-row').forEach(skillRow => {
-        const skillName = skillRow.querySelector('.skill-name span');
-        if (skillName && skillName.textContent === '母语') {
-            // 检查是否选择了子技能
-            const selectedSubtype = skillRow.querySelector('.selected-subtype');
-            if (selectedSubtype && selectedSubtype.textContent.trim() !== '') {
-                const baseInput = skillRow.querySelector('.base-value');
-                baseInput.value = eduValue;
-                calculateSkillSuccess(skillRow);
-            }
+
+    // 通过 data-skill 属性直接定位母语技能行
+    const motherTongueSpan = document.querySelector('.skill-row .skill-name span[data-skill="母语"]');
+    if (motherTongueSpan) {
+        const skillRow = motherTongueSpan.closest('.skill-row');
+        // 检查是否选择了子技能
+        const selectedSubtype = skillRow?.querySelector('.selected-subtype');
+        if (selectedSubtype && selectedSubtype.textContent.trim() !== '') {
+            const baseInput = skillRow.querySelector('.base-value');
+            baseInput.value = eduValue;
+            calculateSkillSuccess(skillRow);
         }
-    });
+    }
 }

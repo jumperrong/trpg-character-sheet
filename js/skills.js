@@ -101,18 +101,12 @@ function createSkillsList() {
         skillsTable.className = 'skills-table';
         skillsContainer.appendChild(skillsTable);
         
-        // 创建左右两列容器
+        // 创建左右两列容器（样式由 .skills-column 提供）
         const leftColumn = document.createElement('div');
         leftColumn.className = 'skills-column left-column';
-        leftColumn.style.width = '50%';
-        leftColumn.style.display = 'flex';
-        leftColumn.style.flexDirection = 'column';
-        
+
         const rightColumn = document.createElement('div');
         rightColumn.className = 'skills-column right-column';
-        rightColumn.style.width = '50%';
-        rightColumn.style.display = 'flex';
-        rightColumn.style.flexDirection = 'column';
         
         // 创建所有技能行的数组
         const allSkills = [];
@@ -245,12 +239,9 @@ function createSingleSkill(container, skillData) {
         
         nameCell.appendChild(nameSpan);
         
-        // 子技能显示区域
+        // 子技能显示区域（样式由 .selected-subtype 提供）
         const selectedSubtype = document.createElement('span');
         selectedSubtype.className = 'selected-subtype';
-        selectedSubtype.style.fontStyle = 'italic';
-        selectedSubtype.style.marginLeft = '5px';
-        selectedSubtype.style.color = '#666';
         // 默认为空，不显示任何文本
         nameCell.appendChild(selectedSubtype);
         

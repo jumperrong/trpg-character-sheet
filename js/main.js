@@ -83,15 +83,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 const characterData = JSON.parse(savedData);
                 
                 // 验证数据结构是否完整
-                if (characterData && 
-                    characterData.basic && 
-                    (characterData.basic.characterName || 
+                if (characterData &&
+                    characterData.basic &&
+                    (characterData.basic.characterName ||
                      characterData.attributes && Object.values(characterData.attributes).some(val => val))) {
-                    
-                    // 数据有效，询问是否加载
-                    if (confirm("检测到有保存的角色数据，是否加载？")) {
-                        loadCharacter();
-                    }
+
+                    // 数据有效，自动加载（不再每次弹窗询问，skipAlert=true 静默加载）
+                    loadCharacter(true);
                 } else {
                     console.log("发现无效或空的角色数据，不提示加载");
                     // 数据无效或为空，清除localStorage

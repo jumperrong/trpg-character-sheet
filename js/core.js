@@ -272,6 +272,15 @@ const noteCategories = [
     '冒险', '人物', '功法', '强化', '待办', '其他'
 ];
 
+// 默认笔记配置（名称固定，仅可编辑备注）
+// globalPos 为左列偶数位置，collectNotes / loadNotes / initNotesTable 共用此定义
+const DEFAULT_NOTES = [
+    { name: '贡献', type: '其他', globalPos: 0 },
+    { name: '幕间', type: '其他', globalPos: 2 },
+    { name: '修炼', type: '其他', globalPos: 4 }
+];
+const DEFAULT_NOTE_POSITIONS = DEFAULT_NOTES.map(n => n.globalPos);
+
 // 初始化完成标志
 let initializationComplete = false;
 

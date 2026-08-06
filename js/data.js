@@ -595,16 +595,10 @@ function collectItems() {
 function collectNotes() {
     const body = DOMCache.get('notes-body');
     if (!body) return [];
-    
+
     const notes = [];
     const rows = body.querySelectorAll('tr');
-    const DEFAULT_NOTES = [
-        { name: '贡献', type: '其他' },  // 位置 0
-        { name: '幕间', type: '其他' },  // 位置 2
-        { name: '修炼', type: '其他' }   // 位置 4
-    ];
-    const DEFAULT_POSITIONS = [0, 2, 4];
-    
+
     // 只收集左列偶数位置的笔记数据
     const leftNotes = [];
     rows.forEach((row, rowIndex) => {
@@ -621,10 +615,10 @@ function collectNotes() {
             leftNotes.push({ globalPos: globalPos, name: '', type: '', note: '' });
         }
     });
-    
-    // 收集默认笔记（位置 0, 2, 4）
+
+    // 收集默认笔记（位置由 DEFAULT_NOTE_POSITIONS 定义）
     for (let i = 0; i < DEFAULT_NOTES.length; i++) {
-        const position = DEFAULT_POSITIONS[i];
+        const position = DEFAULT_NOTES[i].globalPos;
         const note = leftNotes[position / 2] || {};
         notes.push({
             name: DEFAULT_NOTES[i].name,
@@ -632,11 +626,11 @@ function collectNotes() {
             note: note.note || ''
         });
     }
-    
+
     // 收集自定义笔记（跳过默认位置，只收集有名称的）
     for (let i = 0; i < leftNotes.length; i++) {
         const globalPos = leftNotes[i].globalPos;
-        if (DEFAULT_POSITIONS.includes(globalPos)) continue;
+        if (DEFAULT_NOTE_POSITIONS.includes(globalPos)) continue;
         const note = leftNotes[i];
         if (note.name && note.name.trim()) {
             notes.push({
@@ -646,7 +640,7 @@ function collectNotes() {
             });
         }
     }
-    
+
     return notes;
 }
 
@@ -688,13 +682,11 @@ function loadCharacter(skipAlert = false) {
         console.error('解析保存的数据时出错:', error);
         alert('加载失败，请稍后再试。');
     }
-    
-    // 延迟更新计算
-    setTimeout(() => {
-        updatePointsRemaining();
-        updateDerivedStats();
-        updateTotalPoints();
-    }, 100);
+
+    // 各 load 函数均为同步 DOM 操作，此处可直接同步重算，无需 setTimeout
+    updatePointsRemaining();
+    updateDerivedStats();
+    updateTotalPoints();
 }
 
 // ---------- 加载辅助函数 ----------
@@ -1072,14 +1064,12 @@ function loadNotes(data) {
     
     const rows = document.querySelectorAll('#notes-body tr');
     const totalRows = rows.length;
-    const DEFAULT_NOTES_COUNT = 3;
-    const DEFAULT_NOTE_NAMES = ['贡献', '幕间', '修炼'];
-    const DEFAULT_POSITIONS = [0, 2, 4];
-    
+    const DEFAULT_NOTE_NAMES = DEFAULT_NOTES.map(n => n.name);
+
     // 分离默认笔记和自定义笔记
-    let defaultNotes = [null, null, null];
+    let defaultNotes = new Array(DEFAULT_NOTES.length).fill(null);
     let customNotes = [];
-    
+
     data.notes.forEach(note => {
         const defaultIndex = DEFAULT_NOTE_NAMES.indexOf(note.name);
         if (defaultIndex !== -1 && note.type === '其他') {
@@ -1088,10 +1078,10 @@ function loadNotes(data) {
             customNotes.push(note);
         }
     });
-    
-    // 填充前三项默认笔记（只恢复备注），映射到全局位置 0, 2, 4（均为左列）
-    for (let i = 0; i < DEFAULT_NOTES_COUNT; i++) {
-        const globalPosition = DEFAULT_POSITIONS[i];
+
+    // 填充默认笔记（只恢复备注），位置由 DEFAULT_NOTE_POSITIONS 定义（均为左列）
+    for (let i = 0; i < DEFAULT_NOTES.length; i++) {
+        const globalPosition = DEFAULT_NOTE_POSITIONS[i];
         const rowIndex = Math.floor(globalPosition / 2);
         
         if (rowIndex >= totalRows) break;
@@ -1107,11 +1097,10 @@ function loadNotes(data) {
         }
     }
     
-    // 填充自定义笔记（只使用左列偶数位置，跳过默认位置 0, 2, 4，从位置 6 开始）
-    const SKIP_POSITIONS = [0, 2, 4];
+    // 填充自定义笔记（只使用左列偶数位置，跳过默认位置，从位置 6 开始）
     let customIdx = 0;
     for (let globalPos = 0; customIdx < customNotes.length; globalPos += 2) {
-        if (SKIP_POSITIONS.includes(globalPos)) continue;
+        if (DEFAULT_NOTE_POSITIONS.includes(globalPos)) continue;
         if (globalPos >= totalRows * 2) break;
         
         const note = customNotes[customIdx];
