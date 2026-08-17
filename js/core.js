@@ -322,6 +322,178 @@ const CharacterStore = {
     }
 };
 
+// ============ 角色管理器（多角色数据隔离） ============
+// localStorage 键：
+//   'characterIndex'        → [{id, name, occupation, updatedAt, createdAt}]
+//   'characterData:{id}'    → 单个角色完整 characterData
+//   'currentCharacterId'    → 当前活跃角色 ID
+const CharacterManager = {
+    INDEX_KEY: 'characterIndex',
+    CURRENT_ID_KEY: 'currentCharacterId',
+    DATA_KEY_PREFIX: 'characterData:',
+
+    /** 生成唯一角色 ID */
+    _genId() {
+        return 'ch_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+    },
+
+    /** 获取角色索引数组 */
+    getIndex() {
+        try {
+            const raw = localStorage.getItem(this.INDEX_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            console.error('读取角色索引失败:', e);
+            return [];
+        }
+    },
+
+    /** 持久化索引 */
+    _saveIndex(index) {
+        localStorage.setItem(this.INDEX_KEY, JSON.stringify(index));
+    },
+
+    /** 获取当前活跃角色 ID */
+    getCurrentId() {
+        return localStorage.getItem(this.CURRENT_ID_KEY) || null;
+    },
+
+    /** 设置当前活跃角色 ID */
+    setCurrentId(id) {
+        if (id) {
+            localStorage.setItem(this.CURRENT_ID_KEY, id);
+        } else {
+            localStorage.removeItem(this.CURRENT_ID_KEY);
+        }
+    },
+
+    /** 构造单角色存储 key */
+    _dataKey(id) {
+        return this.DATA_KEY_PREFIX + id;
+    },
+
+    /** 读取单角色完整数据 */
+    getCharacterData(id) {
+        try {
+            const raw = localStorage.getItem(this._dataKey(id));
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+            console.error(`读取角色数据失败 [${id}]:`, e);
+            return null;
+        }
+    },
+
+    /** 写入单角色完整数据 */
+    setCharacterData(id, data) {
+        localStorage.setItem(this._dataKey(id), JSON.stringify(data));
+    },
+
+    /** 删除单角色数据与索引条目 */
+    deleteCharacter(id) {
+        const index = this.getIndex().filter(item => item.id !== id);
+        this._saveIndex(index);
+        localStorage.removeItem(this._dataKey(id));
+        if (this.getCurrentId() === id) {
+            this.setCurrentId(index[0]?.id || null);
+        }
+    },
+
+    /** 更新索引的元信息（name/occupation/updatedAt），从 characterData 提取 */
+    refreshMeta(id) {
+        const index = this.getIndex();
+        const data = this.getCharacterData(id);
+        if (!data) return;
+        const item = index.find(x => x.id === id);
+        if (item) {
+            item.name = data.basic?.characterName || '未命名角色';
+            item.occupation = data.basic?.occupation || '';
+            item.updatedAt = Date.now();
+            this._saveIndex(index);
+        }
+    },
+
+    /** 新建角色，返回新角色 ID（空角色，未写入数据，等首次 save） */
+    createCharacter(name = '未命名角色') {
+        const index = this.getIndex();
+        const id = this._genId();
+        index.unshift({
+            id,
+            name,
+            occupation: '',
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        });
+        this._saveIndex(index);
+        this.setCurrentId(id);
+        return id;
+    },
+
+    /** 将完整 characterData 导入为一个新角色（导入功能使用） */
+    importAsNewCharacter(characterData, suggestName) {
+        const index = this.getIndex();
+        const id = this._genId();
+        const name = suggestName || characterData.basic?.characterName || '导入角色';
+        index.unshift({
+            id,
+            name,
+            occupation: characterData.basic?.occupation || '',
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+        });
+        this._saveIndex(index);
+        this.setCharacterData(id, characterData);
+        this.setCurrentId(id);
+        return id;
+    },
+
+    /** 重命名角色条目名 */
+    renameCharacter(id, newName) {
+        const index = this.getIndex();
+        const item = index.find(x => x.id === id);
+        if (item) {
+            item.name = newName || '未命名角色';
+            item.updatedAt = Date.now();
+            this._saveIndex(index);
+        }
+    },
+
+    /**
+     * 迁移旧单角色数据：
+     *   若存在旧键 'characterData' 且索引为空，则迁移为第一个角色并清除旧键。
+     */
+    migrateLegacySingleCharacter() {
+        const legacyRaw = localStorage.getItem('characterData');
+        if (!legacyRaw) return null;
+        const index = this.getIndex();
+        if (index.length > 0) {
+            // 索引已存在，不做迁移；但旧键仍保留（以防万一）
+            return null;
+        }
+        try {
+            const legacyData = JSON.parse(legacyRaw);
+            if (!legacyData || !legacyData.basic) return null;
+            const name = legacyData.basic.characterName || '已存角色';
+            const occupation = legacyData.basic.occupation || '';
+            const id = this._genId();
+            const newIndex = [{
+                id,
+                name,
+                occupation,
+                createdAt: Date.now(),
+                updatedAt: Date.now()
+            }];
+            this._saveIndex(newIndex);
+            this.setCharacterData(id, legacyData);
+            this.setCurrentId(id);
+            localStorage.removeItem('characterData');
+            return id;
+        } catch (e) {
+            console.error('迁移旧单角色失败:', e);
+            return null;
+        }
+    }
+};
+
 // ============ 订阅者注册（在DOMReady后调用） ============
 function setupEventBusSubscribers() {
     // 订阅角色名变更 - 同步到所有Tab的姓名显示

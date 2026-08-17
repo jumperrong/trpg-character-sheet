@@ -68,13 +68,19 @@ function initSaveLoad() {
 async function exportCharacter() {
     try {
         saveCharacter(false);
-        const dataStr = localStorage.getItem('characterData');
-        if (!dataStr) {
+        const currentId = CharacterManager.getCurrentId();
+        let characterData;
+        if (currentId) {
+            characterData = CharacterManager.getCharacterData(currentId);
+        } else {
+            // 兜底：读取旧键（兼容未迁移的现场）
+            const raw = localStorage.getItem('characterData');
+            characterData = raw ? JSON.parse(raw) : null;
+        }
+        if (!characterData) {
             await showMessage('没有可导出的角色数据');
             return;
         }
-
-        const characterData = JSON.parse(dataStr);
 
         const characterName = characterData.basic?.characterName || 'character';
         const fileName = `${characterName}_${new Date().toISOString().split('T')[0]}.json`;
@@ -249,9 +255,19 @@ function showImportConfirm(data, fileName) {
     const safeResidence = esc(basic.residence || '（空）');
     const safeBirthplace = esc(basic.birthplace || '（空）');
 
+    const hasCurrent = !!CharacterManager.getCurrentId();
     body.innerHTML = `
-        <div class="import-confirm-warning">
-            ⚠ 导入将覆盖当前所有角色数据，此操作不可撤销
+        <div class="import-confirm-section">
+            <div class="import-confirm-section-title">导入模式</div>
+            <label class="import-radio-item">
+                <input type="radio" name="import-mode" value="new" checked>
+                <span>创建为新角色</span>
+            </label>
+            <label class="import-radio-item">
+                <input type="radio" name="import-mode" value="overwrite" ${hasCurrent ? '' : 'disabled'}>
+                <span>覆盖当前角色 ${hasCurrent ? '' : '（当前无角色，不可用）'}</span>
+            </label>
+            ${hasCurrent ? `<div class="import-confirm-warning" style="margin-top:10px">⚠ "覆盖"将替换当前角色的所有内容，不可撤销</div>` : ''}
         </div>
         <div class="import-confirm-section">
             <div class="import-confirm-section-title">文件信息</div>
@@ -307,9 +323,30 @@ async function confirmImport() {
     if (!pendingImportData) return;
 
     try {
-        localStorage.setItem('characterData', JSON.stringify(pendingImportData));
-        loadCharacter(true);
-        await showMessage('角色数据已成功导入');
+        const modeEl = document.querySelector('input[name="import-mode"]:checked');
+        const mode = modeEl?.value || 'new';
+
+        if (mode === 'overwrite') {
+            // 覆盖当前角色
+            const currentId = CharacterManager.getCurrentId();
+            if (!currentId) {
+                await showMessage('当前无角色可覆盖，请使用"创建为新角色"模式');
+                return;
+            }
+            CharacterManager.setCharacterData(currentId, pendingImportData);
+            CharacterManager.refreshMeta(currentId);
+            await loadCharacter(true);
+            await showMessage('已覆盖当前角色并加载');
+        } else {
+            // 新建角色
+            const newId = CharacterManager.importAsNewCharacter(pendingImportData);
+            await loadCharacter(true);
+            await showMessage('已创建为新角色并切换到该角色');
+        }
+
+        if (typeof updateCharacterManagerUi === 'function') {
+            updateCharacterManagerUi();
+        }
     } catch (error) {
         console.error('Error confirming import:', error);
         await showMessage('导入失败，请稍后再试。');
@@ -365,7 +402,15 @@ async function saveCharacter(showAlert = true) {
             version: SAVE_VERSION
         };
 
-        localStorage.setItem('characterData', JSON.stringify(characterData));
+        // 按当前角色 ID 存储；若无角色则先新建
+        let currentId = CharacterManager.getCurrentId();
+        if (!currentId) {
+            currentId = CharacterManager.createCharacter(
+                characterData.basic?.characterName || '未命名角色'
+            );
+        }
+        CharacterManager.setCharacterData(currentId, characterData);
+        CharacterManager.refreshMeta(currentId);
 
         if (showAlert) {
             await showMessage('角色数据已保存到本地缓存');
