@@ -483,6 +483,10 @@
 
     <!-- 悬浮按钮组 -->
     <div class="float-buttons">
+        <button class="float-button" id="characters-button">
+            <i class="fas fa-user-circle"></i>
+            <span class="button-tooltip">角色管理</span>
+        </button>
         <button class="float-button" id="print-button">
             <i class="fas fa-print"></i>
             <span class="button-tooltip">打印角色卡</span>
@@ -542,6 +546,24 @@
             <div class="modal-footer">
                 <button id="cancel-print" class="modal-button">取消</button>
                 <button id="confirm-print" class="modal-button">打印</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 角色管理模态框 -->
+    <div class="modal" id="characters-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>角色管理</h2>
+            </div>
+            <div class="modal-body">
+                <button id="create-character-button" class="modal-button character-create-button">
+                    <i class="fas fa-plus"></i> 新建角色
+                </button>
+                <div id="character-list" class="character-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="close-characters" class="modal-button">关闭</button>
             </div>
         </div>
     </div>

@@ -63,37 +63,30 @@ document.addEventListener("DOMContentLoaded", function() {
     try {
         // 注册 EventBus 订阅者
         setupEventBusSubscribers();
-        
+
         // 初始化角色卡
         initCharacterSheet();
-        
+
         // 初始化全局功能
         initAll();
-        
-        // 检查localStorage中的数据是否有效
-        const savedData = localStorage.getItem("characterData");
-        if (savedData) {
-            try {
-                // 尝试解析JSON数据
-                const characterData = JSON.parse(savedData);
-                
-                // 验证数据结构是否完整
-                if (characterData &&
-                    characterData.basic &&
-                    (characterData.basic.characterName ||
-                     characterData.attributes && Object.values(characterData.attributes).some(val => val))) {
 
-                    // 数据有效，自动加载（不再每次弹窗询问，skipAlert=true 静默加载）
-                    loadCharacter(true);
-                } else {
-                    // 数据无效或为空，清除localStorage
-                    localStorage.removeItem("characterData");
-                }
-            } catch (parseError) {
-                console.error("解析保存的数据时出错:", parseError);
-                // JSON解析错误，清除localStorage
-                localStorage.removeItem("characterData");
+        // 迁移旧单角色数据 → 多角色结构（幂等，已迁移则跳过）
+        if (typeof CharacterManager !== 'undefined') {
+            CharacterManager.migrateLegacySingleCharacter();
+        }
+
+        // 加载当前角色数据（静默，skipAlert=true）
+        if (typeof CharacterManager !== 'undefined') {
+            const currentId = CharacterManager.getCurrentId();
+            if (currentId && CharacterManager.getCharacterData(currentId)) {
+                loadCharacter(true);
             }
+        }
+
+        // 初始化角色管理 UI（多角色切换/新建/删除）
+        if (typeof initCharacterManager === 'function') {
+            initCharacterManager();
+            updateCharacterManagerUi();
         }
     } catch (error) {
         console.error("初始化出错：", error);

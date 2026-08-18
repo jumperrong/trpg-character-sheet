@@ -127,13 +127,127 @@ function initEditModalOnce() {
     editModalInitialized = true;
 }
 
+// ============ 角色管理（多角色数据隔离） ============
+
+// 初始化角色管理 UI（按钮 + 模态框 + 事件委托）
+function initCharacterManager() {
+    const btn = document.getElementById('characters-button');
+    const modal = document.getElementById('characters-modal');
+    const closeBtn = document.getElementById('close-characters');
+    const createBtn = document.getElementById('create-character-button');
+    const listEl = document.getElementById('character-list');
+    if (!btn || !modal || !listEl) return;
+
+    // 打开模态框时刷新列表
+    btn.addEventListener('click', () => {
+        renderCharacterList();
+        modal.classList.add('active');
+    });
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+    }
+    // 点击遮罩关闭
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+    });
+
+    // 新建角色
+    if (createBtn) {
+        createBtn.addEventListener('click', createNewCharacterFlow);
+    }
+
+    // 列表事件委托：切换 / 删除
+    listEl.addEventListener('click', (e) => {
+        const actionBtn = e.target.closest('[data-action]');
+        if (!actionBtn) return;
+        const { action, id } = actionBtn.dataset;
+        if (action === 'switch') switchToCharacter(id);
+        if (action === 'delete') deleteCharacterFlow(id);
+    });
+}
+
+// 渲染角色列表
+function renderCharacterList() {
+    const listEl = document.getElementById('character-list');
+    if (!listEl) return;
+
+    const index = CharacterManager.getIndex();
+    const currentId = CharacterManager.getCurrentId();
+
+    if (index.length === 0) {
+        listEl.innerHTML = '<div class="character-empty">暂无角色，点击上方"新建角色"开始</div>';
+        return;
+    }
+
+    listEl.innerHTML = index.map(item => {
+        const isActive = item.id === currentId;
+        const esc = escapeHtml;
+        const date = new Date(item.updatedAt).toLocaleString();
+        return `
+        <div class="character-item${isActive ? ' is-active' : ''}">
+            <div class="character-info">
+                <div class="character-name">${esc(item.name)}${isActive ? '<span class="character-active-tag">当前</span>' : ''}</div>
+                <div class="character-meta">${esc(item.occupation || '无职业')} · ${date}</div>
+            </div>
+            <div class="character-actions">
+                ${isActive ? '' : `<button class="character-switch-btn" data-action="switch" data-id="${item.id}">切换</button>`}
+                <button class="character-delete-btn" data-action="delete" data-id="${item.id}">删除</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// 刷新角色管理 UI（供导入等外部操作后调用）
+function updateCharacterManagerUi() {
+    renderCharacterList();
+}
+
+// 切换角色：保存当前 → 切换 ID → 重载加载目标角色
+function switchToCharacter(id) {
+    if (!id || id === CharacterManager.getCurrentId()) return;
+    saveCharacter(false);                  // 静默保存当前角色
+    CharacterManager.setCurrentId(id);
+    window.location.reload();              // 重载后由 main.js 加载目标角色
+}
+
+// 新建角色：保存当前 → 创建新角色 → 重载显示空表单
+function createNewCharacterFlow() {
+    saveCharacter(false);                  // 静默保存当前角色
+    CharacterManager.createCharacter('未命名角色');
+    window.location.reload();
+}
+
+// 删除角色（带确认）
+async function deleteCharacterFlow(id) {
+    const item = CharacterManager.getIndex().find(x => x.id === id);
+    const name = item?.name || '该角色';
+    const isCurrent = id === CharacterManager.getCurrentId();
+
+    const confirmed = await showConfirm(`确定要删除角色「${name}」吗？此操作不可撤销。`, '删除角色');
+    if (!confirmed) return;
+
+    CharacterManager.deleteCharacter(id);  // 内部自动切换 currentId 到剩余第一个
+
+    if (isCurrent) {
+        window.location.reload();          // 删除的是当前角色 → 重载切换
+    } else {
+        updateCharacterManagerUi();
+        await showMessage('角色已删除');
+    }
+}
+
 // 初始化重置和帮助按钮
 function initResetAndHelp() {
-    // 重置按钮点击事件（使用自定义确认弹窗）
+    // 重置按钮点击事件（多角色语义：重置当前角色）
     document.getElementById('reset-button').addEventListener('click', async function() {
-        const confirmed = await showConfirm('确定要重置所有数据吗？此操作不可撤销。', '重置确认');
+        const confirmed = await showConfirm('确定要重置当前角色吗？将清空该角色的所有数据，此操作不可撤销。', '重置确认');
         if (confirmed) {
-            localStorage.removeItem('characterData');
+            const currentId = CharacterManager.getCurrentId();
+            if (currentId) {
+                CharacterManager.deleteCharacter(currentId);
+            }
+            localStorage.removeItem('characterData'); // 清理残留旧键
             window.location.reload();
         }
     });

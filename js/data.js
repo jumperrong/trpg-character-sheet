@@ -267,7 +267,7 @@ function showImportConfirm(data, fileName) {
                 <input type="radio" name="import-mode" value="overwrite" ${hasCurrent ? '' : 'disabled'}>
                 <span>覆盖当前角色 ${hasCurrent ? '' : '（当前无角色，不可用）'}</span>
             </label>
-            ${hasCurrent ? `<div class="import-confirm-warning" style="margin-top:10px">⚠ "覆盖"将替换当前角色的所有内容，不可撤销</div>` : ''}
+            ${hasCurrent ? `<div class="import-confirm-warning mt">⚠ "覆盖"将替换当前角色的所有内容，不可撤销</div>` : ''}
         </div>
         <div class="import-confirm-section">
             <div class="import-confirm-section-title">文件信息</div>
@@ -736,16 +736,29 @@ function loadGrowth(data) {
 // ============ 加载 ============
 async function loadCharacter(skipAlert = false) {
     try {
-        const dataStr = localStorage.getItem('characterData');
-        if (!dataStr) {
+        // 优先从 CharacterManager 读取当前角色
+        const currentId = CharacterManager.getCurrentId();
+        let characterData = currentId ? CharacterManager.getCharacterData(currentId) : null;
+
+        // 兜底：读取旧键（兼容极端情况下未迁移的现场）
+        if (!characterData) {
+            const dataStr = localStorage.getItem('characterData');
+            if (dataStr) {
+                try {
+                    characterData = JSON.parse(dataStr);
+                } catch (e) {
+                    characterData = null;
+                }
+            }
+        }
+
+        if (!characterData) {
             if (!skipAlert) await showMessage('没有找到保存的角色数据');
             return;
         }
 
-        const characterData = JSON.parse(dataStr);
-        if (!characterData || !characterData.basic) {
+        if (!characterData.basic) {
             await showMessage('保存的角色数据无效或为空');
-            localStorage.removeItem('characterData');
             return;
         }
 
