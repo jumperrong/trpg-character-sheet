@@ -40,9 +40,41 @@ function initSaveLoad() {
     bindings.forEach(([id, fn, args]) => {
         const el = DOMCache.get(id);
         if (el) {
-            el.addEventListener('click', () => fn(...args));
+            el.addEventListener('click', () => {
+                // 点击菜单项后先关闭下拉（移动端不会自动因为hover关闭）
+                const dropdown = document.getElementById('io-dropdown');
+                if (dropdown && dropdown.parentElement) {
+                    dropdown.parentElement.classList.remove('is-open');
+                }
+                fn(...args);
+            });
         }
     });
+
+    // P1#8：导入/导出下拉菜单 click 切换（兼容触屏无 hover）
+    const ioButton = document.getElementById('io-button');
+    const ioContainer = ioButton ? ioButton.closest('.float-button-container') : null;
+    if (ioButton && ioContainer) {
+        ioButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            ioContainer.classList.toggle('is-open');
+        });
+
+        // 点击文档任何地方关闭下拉
+        document.addEventListener('click', (e) => {
+            if (!ioContainer.contains(e.target)) {
+                ioContainer.classList.remove('is-open');
+            }
+        }, true);
+
+        // 选择某项后自动关闭（上面 bindings 中已经处理，这里兜底）
+        const dropdown = document.getElementById('io-dropdown');
+        if (dropdown) {
+            dropdown.addEventListener('click', () => {
+                ioContainer.classList.remove('is-open');
+            });
+        }
+    }
     
     // 导入确认弹窗
     const cancelImportBtn = document.getElementById('cancel-import');

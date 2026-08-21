@@ -16,6 +16,7 @@
     --table-header-bg: #e0e0e0;
     --table-row-alt: #f2f2f2;
     --title-bg: #333;
+    --base-font-size: 11px;
 }
 
 /* ========== 全局重置 ========== */
@@ -24,7 +25,7 @@
     margin: 0;
     padding: 0;
     font-family: "Microsoft YaHei", Arial, sans-serif;
-    font-size: 11px;
+    font-size: var(--base-font-size);
 }
 
 /* ========== 页面基础样式 ========== */
@@ -35,10 +36,11 @@ html {
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
-    font-size: 11px !important;
+    font-size: var(--base-font-size) !important;
     line-height: 1.2;
     padding: 2px;
-    width: 21cm;
+    width: 100%;
+    max-width: 21cm;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -47,6 +49,49 @@ body {
     margin-top: 40px;
     position: relative;
     overflow-x: hidden;
+}
+
+/* ========== 移动端断点：≤768px（平板/手机通用） ========== */
+@media (max-width: 768px) {
+    :root { --base-font-size: 13px; }
+
+    html { padding-top: 36px; }
+
+    body {
+        padding: 0 4px;
+        margin-top: 36px;
+        max-width: 100%;
+    }
+}
+
+/* ========== 小屏手机断点：≤576px ========== */
+@media (max-width: 576px) {
+    :root { --base-font-size: 13px; }
+
+    html { padding-top: 34px; }
+
+    body {
+        padding: 0 2px;
+        margin-top: 34px;
+    }
+}
+
+/* ========== 移动端：页面标题/Tab 字号压缩 ========== */
+@media (max-width: 768px) {
+    .page-title {
+        padding: 6px 0;
+    }
+    .page-title span {
+        margin-left: 10px;
+        font-size: 14px;
+    }
+    .tab-container {
+        margin-right: 8px;
+    }
+    .tab {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
 }
 
 /* ========== 页面标题样式 ========== */
@@ -70,6 +115,7 @@ body {
 .page-title span {
     margin-left: 20px;
     font-size: 18px;
+    flex-shrink: 0;
 }
 
 /* ========== Tab 样式 ========== */
@@ -77,7 +123,14 @@ body {
     display: flex;
     margin: 0;
     margin-right: 20px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
 }
+
+.tab-container::-webkit-scrollbar { display: none; }
 
 .tab {
     padding: 5px 15px;
@@ -88,6 +141,7 @@ body {
     border-radius: 5px;
     color: white;
     font-size: 14px;
+    flex-shrink: 0;
 }
 
 .tab.active {

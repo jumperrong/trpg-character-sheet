@@ -2080,3 +2080,292 @@
         gap: 10px;
     }
 }
+
+/* ================================================================
+ * 移动端全量响应式适配（P0 + P1 + P2）
+ * 断点：≤768px  平板/手机通用
+ * ================================================================ */
+@media (max-width: 768px) {
+
+    /* ---------- P0#3：属性网格窄屏改2列 ---------- */
+    .characteristics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 4px;
+    }
+
+    /* ---------- P1#5：表格容器加横向滚动 + 最小宽度保护 ---------- */
+    .custom-skills-container,
+    .items-container,
+    #notes .items-container,
+    #custom-skills .custom-skills-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        overflow-y: hidden;
+    }
+    .custom-skills-table,
+    .items-table,
+    .data-table,
+    #notes .items-table {
+        min-width: 600px;
+        width: 100%;
+    }
+    /* 武器行固定宽度避免挤压 */
+    .weapons-table {
+        min-width: 400px;
+    }
+    .weapons-section {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* ---------- P1#6：模态框/弹窗改为自适应宽度 ---------- */
+    .modal-content,
+    .subtype-modal-content,
+    .subtype-input-modal-content,
+    #edit-modal-content,
+    #help-modal-content {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        margin: 8px;
+    }
+    .character-list {
+        max-height: 60vh;
+    }
+    #help-modal-body {
+        max-height: 75vh;
+    }
+
+    /* ---------- P1#7：触控友好的最小高度 ---------- */
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea,
+    button,
+    .field-input,
+    .char-value,
+    .skill-input,
+    .combat-input,
+    .stat-value,
+    .points-input,
+    .growth-points-input,
+    .items-table input,
+    .items-table textarea,
+    .custom-skills-table input,
+    #notes input,
+    #notes textarea,
+    .weapon-cell input,
+    .info-table .field-input {
+        min-height: 36px;
+        line-height: 32px;
+        font-size: 16px !important;
+        padding: 0 6px;
+    }
+
+    textarea {
+        line-height: 1.35 !important;
+        padding: 6px !important;
+    }
+
+    /* 表格行跟随加高 */
+    .info-table tr,
+    .characteristic-item,
+    .skill-row,
+    .weapon-row,
+    .combat-row,
+    .custom-skills-table tr,
+    .items-table tr,
+    #notes tr,
+    .field-row,
+    .data-table tr {
+        height: auto;
+        min-height: 38px;
+    }
+    .custom-skills-table th,
+    .items-table th,
+    .data-table th,
+    .custom-skills-table td,
+    .items-table td,
+    .data-table td,
+    .weapon-cell,
+    .info-table td {
+        height: auto;
+        min-height: 38px;
+        vertical-align: middle;
+    }
+
+    /* 按钮/单选/下拉点击热区 */
+    .modal-button,
+    .subtype-modal-button,
+    .mini-button,
+    .add-button,
+    .confirm-points-button,
+    .roll-button,
+    .character-switch-btn,
+    .character-delete-btn,
+    .character-create-button {
+        min-height: 40px;
+        padding: 8px 14px;
+        font-size: 14px;
+    }
+
+    /* ---------- P1#9：悬浮按钮手机端改到底部横向排列 ---------- */
+    .float-buttons {
+        position: fixed;
+        right: auto;
+        top: auto;
+        transform: none;
+        left: 50%;
+        bottom: 8px;
+        transform: translateX(-50%);
+        flex-direction: row;
+        gap: 6px;
+        padding: 6px 10px;
+        background: rgba(255, 255, 255, 0.96);
+        border-radius: 28px;
+        box-shadow: 0 2px 14px rgba(0, 0, 0, 0.18);
+        z-index: 1000;
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+    }
+
+    .float-button {
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+    }
+    .float-button i {
+        font-size: 16px;
+    }
+
+    /* 触屏 Tooltip 用点击/长按也能看到，这里禁用 hover 版本避免误显示 */
+    .button-tooltip {
+        display: none;
+    }
+
+    /* 页面底部留白，避免被悬浮按钮遮挡最后内容 */
+    body::after {
+        content: "";
+        display: block;
+        height: 64px;
+    }
+
+    /* ---------- P1#8：导入/导出下拉菜单 click 版 (is-open) + hover 共存 ---------- */
+    .float-button-container:hover .dropdown-menu,
+    .float-button-container.is-open .dropdown-menu {
+        display: block;
+    }
+    .dropdown-menu {
+        position: fixed;
+        right: auto;
+        bottom: 62px;
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: 180px;
+        border-radius: 8px;
+    }
+    .dropdown-menu::after {
+        content: '';
+        position: absolute;
+        bottom: -6px;
+        left: 50%;
+        transform: translateX(-50%) rotate(180deg);
+        border-width: 6px 0 6px 6px;
+        border-style: solid;
+        border-color: transparent transparent transparent #f9f9f9;
+    }
+
+    /* ---------- P2：技能区单列 + 子技能按钮加宽 ---------- */
+    .skills-container,
+    .skills-table {
+        flex-direction: column;
+    }
+    .skills-column {
+        width: 100%;
+    }
+    .left-column .skill-row {
+        border-right: none;
+    }
+    .subtype-select-button {
+        padding: 4px 8px;
+        font-size: 12px;
+        min-height: 28px;
+    }
+    .selected-subtype {
+        max-width: 60vw;
+    }
+
+    /* ---------- 状态区域 6 宫格 改成 2 行 3 列更紧凑 ---------- */
+    .stats-container {
+        flex-direction: column;
+        gap: 4px;
+    }
+    .stat-box {
+        width: 100%;
+    }
+
+    /* 头像容器响应式放大（单列后宽度富裕） */
+    .avatar-container {
+        width: 140px;
+        height: 140px;
+        max-width: 160px;
+    }
+
+    /* 成长页面：技能/历史列表行加高 */
+    .growth-skill-row,
+    .history-item {
+        padding: 10px 12px;
+        min-height: 48px;
+    }
+    .growth-skill-list {
+        max-height: 60vh;
+    }
+}
+
+/* ================================================================
+ * 小屏极限优化：≤576px（iPhone SE/小屏安卓）
+ * ================================================================ */
+@media (max-width: 576px) {
+
+    .characteristics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    /* 悬浮按钮更小一些 */
+    .float-buttons {
+        gap: 4px;
+        padding: 5px 8px;
+        border-radius: 24px;
+    }
+    .float-button {
+        width: 34px;
+        height: 34px;
+        font-size: 15px;
+    }
+    .float-button i { font-size: 15px; }
+
+    /* 标签/Tab进一步瘦身 */
+    .tab {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+    .page-title span {
+        font-size: 13px;
+        margin-left: 6px;
+    }
+
+    /* 模态框 padding 压缩以利用屏幕 */
+    .modal-body,
+    .subtype-modal-body,
+    .subtype-input-modal-body,
+    #edit-modal-content {
+        padding: 10px;
+    }
+    .modal-header,
+    .subtype-modal-header {
+        padding: 8px 10px;
+    }
+    .modal-footer,
+    .subtype-modal-footer {
+        padding: 8px 10px;
+    }
+}
