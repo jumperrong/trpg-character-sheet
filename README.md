@@ -211,6 +211,45 @@ trpg-character-sheet/
 5. 导入时可选择"创建为新角色"或"覆盖当前角色"模式，旧版 JSON 文件自动兼容
 6. 旧版单角色数据（v1.2.0 之前）首次打开会自动迁移为多角色结构，无数据丢失
 
+## 版本更新日志
+
+### v1.3.8
+- **移动端：备注栏聚焦锁定背景滚动**（道具页 / 笔记页）
+  - 根因：此前仅锁定了 `.items-container` 的 `overflow`，但手机端真正滚动的是 `html` 根层（`scrollHeight > clientHeight`），导致锁定无效，背景列表仍可上下滑动。
+  - 修复（4 层协同锁定，必生效）：
+    1. **锁根层 DOM**：`focusin` 备注时将 `document.documentElement` + `body` 置为 `overflow:hidden` + `touch-action:none`，失焦后精确还原原值并恢复 `scrollTop`。
+    2. **CSS 强化锁（≤768px）**：新增 `.note-scroll-locked` 类，`position: fixed; width/height: 100%; overscroll-behavior: none`，即便 overflow:hidden 在某些 WebView 不生效，`fixed` 也会钉住视口。
+    3. **触摸穿透阻断**：document 级 `touchmove` 监听，`activeElement` 为备注时所有不在 textarea 上的滑动全部 `preventDefault`。
+    4. **滚动链切断**：`.item-note` 加 `overscroll-behavior: contain`，滚到顶/底不再冒泡给父层（scroll chaining）。
+  - 同步：移动端 `:focus` textarea 显式 `touch-action: pan-y`，保证其自身 120px 内仍可独立滚动查看长文本。
+- **移动端：响应式布局完整性**
+  - 自定义技能页：单列布局（隐藏右半 5 列，列宽调整：技能名 30%、数据列 10%），`min-width: 100%` 占满容器，消除右侧空白区。
+  - 道具页 / 笔记页：单列布局（隐藏右半 3 列），备注框默认高 32px、聚焦时展开 120px 可滚动。
+- **修复**：`bindNoteFocusScrollLock` 函数此前被调用但定义缺失（`ReferenceError`），现已补全并在道具表、笔记表初始化时正确绑定，带 `_noteScrollLockBound` 防重复绑定标记。
+- **资源版本号**：`1.3.6 → 1.3.8`，强制浏览器加载最新 CSS/JS，避免缓存干扰。
+
+### v1.3.7
+- 新增 `bindNoteFocusScrollLock` 函数调用点（道具表、笔记表初始化时），修复此前函数体未实际落地导致的 ReferenceError。
+
+### v1.3.6
+- 自定义技能、道具、笔记 tab 的移动端单列适配与备注框展开/可滚动样式。
+
+---
+
+## 移动端适配说明
+
+支持断点 `max-width: 768px`（平板/手机通用），`max-width: 576px`（iPhone SE/小屏安卓）极限优化。
+
+| 页面 | 优化项 |
+|------|--------|
+| 主页面 | 三栏 → 单列堆叠（属性、基本信息、头像依次排列） |
+| 自定义技能 | 隐藏右半 5 列 → 单列；技能名列宽 30%、数据列各 10%；表格 `min-width: 100%` |
+| 道具 | 隐藏右半 3 列 → 单列；备注 `:focus` 展开 120px 可滚动；**聚焦时根层滚动锁定** |
+| 笔记 | 同上（6 类预设分类保留） |
+| 备注框 | 聚焦：高 120px、`overflow-y:auto`、`touch-action:pan-y`、`overscroll-behavior:contain`；失焦：高 32px |
+
+---
+
 ## 版权声明
 © 2024 大胡子跑团  
 设计：龙王 jumper.rong@outlook.com  
