@@ -2109,6 +2109,20 @@
         min-width: 600px;
         width: 100%;
     }
+    /* 自定义技能表移动端改为单列布局（隐藏右半边的"技能名"等表头和数据列） */
+    .custom-skills-table thead th:nth-child(n+9),
+    .custom-skills-table tbody td:nth-child(n+9) {
+        display: none;
+    }
+    .custom-skills-table thead th.col-name + th,
+    .custom-skills-table thead th.col-name {
+        /* 触发 layout 重算 */
+    }
+    .custom-skills-table {
+        min-width: 320px;
+    }
+    .custom-skills-table .col-w-20 { width: 40%; }
+    .custom-skills-table .col-w-6 { width: 8.5%; }
     /* 武器行固定宽度避免挤压 */
     .weapons-table {
         min-width: 400px;
