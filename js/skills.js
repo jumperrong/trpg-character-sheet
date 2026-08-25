@@ -47,11 +47,11 @@ function createSkillsHeader() {
         
         // 创建左列表头
         const leftHeader = document.createElement('div');
-        leftHeader.className = 'skills-header-column half';
+        leftHeader.className = 'skills-header-column half left-column';
 
         // 创建右列表头
         const rightHeader = document.createElement('div');
-        rightHeader.className = 'skills-header-column half';
+        rightHeader.className = 'skills-header-column half right-column';
         
         // 创建表头项
         const headerItems = [

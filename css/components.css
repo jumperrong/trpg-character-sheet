@@ -2283,11 +2283,14 @@
         width: 100%;
     }
     /* 移动端只显示左侧一组表头，右侧表头隐藏（避免出现两条"技能名称"） */
-    .skills-header-column:last-child {
-        display: none;
+    .skills-header-column.right-column,
+    .skills-header-column:last-child,
+    .skills-header-column:nth-child(2) {
+        display: none !important;
     }
+    .skills-header-column.left-column,
     .skills-header-column:first-child {
-        width: 100%;
+        width: 100% !important;
         border-right: none;
     }
     .skills-header {
