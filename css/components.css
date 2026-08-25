@@ -2201,6 +2201,7 @@
         overflow-y: auto !important;       /* 聚焦后内容可滚动 */
         white-space: pre-wrap !important;
         -webkit-overflow-scrolling: touch;
+        touch-action: pan-y !important;    /* 允许 textarea 自身垂直滑动，不受父容器锁定影响 */
         background: #fff !important;
         z-index: 2;
         position: relative;

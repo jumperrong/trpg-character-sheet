@@ -559,6 +559,43 @@ function createCustomSkillItem() {
     return tds;
 }
 
+// 备注框焦点控制：聚焦时锁定外层容器滚动，避免误触滑动整张列表
+// 失焦后恢复，textarea 内部仍可滚动查看长文本
+function bindNoteFocusScrollLock(bodyElement) {
+    if (!bodyElement || bodyElement._noteScrollLockBound) return;
+    bodyElement._noteScrollLockBound = true;
+
+    const container = bodyElement.closest('.items-container');
+    // 记录原始值，失焦时精确还原（避免清空本应由 CSS 控制的样式）
+    let originOverflow = '';
+    let originTouchAction = '';
+
+    bodyElement.addEventListener('focusin', function(e) {
+        if (!e.target.classList.contains('item-note')) return;
+        if (!container) return;
+        originOverflow = container.style.overflow;
+        originTouchAction = container.style.touchAction;
+        // 锁定外层容器，禁止下方列表滚动
+        container.style.overflow = 'hidden';
+        container.style.touchAction = 'none';
+    });
+
+    bodyElement.addEventListener('focusout', function(e) {
+        if (!e.target.classList.contains('item-note')) return;
+        if (!container) return;
+        container.style.overflow = originOverflow;
+        container.style.touchAction = originTouchAction;
+    });
+
+    // 聚焦状态下阻止 touchmove 冒泡到容器，确保只滚动 textarea 自身
+    bodyElement.addEventListener('touchmove', function(e) {
+        const active = document.activeElement;
+        if (active && active.classList.contains('item-note')) {
+            e.stopPropagation();
+        }
+    }, { passive: false });
+}
+
 // 初始化道具表（性能优化版：使用事件委托）
 function initItemsTable() {
     const itemsBody = $.itemsBody || DOMCache.get('items-body');
@@ -592,7 +629,11 @@ function initItemsTable() {
         });
         itemsBody._delegatedEvents = true;
     }
-    
+
+    // 移动端：备注 textarea 聚焦时禁止外层容器滚动（避免误触滑动整张表）
+    // 失焦后恢复原状，textarea 内部仍可滚动查看长文本
+    bindNoteFocusScrollLock(itemsBody);
+
     // 使道具表缓存失效
     DOMCache.invalidateByPrefix('qa:.item');
 }
@@ -910,10 +951,13 @@ function initNotesTable() {
                 e.target.setAttribute('value', e.target.value);
             }
         });
-        
+
         itemsBody._delegatedEvents = true;
     }
-    
+
+    // 移动端：备注 textarea 聚焦时禁止外层容器滚动（避免误触滑动整张表）
+    bindNoteFocusScrollLock(itemsBody);
+
     // 使笔记表缓存失效
     DOMCache.invalidateByPrefix('qa:.note');
 }
