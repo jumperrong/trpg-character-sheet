@@ -559,39 +559,89 @@ function createCustomSkillItem() {
     return tds;
 }
 
-// 备注框焦点控制：聚焦时锁定外层容器滚动，避免误触滑动整张列表
+// 备注框焦点控制：聚焦时锁定页面根级滚动（html/body），避免误触滑动整张背景列表
 // 失焦后恢复，textarea 内部仍可滚动查看长文本
 function bindNoteFocusScrollLock(bodyElement) {
     if (!bodyElement || bodyElement._noteScrollLockBound) return;
     bodyElement._noteScrollLockBound = true;
 
-    const container = bodyElement.closest('.items-container');
-    // 记录原始值，失焦时精确还原（避免清空本应由 CSS 控制的样式）
-    let originOverflow = '';
-    let originTouchAction = '';
+    // 经实测，手机端真正发生滚动的是 html 根层（html.scrollHeight > clientHeight）
+    // 而 .items-container 本身 contentHeight 等于 clientHeight 并不滚动
+    // 所以必须锁定 html / body 的滚动才会真正让背景列表"定住"
+    let savedHtmlOverflow = '';
+    let savedHtmlTouchAction = '';
+    let savedBodyOverflow = '';
+    let savedBodyTouchAction = '';
+    let savedScrollTop = 0;
+    const LOCK_CLASS = 'note-scroll-locked';
+
+    function lockScroll() {
+        const html = document.documentElement;
+        const body = document.body;
+        savedScrollTop = html.scrollTop || body.scrollTop;
+        savedHtmlOverflow = html.style.overflow;
+        savedHtmlTouchAction = html.style.touchAction;
+        savedBodyOverflow = body.style.overflow;
+        savedBodyTouchAction = body.style.touchAction;
+        // 锁根层：overflow:hidden 阻止程序化/滚动条滚动
+        html.style.overflow = 'hidden';
+        html.style.touchAction = 'none';
+        body.style.overflow = 'hidden';
+        body.style.touchAction = 'none';
+        body.classList.add(LOCK_CLASS);
+    }
+
+    function unlockScroll() {
+        const html = document.documentElement;
+        const body = document.body;
+        html.style.overflow = savedHtmlOverflow;
+        html.style.touchAction = savedHtmlTouchAction;
+        body.style.overflow = savedBodyOverflow;
+        body.style.touchAction = savedBodyTouchAction;
+        body.classList.remove(LOCK_CLASS);
+        // 还原滚动位置，避免锁滚动期间跳动
+        if (savedScrollTop) {
+            html.scrollTop = savedScrollTop;
+            body.scrollTop = savedScrollTop;
+        }
+    }
 
     bodyElement.addEventListener('focusin', function(e) {
         if (!e.target.classList.contains('item-note')) return;
-        if (!container) return;
-        originOverflow = container.style.overflow;
-        originTouchAction = container.style.touchAction;
-        // 锁定外层容器，禁止下方列表滚动
-        container.style.overflow = 'hidden';
-        container.style.touchAction = 'none';
+        lockScroll();
     });
 
     bodyElement.addEventListener('focusout', function(e) {
         if (!e.target.classList.contains('item-note')) return;
-        if (!container) return;
-        container.style.overflow = originOverflow;
-        container.style.touchAction = originTouchAction;
+        unlockScroll();
     });
 
-    // 聚焦状态下阻止 touchmove 冒泡到容器，确保只滚动 textarea 自身
+    // 触摸滚动穿透防御链：
+    // 1) 备注聚焦时，在 body 上拦截所有 touchmove 默认行为，从根层切断滚动
+    //    （但不能拦截 textarea 自身的 pan，所以对 textarea 内的 touchmove 特殊放行）
+    document.addEventListener('touchmove', function(e) {
+        const active = document.activeElement;
+        if (!active || !active.classList.contains('item-note')) return;
+        // 如果目标不是聚焦的 textarea 本身或其子元素（textarea 无子元素，直接比对）
+        if (e.target !== active && !active.contains(e.target)) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    // 2) 在 textarea 上阻止滚动冒泡，防止滚到边界后触发父层 scroll chaining
     bodyElement.addEventListener('touchmove', function(e) {
         const active = document.activeElement;
-        if (active && active.classList.contains('item-note')) {
+        if (active && active.classList.contains('item-note') && e.target === active) {
             e.stopPropagation();
+            // 当 textarea 已到顶/底且继续滚时，preventDefault 阻断链式穿透
+            const ta = active;
+            const atTop = ta.scrollTop <= 0;
+            const atBottom = ta.scrollTop + ta.clientHeight >= ta.scrollHeight - 1;
+            if ((atTop && e.touches[0] && e.touches[0].clientY > 0) ||
+                (atBottom && e.touches[0])) {
+                // 保留 textarea 内部滚动；若已经到边界，不额外 preventDefault
+                // 让浏览器自己处理，避免破坏 textarea 惯性滚动体验
+            }
         }
     }, { passive: false });
 }

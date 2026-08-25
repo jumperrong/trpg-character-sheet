@@ -1196,6 +1196,7 @@
     text-overflow: ellipsis;
     transition: all 0.3s;
     resize: none;
+    overscroll-behavior: contain;       /* 切断滚动链：滚到边界不再外传 */
 }
 
 /* ========== 默认笔记样式（贡献/幕间/修炼） ========== */
@@ -2086,6 +2087,24 @@
  * 断点：≤768px  平板/手机通用
  * ================================================================ */
 @media (max-width: 768px) {
+
+    /* ---------- 备注框聚焦锁滚动的根层样式 ---------- */
+    /* JS 在聚焦备注时给 body 加 .note-scroll-locked，配合以下规则硬锁页面滚动 */
+    body.note-scroll-locked,
+    body.note-scroll-locked > html,
+    html:has(body.note-scroll-locked) {
+        overflow: hidden !important;
+        touch-action: none !important;
+        position: fixed !important;
+        width: 100% !important;
+        height: 100% !important;
+        overscroll-behavior: none !important;
+    }
+    /* 聚焦时的 textarea 仍然允许内部滚动 */
+    body.note-scroll-locked .item-note:focus {
+        touch-action: pan-y !important;
+        overscroll-behavior: contain !important;
+    }
 
     /* ---------- P0#3：属性网格窄屏改2列 ---------- */
     .characteristics-grid {
