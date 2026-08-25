@@ -2141,6 +2141,43 @@
         font-size: 12px;
         padding: 4px 2px;
     }
+    /* ---------- 道具/笔记表移动端改为单列布局（隐藏右半边的重复表头和数据列） ---------- */
+    /* 这两个表 6 列布局：左右各 3 列 (名称/类型/备注 x2)，移动端只显示左半边 */
+    #items .items-table thead th:nth-child(n+4),
+    #items .items-table tbody td:nth-child(n+4),
+    #notes .items-table thead th:nth-child(n+4),
+    #notes .items-table tbody td:nth-child(n+4) {
+        display: none !important;
+    }
+    /* 表格占满容器宽度，消除右侧空白 */
+    #items .items-table,
+    #notes .items-table {
+        min-width: 100% !important;
+        width: 100% !important;
+        table-layout: fixed;
+    }
+    /* 列宽重分配：名称 40%, 类型 20%, 备注 40% (合计 100%) */
+    #items .items-table thead th.col-w-15,
+    #notes .items-table thead th.col-w-15 { width: 40% !important; }
+    #items .items-table thead th.col-w-10,
+    #notes .items-table thead th.col-w-10 { width: 20% !important; }
+    #items .items-table thead th.col-w-25,
+    #notes .items-table thead th.col-w-25 { width: 40% !important; }
+    /* 输入框占满 td 宽度 */
+    #items .items-table tbody input,
+    #items .items-table tbody textarea,
+    #notes .items-table tbody input,
+    #notes .items-table tbody textarea {
+        width: 100% !important;
+        box-sizing: border-box;
+        padding: 1px 3px !important;
+    }
+    /* 表头加粗可读 */
+    #items .items-table th,
+    #notes .items-table th {
+        font-size: 12px;
+        padding: 4px 2px;
+    }
     /* 武器行固定宽度避免挤压 */
     .weapons-table {
         min-width: 400px;
