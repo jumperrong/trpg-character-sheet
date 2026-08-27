@@ -1212,6 +1212,20 @@
     cursor: not-allowed;
 }
 
+/* 修复 S2：右列笔记只读置灰（collectNotes 仅收集左列，右列禁止编辑避免数据黑洞） */
+.items-table .item-name.note-col-disabled,
+.items-table .item-type-input.note-col-disabled,
+.items-table .item-note.note-col-disabled {
+    background-color: #f5f5f5;
+    color: #bbb;
+    cursor: not-allowed;
+    -webkit-text-fill-color: #bbb; /* iOS Safari readonly 文本颜色 */
+}
+.items-table .item-note.note-col-disabled:focus {
+    height: 18px;
+    overflow: hidden;
+}
+
 .item-note:focus {
     height: 5em;
     white-space: normal;

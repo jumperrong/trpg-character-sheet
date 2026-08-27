@@ -100,4 +100,16 @@ document.addEventListener("DOMContentLoaded", function() {
             CharacterStore.setCharacterName(this.value);
         });
     }
+
+    // 修复 S4：页面卸载前静默保存，避免误关标签页丢失高频输入（属性/技能点）
+    // saveCharacter(false) 内部 setItem 是同步的，即使 beforeunload 不等待 async 也能完成写入
+    window.addEventListener('beforeunload', function() {
+        if (typeof saveCharacter === 'function') {
+            try {
+                saveCharacter(false);
+            } catch (e) {
+                console.error('beforeunload 保存失败:', e);
+            }
+        }
+    });
 });

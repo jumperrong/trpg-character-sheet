@@ -69,18 +69,6 @@ const DOMCache = {
 
         parent.addEventListener(eventType, wrappedHandler);
         this._delegatedParents.set(key, { parent, handler: wrappedHandler });
-    },
-
-    // 批量绑定事件到缓存元素
-    bind(idOrElement, eventType, handler) {
-        const el = typeof idOrElement === 'string' ? this.get(idOrElement) : idOrElement;
-        if (el) {
-            const key = `${idOrElement}_${eventType}_${handler.toString().slice(0, 20)}`;
-            if (!this._listeners.has(key)) {
-                el.addEventListener(eventType, handler);
-                this._listeners.set(key, { el, eventType, handler });
-            }
-        }
     }
 };
 
@@ -385,6 +373,7 @@ const CharacterManager = {
 
     /** 写入单角色完整数据 */
     setCharacterData(id, data) {
+        // 修复 S1：不吞 QuotaExceededError，让其冒泡到 saveCharacter 的 catch 统一提示
         localStorage.setItem(this._dataKey(id), JSON.stringify(data));
     },
 

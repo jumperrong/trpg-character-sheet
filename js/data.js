@@ -10,9 +10,8 @@
 // ============ 常量配置 ============
 const SAVE_VERSION = '1.3.0';
 const ATTR_IDS = ['str', 'con', 'siz', 'dex', 'app', 'int', 'pow', 'edu', 'luc'];
-const LAST_EXPORT_KEY = 'lastExportFileHandle';
 
-// 会话级缓存上次导出的文件句柄
+// 会话级缓存上次导出的文件句柄（不持久化，刷新后失效）
 let lastExportHandle = null;
 
 // 状态属性的字段映射配置
@@ -449,7 +448,13 @@ async function saveCharacter(showAlert = true) {
         }
     } catch (error) {
         console.error('Error saving character:', error);
-        if (showAlert) {
+        // 修复 S1：识别 QuotaExceededError，无论 showAlert 都提示（存储满是严重错误，不能静默）
+        const isQuota = error && (error.name === 'QuotaExceededError'
+            || error.name === 'NS_ERROR_DOM_QUOTA_REACHED'
+            || error.code === 22 || error.code === 1014);
+        if (isQuota) {
+            await showMessage('本地存储已满，建议删除不用的角色或导出备份后再保存。', '存储已满');
+        } else if (showAlert) {
             await showMessage('保存失败，请稍后再试。');
         }
     }
@@ -529,6 +534,8 @@ function collectSkills() {
 
 /**
  * 获取子技能的索引值
+ * 修复 S3：回退路径按 row.dataset.parentSkill 过滤，避免在整列范围内数 .sub-skill-row
+ *          导致外语第 2 行被算成"列内第 3 个子技能行"
  */
 function getSubSkillIndex(skillRow, nameElement) {
     if (skillRow.dataset.subSkillIndex) {
@@ -537,7 +544,13 @@ function getSubSkillIndex(skillRow, nameElement) {
     if (skillRow.classList.contains('sub-skill-row')) {
         const parent = nameElement.closest('.skills-column');
         if (parent) {
-            const allSubSkillRows = Array.from(parent.querySelectorAll('.sub-skill-row'));
+            // 按父技能过滤，仅在当前父技能组内数序号
+            const parentSkillName = skillRow.dataset.parentSkill
+                || nameElement.dataset.skill;
+            const subSkillSelector = parentSkillName
+                ? `.sub-skill-row[data-parent-skill="${parentSkillName}"]`
+                : '.sub-skill-row';
+            const allSubSkillRows = Array.from(parent.querySelectorAll(subSkillSelector));
             const index = allSubSkillRows.indexOf(skillRow);
             if (index !== -1) {
                 return index + 1;
@@ -765,9 +778,60 @@ function loadGrowth(data) {
     };
 }
 
+/**
+ * 无条件清空所有表格，用于切换/新建角色时清除旧 DOM 数据
+ * 修复 B1：loadCharacter 开头调用，确保即使新角色无数据也能清空残留
+ */
+function resetAllTables() {
+    // 技能表由 rebuildSkillsContainer 在后续重建，这里不重复
+    // 道具/自定义技能/笔记/武器表：调用对应 init 函数（内部 innerHTML='' 重建）
+    if (typeof initItemsTable === 'function') initItemsTable();
+    if (typeof initCustomSkillsTable === 'function') initCustomSkillsTable();
+    if (typeof initNotesTable === 'function') initNotesTable();
+    // 武器表：复用 loadWeapons 的清空逻辑（填充后清多余行），这里直接清空所有武器行
+    const weaponsTable = document.querySelector('.weapons-table');
+    if (weaponsTable) {
+        weaponsTable.querySelectorAll('.weapon-row .weapon-name, .weapon-row .weapon-damage, .weapon-row .weapon-feature').forEach(input => {
+            input.value = '';
+        });
+    }
+    // 基本信息表单：清空姓名/玩家/时代等输入框
+    const basicIds = ['character-name', 'player-name', 'era', 'occupation', 'age', 'gender', 'residence', 'birthplace'];
+    basicIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    // 头像
+    const avatarImg = document.getElementById('avatar-img');
+    const avatarPlaceholder = document.querySelector('.avatar-placeholder');
+    if (avatarImg) { avatarImg.src = ''; avatarImg.classList.remove('is-visible'); }
+    if (avatarPlaceholder) avatarPlaceholder.classList.remove('is-hidden');
+    // 属性输入框
+    ATTR_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    // 战斗属性
+    ['damage-bonus', 'spirit-bonus', 'build', 'armor'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    // 状态值
+    Object.entries(STATUS_MAPPINGS).forEach(([, config]) => {
+        Object.entries(config.selectors).forEach(([field, selector]) => {
+            const el = document.querySelector(selector);
+            if (el) el.value = config.defaults[field] || '';
+        });
+    });
+}
+
 // ============ 加载 ============
 async function loadCharacter(skipAlert = false) {
     try {
+        // 修复 B1：无论是否有数据，先无条件清空所有表格，避免切换/新建空角色时旧角色数据残留
+        // （新建的空角色无 characterData，原逻辑会提前 return，导致旧 DOM 数据无法被清）
+        resetAllTables();
+
         // 优先从 CharacterManager 读取当前角色
         const currentId = CharacterManager.getCurrentId();
         let characterData = currentId ? CharacterManager.getCharacterData(currentId) : null;
@@ -1122,30 +1186,24 @@ function createWeaponRow(data = {}) {
 
 /**
  * 加载物品数据
+ * 修复 B1：无条件重建表格清空旧数据，避免切换/覆盖导入时旧角色备注残留
  */
 function loadItems(data) {
-    if (!data.items?.length) return;
-    
     const itemsBody = DOMCache.get('items-body');
     if (!itemsBody) return;
-    
-    if (itemsBody.children.length === 0) {
-        initItemsTable();
-    }
-    
-    // 清除现有值
-    itemsBody.querySelectorAll('input').forEach(input => {
-        input.value = '';
-        input.setAttribute('value', '');
-    });
-    
+
+    // 无条件重建：清空全部 input + textarea，杜绝旧角色数据残留
+    initItemsTable();
+
+    if (!data.items?.length) return;
+
     data.items.forEach(item => {
         const itemIndex = getItemIndex(item);
-        
+
         const nameInput = document.querySelector(`#items-body input.item-name[data-item-index="${itemIndex}"]`);
         const typeInput = document.querySelector(`#items-body input.item-type-input[data-item-index="${itemIndex}"]`);
         const noteInput = document.querySelector(`#items-body textarea.item-note[data-item-index="${itemIndex}"]`);
-        
+
         if (nameInput) {
             nameInput.value = item.name || '';
             nameInput.setAttribute('value', item.name || '');
@@ -1175,47 +1233,54 @@ function getItemIndex(item) {
 
 /**
  * 加载自定义技能数据（左右双栏）
+ * 修复 B1：无条件重建表格清空旧数据，避免切换/覆盖导入时旧角色技能残留
  */
 function loadCustomSkills(data) {
-    if (!data.customSkills?.length) return;
-    
     const body = DOMCache.get('custom-skills-body');
-    if (body.children.length === 0) {
-        initCustomSkillsTable();
+    if (!body) return;
+
+    // 无条件重建：清空全部 input，杜绝旧角色数据残留
+    initCustomSkillsTable();
+
+    if (!data.customSkills?.length) {
+        setupCustomSkills();
+        return;
     }
-    
+
     const rows = document.querySelectorAll('#custom-skills-body tr');
     let leftIdx = 0, rightIdx = 0;
-    
+
     data.customSkills.forEach(skill => {
         const rowIdx = skill.position === 'left' ? leftIdx++ : rightIdx++;
         if (rowIdx >= rows.length) return;
-        
+
         const startCell = skill.position === 'left' ? 1 : 9;
         const row = rows[rowIdx];
-        
+
         setCustomSkillCell(row, startCell, skill.name);
         setCustomSkillCell(row, startCell + 1, skill.base, '0');
         setCustomSkillCell(row, startCell + 2, skill.occupation, '0', true);
         setCustomSkillCell(row, startCell + 3, skill.interest, '0', true);
         setCustomSkillCell(row, startCell + 4, skill.growth, '0', true);
     });
-    
+
     setupCustomSkills();
 }
 
 /**
  * 加载笔记数据（左右双栏）
  * 笔记优先填充左列，填满后再填充右列
+ * 修复 B1：无条件重建表格清空旧数据，避免切换/覆盖导入时旧角色笔记残留
  */
 function loadNotes(data) {
-    if (!data.notes?.length) return;
-    
     const body = DOMCache.get('notes-body');
-    if (body.children.length === 0) {
-        initNotesTable();
-    }
-    
+    if (!body) return;
+
+    // 无条件重建：默认笔记 name/type 由 createNoteCells 自动恢复，自定义笔记全部清空
+    initNotesTable();
+
+    if (!data.notes?.length) return;
+
     const rows = document.querySelectorAll('#notes-body tr');
     const totalRows = rows.length;
     const DEFAULT_NOTE_NAMES = DEFAULT_NOTES.map(n => n.name);

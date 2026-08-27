@@ -561,6 +561,25 @@ function createCustomSkillItem() {
 
 // 备注框焦点控制：聚焦时锁定页面根级滚动（html/body），避免误触滑动整张背景列表
 // 失焦后恢复，textarea 内部仍可滚动查看长文本
+// 修复 [1]：document 级 touchmove 监听提取为模块级单次注册，避免 items/notes 各绑定一次造成重复；
+//           同时排除悬浮按钮区，避免误拦悬浮按钮内部滚动
+let _noteDocTouchMoveBound = false;
+function ensureNoteDocTouchMoveGuard() {
+    if (_noteDocTouchMoveBound) return;
+    _noteDocTouchMoveBound = true;
+
+    document.addEventListener('touchmove', function(e) {
+        const active = document.activeElement;
+        if (!active || !active.classList.contains('item-note')) return;
+        // 排除悬浮按钮区：IO/保存等悬浮控件内部滚动不拦
+        if (e.target.closest('.float-button-container')) return;
+        // 如果目标不是聚焦的 textarea 本身或其子元素（textarea 无子元素，直接比对）
+        if (e.target !== active && !active.contains(e.target)) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+}
+
 function bindNoteFocusScrollLock(bodyElement) {
     if (!bodyElement || bodyElement._noteScrollLockBound) return;
     bodyElement._noteScrollLockBound = true;
@@ -616,32 +635,14 @@ function bindNoteFocusScrollLock(bodyElement) {
         unlockScroll();
     });
 
-    // 触摸滚动穿透防御链：
-    // 1) 备注聚焦时，在 body 上拦截所有 touchmove 默认行为，从根层切断滚动
-    //    （但不能拦截 textarea 自身的 pan，所以对 textarea 内的 touchmove 特殊放行）
-    document.addEventListener('touchmove', function(e) {
-        const active = document.activeElement;
-        if (!active || !active.classList.contains('item-note')) return;
-        // 如果目标不是聚焦的 textarea 本身或其子元素（textarea 无子元素，直接比对）
-        if (e.target !== active && !active.contains(e.target)) {
-            e.preventDefault();
-        }
-    }, { passive: false });
+    // 触摸滚动穿透防御链：document 级监听只注册一次（模块级单例）
+    ensureNoteDocTouchMoveGuard();
 
-    // 2) 在 textarea 上阻止滚动冒泡，防止滚到边界后触发父层 scroll chaining
+    // 在 textarea 上阻止滚动冒泡，防止滚到边界后触发父层 scroll chaining
     bodyElement.addEventListener('touchmove', function(e) {
         const active = document.activeElement;
         if (active && active.classList.contains('item-note') && e.target === active) {
             e.stopPropagation();
-            // 当 textarea 已到顶/底且继续滚时，preventDefault 阻断链式穿透
-            const ta = active;
-            const atTop = ta.scrollTop <= 0;
-            const atBottom = ta.scrollTop + ta.clientHeight >= ta.scrollHeight - 1;
-            if ((atTop && e.touches[0] && e.touches[0].clientY > 0) ||
-                (atBottom && e.touches[0])) {
-                // 保留 textarea 内部滚动；若已经到边界，不额外 preventDefault
-                // 让浏览器自己处理，避免破坏 textarea 惯性滚动体验
-            }
         }
     }, { passive: false });
 }
@@ -902,9 +903,9 @@ function openItemTypeModal(typeInput) {
 }
 
 // 统一创建单元格函数
-function createNoteCells(row, noteIndex, defaults = {}) {
+function createNoteCells(row, noteIndex, defaults = {}, disabled = false) {
     const isDefault = defaults.isDefault === true;
-    
+
     // 第一列：笔记名称
     const nameCell = document.createElement('td');
     const nameInput = document.createElement('input');
@@ -918,6 +919,11 @@ function createNoteCells(row, noteIndex, defaults = {}) {
     if (isDefault) {
         nameInput.readOnly = true;
         nameInput.classList.add('default-note');
+    }
+    // 修复 S2：右列笔记不可编辑（collectNotes 仅收集左列，右列是数据黑洞）
+    if (disabled) {
+        nameInput.readOnly = true;
+        nameInput.classList.add('note-col-disabled');
     }
     nameCell.appendChild(nameInput);
     row.appendChild(nameCell);
@@ -937,9 +943,13 @@ function createNoteCells(row, noteIndex, defaults = {}) {
     if (isDefault) {
         typeInput.classList.add('default-note');
     }
+    // 修复 S2：右列置灰
+    if (disabled) {
+        typeInput.classList.add('note-col-disabled');
+    }
     typeCell.appendChild(typeInput);
-    
-    if (!isDefault) {
+
+    if (!isDefault && !disabled) {
         // 只有非默认笔记才可点击修改类型
         typeCell.addEventListener('click', function() {
             openNoteTypeModal(typeInput);
@@ -953,10 +963,15 @@ function createNoteCells(row, noteIndex, defaults = {}) {
     noteTextarea.className = 'item-note';
     noteTextarea.placeholder = '备注';
     noteTextarea.rows = 1;
+    // 修复 S2：右列备注不可编辑
+    if (disabled) {
+        noteTextarea.readOnly = true;
+        noteTextarea.classList.add('note-col-disabled');
+    }
     noteCell.appendChild(noteTextarea);
     row.appendChild(noteCell);
 
-    // 立即添加备注事件监听
+    // 立即添加备注事件监听（右列只读，仍绑定无副作用，且保持事件委托一致性）
     addNoteEvents(noteTextarea);
 
     return row;
@@ -988,8 +1003,9 @@ function initNotesTable() {
         createNoteCells(row, leftGlobalIndex, leftDefaults);
         
         // 右栏 - 全局位置 i * 2 + 1
+        // 修复 S2：右列设为只读（collectNotes 仅收集左列，避免数据黑洞）
         const rightGlobalIndex = i * 2 + 1;
-        createNoteCells(row, rightGlobalIndex, {});
+        createNoteCells(row, rightGlobalIndex, {}, true);
         
         itemsBody.appendChild(row);
     }

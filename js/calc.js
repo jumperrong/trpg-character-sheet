@@ -89,9 +89,9 @@ function updateDerivedStats() {
         // 计算伤害加值和体格
         let damageBonus = '';
         let build = '';
-        
+
         const strengthSizeSum = strValue + sizValue;
-        
+
         if (strengthSizeSum >= 2 && strengthSizeSum <= 64) {
             damageBonus = '-2';
             build = '-2';
@@ -119,12 +119,20 @@ function updateDerivedStats() {
         } else if (strengthSizeSum >= 445 && strengthSizeSum <= 524) {
             damageBonus = '+5d6';
             build = '6';
+        } else if (strengthSizeSum > 524) {
+            // 修复 [4]：超范围兜底显示，避免空字符串让用户困惑
+            damageBonus = '+5d6';
+            build = '6+';
+        } else {
+            // strengthSizeSum < 2（属性未填或极端低值）
+            damageBonus = '-';
+            build = '-';
         }
         
         // 计算精神加值
         let spiritBonus = '';
         const intPowSum = intValue + powValue;
-        
+
         if (intPowSum >= 2 && intPowSum <= 64) {
             spiritBonus = '-2';
         } else if (intPowSum >= 65 && intPowSum <= 84) {
@@ -143,6 +151,12 @@ function updateDerivedStats() {
             spiritBonus = '+4d6';
         } else if (intPowSum >= 445 && intPowSum <= 524) {
             spiritBonus = '+5d6';
+        } else if (intPowSum > 524) {
+            // 修复 [4]：超范围兜底显示
+            spiritBonus = '+5d6';
+        } else {
+            // intPowSum < 2（属性未填或极端低值）
+            spiritBonus = '-';
         }
         
         // 使用缓存写入战斗属性
